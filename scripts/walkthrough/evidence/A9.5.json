@@ -1,0 +1,48 @@
+{
+  "case_id": "A9.5",
+  "timestamp": "2026-11-04T06:31:23.679Z",
+  "channel": "API-only",
+  "actions": [
+    "POST /api/payments/19/confirm/ second time on already PAID payment"
+  ],
+  "target_selector": null,
+  "visible_text": null,
+  "api_status": 200,
+  "api_body": {
+    "id": 12,
+    "receipt_number": "FF-2026-000019",
+    "issued_at": "2026-11-04T11:57:49.646149+05:30",
+    "data": {
+      "route": "Wt Origin to Wt Destination",
+      "amount": "3165.00",
+      "driver": "Suresh Kumar (AP05-2022-001)",
+      "paid_at": "2026-11-04T06:27:49.640647+00:00",
+      "vehicle": "AP05WT0001 (TestBrand TestModel)",
+      "payment_id": 19,
+      "distance_km": 211,
+      "customer_name": "WT-Customer One",
+      "customer_email": "wt.customer+1@gmail.com",
+      "payment_method": "ONLINE",
+      "receipt_number": "FF-2026-000019",
+      "gateway_reference": "UTR9988776655"
+    }
+  },
+  "db_before": {
+    "id": 19,
+    "status": "PAID"
+  },
+  "db_after": {
+    "id": 19,
+    "status": "PAID"
+  },
+  "assertions": [
+    {
+      "name": "Second confirmation returns 200 with unchanged PAID status (idempotent)",
+      "condition": "reConfirmRes.status === 200 && dbAfterReconfirm.status === \"PAID\"",
+      "passed": true,
+      "details": "HTTP 200, DB=PAID"
+    }
+  ],
+  "screenshot_full": null,
+  "screenshot_crop": null
+}

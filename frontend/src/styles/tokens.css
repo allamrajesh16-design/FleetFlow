@@ -1,0 +1,515 @@
+/* ==========================================================================
+   FleetFlow Design System Tokens
+   One unified professional color system across all roles
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CSS Houdini @property registrations for smooth color & gradient transitions
+   Fallback: Standard CSS variable inheritance for non-supporting browsers
+   -------------------------------------------------------------------------- */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --stop-a {
+  syntax: '<color>';
+  initial-value: #2563EB;
+  inherits: true;
+}
+
+@property --stop-b {
+  syntax: '<color>';
+  initial-value: #0E7490;
+  inherits: true;
+}
+
+@property --p {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
+
+:root {
+  /* Motion angle and interpolation base */
+  --angle: 0deg;
+  --stop-a: #2563EB;
+  --stop-b: #0E7490;
+  --p: 0;
+
+  /* Navy palette */
+  --navy-900: #0B1F3A;
+  --navy-800: #112B52;
+
+  /* Blue & accent palette */
+  --blue-50: #EFF6FF;
+  --blue-100: #DBEAFE;
+  --blue-600: #2563EB;
+  --blue-700: #1D4ED8;
+  --cyan-500: #06B6D4;
+  --teal-600: #0D9488;
+  --cyan-600: #0891B2;
+  --indigo-600: #4F46E5;
+  --violet-500: #8B5CF6;
+  --sky-600: #0284C7;
+  --sky-500: #0EA5E9;
+
+  /* Darkened stop colours for contrast compliance (>= 4.5:1 against white) */
+  --cyan-700: #0E7490;
+  --green-700: #15803D;
+  --teal-700: #0F766E;
+  --sky-700: #0369A1;
+  --purple-700: #7C3AED;
+
+  /* Amber & Orange */
+  --amber-500: #F59E0B;
+  --orange-500: #F97316;
+
+  /* Semantic status colors */
+  --success: #16A34A;
+  --success-text: #15803D;
+  --success-bg: #DCFCE7;
+
+  --warning-text: #B45309;
+  --warning-bg: #FEF3C7;
+  --warning-border: #FCD34D;
+
+  --danger: #DC2626;
+  --danger-text: #B91C1C;
+  --danger-bg: #FEE2E2;
+  --danger-border: #FCA5A5;
+
+  --info-text: #1D4ED8;
+  --info-bg: #DBEAFE;
+
+  --purple-text: #6D28D9;
+  --purple-bg: #EDE9FE;
+
+  --neutral-text: #64748B;
+  --neutral-bg: #F1F5F9;
+
+  /* Neutrals & Surfaces - Premium Clean SaaS Light Palette */
+  --bg: #F5F7FC;
+  --surface: #FFFFFF;
+  --border: #E2E8F0;
+  --text: #172033;
+  --text-muted: #64748B;
+  --text-subtle: #94A3B8;
+
+  /* Default role accent variables (defaults to manager/brand blue) */
+  --accent: #2563EB;
+  --accent-2: #1D4ED8;
+  --accent-soft: #EFF6FF;
+  --accent-glow: rgba(37, 99, 235, 0.25);
+
+  /* Primary Brand Roles */
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-soft: #EFF6FF;
+  --primary-glow: rgba(37, 99, 235, 0.25);
+  --focus-ring: rgba(37, 99, 235, 0.20);
+
+  /* Gradients with high-contrast darkened endpoints for white text */
+  --gradient-brand: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --gradient-sidebar: #FFFFFF;
+  --gradient-admin: linear-gradient(135deg, #4F46E5, #7C3AED);
+  --gradient-manager: linear-gradient(135deg, #2563EB, #1D4ED8);
+  --gradient-driver: linear-gradient(135deg, #0F766E, #15803D);
+  --gradient-customer: linear-gradient(135deg, #0369A1, #0E7490);
+
+  /* Shadows - Layered Premium Box Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -4px rgba(15, 23, 42, 0.03);
+  --shadow-xl: 0 20px 32px -6px rgba(15, 23, 42, 0.12), 0 8px 16px -6px rgba(15, 23, 42, 0.06);
+
+  /* Chart colours */
+  --chart-1: var(--accent);
+  --chart-2: #06B6D4;
+  --chart-3: #16A34A;
+  --chart-4: #F59E0B;
+  --chart-5: #8B5CF6;
+  --chart-6: #EF4444;
+
+  /* Backward-compatible token aliases for legacy UI elements */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--blue-700);
+  --color-primary-light: var(--accent-soft);
+  --color-primary-subtle: var(--blue-100);
+  --color-primary-border: var(--blue-100);
+
+  --color-sidebar-bg: #FFFFFF;
+  --color-sidebar-surface: #F8FAFC;
+  --color-sidebar-border: #E2E8F0;
+  --color-sidebar-text: #172033;
+  --color-sidebar-text-muted: #64748B;
+  --color-sidebar-active: var(--primary);
+  --color-sidebar-hover: var(--blue-50);
+
+  --color-bg-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--blue-50);
+  --color-surface-active: var(--neutral-bg);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--neutral-bg);
+  --color-border-strong: var(--text-subtle);
+
+  --color-text-primary: var(--text);
+  --color-text-secondary: var(--neutral-text);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-subtle);
+  --color-text-inverse: var(--surface);
+
+  --status-green-bg: var(--success-bg);
+  --status-green-text: var(--success-text);
+  --status-green-border: var(--success-bg);
+
+  --status-orange-bg: var(--warning-bg);
+  --status-orange-text: var(--warning-text);
+  --status-orange-border: var(--warning-bg);
+
+  --status-red-bg: var(--danger-bg);
+  --status-red-text: var(--danger-text);
+  --status-red-border: var(--danger-bg);
+
+  --status-blue-bg: var(--info-bg);
+  --status-blue-text: var(--info-text);
+  --status-blue-border: var(--info-bg);
+
+  --status-grey-bg: var(--neutral-bg);
+  --status-grey-text: var(--neutral-text);
+  --status-grey-border: var(--border);
+
+  /* Typography scale */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;           /* inputs & buttons */
+  --radius-card: 14px;        /* cards */
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-pill: 9999px;      /* badges & pills */
+
+  /* Shadows aliases */
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+  --shadow-modal: var(--shadow-lg);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-role: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-card: 2;
+  --z-sticky: 10;
+  --z-dropdown: 20;
+  --z-nav: 50;
+  --z-modal-backdrop: 100;
+  --z-modal: 110;
+  --z-toast: 150;
+  --z-tooltip: 200;
+
+  /* Layout Constants */
+  --sidebar-width: 256px;
+  --sidebar-width-rail: 72px;
+  --topbar-height: 64px;
+}
+
+/* --------------------------------------------------------------------------
+   Role Accent Configurations on Root with 500ms cross-fading
+   -------------------------------------------------------------------------- */
+[data-role="admin"] {
+  --accent: #4F46E5;
+  --accent-2: #7C3AED;
+  --accent-soft: #EDE9FE;
+  --accent-glow: rgba(79, 70, 229, 0.35);
+  --focus-ring: rgba(79, 70, 229, 0.28);
+}
+
+[data-role="manager"] {
+  --accent: #2563EB;
+  --accent-2: #0E7490;
+  --accent-soft: #EFF6FF;
+  --accent-glow: rgba(37, 99, 235, 0.35);
+  --focus-ring: rgba(37, 99, 235, 0.28);
+}
+
+[data-role="driver"] {
+  --accent: #0F766E;
+  --accent-2: #15803D;
+  --accent-soft: #DCFCE7;
+  --accent-glow: rgba(15, 118, 110, 0.35);
+  --focus-ring: rgba(15, 118, 110, 0.28);
+}
+
+[data-role="customer"] {
+  --accent: #0369A1;
+  --accent-2: #0E7490;
+  --accent-soft: #E0F2FE;
+  --accent-glow: rgba(3, 105, 161, 0.35);
+  --focus-ring: rgba(3, 105, 161, 0.28);
+}
+
+/* Role Transition: Smooth 500ms transition when logging in or switching roles */
+[data-role] {
+  transition: background-color var(--transition-role),
+              border-color var(--transition-role),
+              box-shadow var(--transition-role),
+              color var(--transition-role);
+}
+
+/* Dark theme full implementation via [data-theme="dark"]
+   Layered surfaces, soft text, readable sidebar, visible table header */
+[data-theme="dark"] {
+  /* Layer 0: Page Base Background */
+  --bg: #0B0F19;
+  --color-bg-page: #0B0F19;
+
+  /* Layer 1: Elevated Card Surfaces */
+  --surface: #111827;
+  --color-surface: #111827;
+  --card-bg: #111827;
+  --color-surface-hover: #162032;
+  --color-surface-active: #1D2A40;
+
+  /* Layer 2: Recessed Surfaces & Nested Inputs */
+  --surface-muted: #080D16;
+  --neutral-bg: #0E1626;
+  --neutral-text: #94A3B8;
+  --table-stripe: #0E1626;
+  --blue-50: #131F33;
+  --blue-100: #1A2942;
+
+  /* Crisp Subtle Borders */
+  --border: #1E293B;
+  --color-border: #1E293B;
+  --color-border-subtle: #151F30;
+  --color-border-strong: #334155;
+
+  /* Soft Readable Typography */
+  --text: #F8FAFC;
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --color-text-muted: #64748B;
+  --text-subtle: #475569;
+  --color-text-disabled: #475569;
+  --color-text-inverse: #0B0F19;
+
+  /* Headings & Brand */
+  --navy-900: #0B1F3A;
+  --heading-color: #F8FAFC;
+  --color-primary-light: rgba(59, 130, 246, 0.2);
+
+  /* Sidebar in Dark Mode: readable sidebar */
+  --gradient-sidebar: linear-gradient(180deg, #070D18 0%, #0A1222 100%);
+
+  /* Status Pills & Badges: soft text with dark translucent backgrounds */
+  --success-bg: rgba(34, 197, 94, 0.16);
+  --success-text: #4ADE80;
+  --warning-bg: rgba(245, 158, 11, 0.16);
+  --warning-text: #FBBF24;
+  --danger-bg: rgba(239, 68, 68, 0.16);
+  --danger-text: #F87171;
+  --info-bg: rgba(59, 130, 246, 0.16);
+  --info-text: #60A5FA;
+  --purple-bg: rgba(139, 92, 246, 0.16);
+  --purple-text: #C084FC;
+
+  /* Shadows in Dark Mode */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.7), 0 4px 8px -4px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 32px -6px rgba(0, 0, 0, 0.8), 0 8px 16px -6px rgba(0, 0, 0, 0.7);
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: 0 10px 25px -4px rgba(0, 0, 0, 0.7), 0 4px 10px -3px rgba(0, 0, 0, 0.6);
+
+  /* Form Input Controls in Dark Mode */
+  --ff-input-bg: #080D16;
+  --ff-input-border: #1E293B;
+  --ff-input-text: #F8FAFC;
+  --ff-input-placeholder: #64748B;
+  --ff-input-ring: rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] body {
+  background-color: var(--color-bg-page, #0B0F19);
+  color: var(--color-text-primary, #F8FAFC);
+}
+
+/* Specific Dark Mode Enhancements: Readable Sidebar, Visible Table Header, Layered Surfaces */
+[data-theme="dark"] .sidebar-container {
+  background: var(--gradient-sidebar, linear-gradient(180deg, #070D18 0%, #0A1222 100%));
+  border-right-color: #1E293B;
+}
+
+[data-theme="dark"] .sidebar-link {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .sidebar-link:hover {
+  color: #F8FAFC;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .sidebar-nav-fade {
+  background: linear-gradient(to bottom, transparent, #0A1222);
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(11, 15, 25, 0.88);
+  border-bottom-color: #1E293B;
+}
+
+[data-theme="dark"] .topbar-search input,
+[data-theme="dark"] .topbar-search .ff-input-box {
+  background: #080D16;
+  border-color: #1E293B;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .table-th,
+[data-theme="dark"] .datatable-th {
+  background-color: #0E1626;
+  color: #94A3B8;
+  border-bottom-color: #1E293B;
+}
+
+[data-theme="dark"] .table-tr:hover,
+[data-theme="dark"] .datatable-tr:hover {
+  background-color: #131F33;
+}
+
+[data-theme="dark"] .table-td,
+[data-theme="dark"] .datatable-td {
+  border-bottom-color: #151F30;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .badge {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Dark Mode Form Inputs and Native Controls */
+[data-theme="dark"] input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='button']):not([type='submit']):not([type='reset']),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #080D16;
+  border-color: #1E293B;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):hover,
+[data-theme="dark"] select:hover,
+[data-theme="dark"] textarea:hover {
+  border-color: #334155;
+}
+
+[data-theme="dark"] input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: var(--primary, #3B82F6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] option {
+  background-color: #111827;
+  color: #F8FAFC;
+}
+
+/* Dark Mode Modals and Floating Surfaces */
+[data-theme="dark"] .modal-overlay {
+  background-color: rgba(7, 10, 18, 0.72);
+}
+
+[data-theme="dark"] .modal-container {
+  background-color: #111827;
+  border: 1px solid #1E293B;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .modal-header {
+  background-color: #111827;
+  border-bottom-color: #1E293B;
+}
+
+[data-theme="dark"] .modal-footer {
+  background-color: #0B0F19;
+  border-top-color: #1E293B;
+}
+
+[data-theme="dark"] .topbar-dropdown,
+[data-theme="dark"] .topbar-search-dropdown {
+  background-color: #111827;
+  border-color: #1E293B;
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .topbar-dropdown-item:hover,
+[data-theme="dark"] .topbar-search-item:hover {
+  background-color: #162032;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .topbar-dropdown-divider {
+  background-color: #1E293B;
+}
+
+/* Subtle Glass / Metallic Inner Highlight for Cards in Dark Theme */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .admin-card,
+[data-theme="dark"] .ff-card,
+[data-theme="dark"] .fed-chart-card,
+[data-theme="dark"] .datatable-wrapper,
+[data-theme="dark"] .table-container,
+[data-theme="dark"] .dashboard-welcome-banner,
+[data-theme="dark"] .assignment-form-card,
+[data-theme="dark"] .toast-item,
+[data-theme="dark"] .auth-form-card {
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), var(--shadow-sm);
+  background-color: #111827;
+  border-color: #1E293B;
+}
+
+html[data-theme] body,
+html[data-theme] .admin-card,
+html[data-theme] .dashboard-card,
+html[data-theme] .topbar,
+html[data-theme] .landing-header,
+html[data-theme] .landing-container {
+  transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+}

@@ -1,0 +1,37 @@
+{
+  "case_id": "A9.9",
+  "timestamp": "2026-11-04T06:31:40.579Z",
+  "channel": "UI",
+  "actions": [
+    "Extract text from generated PDF receipt using pypdf",
+    "Verify company branding, REFUNDED watermark/label, and IST timezone"
+  ],
+  "target_selector": "table, .payment-card",
+  "visible_text": "FleetFlow Trip Receipt\r\nReceipt: FF-2026-000015\r\nPayment & Trip Details\r\nCustomer Name:\r\nAnil Sharma\r\nCustomer Email:\r\ncustomer1@fleetflow.com\r\nRoute:\r\nKoramangala 4th Block, Bangalore to Kempegowda International Airport, Bangalore\r\nAssigned Vehicle:\r\nAP 05 CD 2002 (Maruti Suzuki Dzire)\r\nAssigned Dr",
+  "api_status": 200,
+  "api_body": {
+    "text_length": 653
+  },
+  "db_before": {
+    "receipt_exists": true
+  },
+  "db_after": {
+    "receipt_exists": true
+  },
+  "assertions": [
+    {
+      "name": "PDF contains FleetFlow receipt title or branding",
+      "condition": "pdfText.toLowerCase().includes(\"fleetflow\") || pdfText.toLowerCase().includes(\"receipt\")",
+      "passed": true,
+      "details": "Contains title: true"
+    },
+    {
+      "name": "Refunded PDF receipt contains REFUNDED text",
+      "condition": "pdfText.toUpperCase().includes(\"REFUNDED\")",
+      "passed": true,
+      "details": "Contains REFUNDED: true"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_9.png",
+  "screenshot_crop": null
+}

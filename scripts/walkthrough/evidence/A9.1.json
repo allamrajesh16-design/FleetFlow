@@ -1,0 +1,50 @@
+{
+  "case_id": "A9.1",
+  "timestamp": "2026-11-04T06:31:11.977Z",
+  "channel": "UI",
+  "actions": [
+    "Navigate to /admin/payments",
+    "Read summary cards for Collected, Pending, and Refunded amounts"
+  ],
+  "target_selector": ".payments-summary-grid",
+  "visible_text": "Payment Management\n\nTrack collections, verify UPI transfer receipts, and manage refunds\n\nTable\nCards\nTotal Collected\n0Rs. 7,330\nGross settled revenue\nPending Amount\n0Rs. 0\nUnconfirmed UPI / QR submissions\nFailed Payments\n0\nIncomplete or rejected transactions\nRefunded\n0Rs. 1,040\nReturned customer fun",
+  "api_status": 200,
+  "api_body": {
+    "total_collected": 7330,
+    "pending_amount": 0,
+    "failed_count": 0,
+    "refunded_amount": 1040
+  },
+  "db_before": {
+    "collected": 7330,
+    "pending": 0,
+    "refunded": 1040
+  },
+  "db_after": {
+    "collected": 7330,
+    "pending": 0,
+    "refunded": 1040
+  },
+  "assertions": [
+    {
+      "name": "Summary API total_collected matches DB PAID sum",
+      "condition": "initialSummary.data.total_collected === dbCollected",
+      "passed": true,
+      "details": "API=7330, DB=7330"
+    },
+    {
+      "name": "Summary API pending_amount matches DB Pending sum",
+      "condition": "initialSummary.data.pending_amount === dbPending",
+      "passed": true,
+      "details": "API=0, DB=0"
+    },
+    {
+      "name": "Summary API refunded_amount matches DB Refunded sum",
+      "condition": "initialSummary.data.refunded_amount === dbRefunded",
+      "passed": true,
+      "details": "API=1040, DB=1040"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_1.png",
+  "screenshot_crop": "docs/guide/images/admin/a9_1_crop.png"
+}

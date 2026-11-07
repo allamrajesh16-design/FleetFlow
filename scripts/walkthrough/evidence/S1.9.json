@@ -1,0 +1,48 @@
+{
+  "case_id": "S1.9",
+  "timestamp": "2026-11-04T07:10:59.895Z",
+  "channel": "UI",
+  "actions": [
+    "Admin verifies and confirms Payment #22",
+    "POST /api/payments/{id}/confirm/"
+  ],
+  "target_selector": "table tbody tr",
+  "visible_text": "Payment #22 confirmed: PAID",
+  "api_status": 200,
+  "api_body": {
+    "id": 15,
+    "receipt_number": "FF-2026-000022",
+    "issued_at": "2026-11-04T12:40:53.060192+05:30",
+    "data": {
+      "receipt_number": "FF-2026-000022",
+      "payment_id": 22,
+      "customer_name": "WT Demo Customer",
+      "customer_email": "wt.demo.s1.cust@gmail.com",
+      "route": "Kakinada Main Road to Rajahmundry Airport",
+      "vehicle": "AP05WT0001 (TestBrand TestModel)",
+      "driver": "WT-Driver One (WT-DL-2026-0001)",
+      "distance_km": 65,
+      "amount": "975.00",
+      "payment_method": "ONLINE",
+      "gateway_reference": "WTUTR_S1_PROOF_123",
+      "paid_at": "2026-11-04T07:10:53.056343+00:00"
+    }
+  },
+  "db_before": {
+    "status": "PAYMENT_INITIATED"
+  },
+  "db_after": {
+    "status": "PAID",
+    "receipt": "FF-2026-000022"
+  },
+  "assertions": [
+    {
+      "name": "Payment status transitions to PAID with issued receipt",
+      "condition": "paymentAfterConfirm.status === \"PAID\" && !!paymentAfterConfirm.receipt",
+      "passed": true,
+      "details": "Status=PAID, Receipt=FF-2026-000022"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_09_admin_confirmed_payment.png",
+  "screenshot_crop": null
+}

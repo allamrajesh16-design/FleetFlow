@@ -1,0 +1,95 @@
+/* 404 & 403 Status Pages */
+.status-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-page);
+  padding: var(--space-6);
+}
+
+.status-page-card {
+  max-width: 480px;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.status-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+  animation: ffShake 350ms var(--ease-in-out);
+}
+
+.status-code {
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+  display: inline-block;
+  animation: ffFadeRiseLg var(--dur-slow) var(--ease-out), ffFloat 4s ease-in-out infinite var(--dur-slow);
+}
+
+.status-code.text-danger {
+  color: var(--danger);
+}
+
+.status-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.status-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.status-roles-info {
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg-subtle, var(--bg));
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-md, 8px);
+  text-align: center;
+}
+
+.status-role-line {
+  margin: 4px 0;
+  font-size: var(--font-size-sm, 14px);
+  color: var(--color-text-secondary, var(--text-muted));
+}
+
+.status-role-highlight {
+  font-weight: 600;
+  color: var(--color-text-primary, var(--text));
+}
+
+.status-blocked-path {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
+  margin: 6px 0 0 0;
+  word-break: break-all;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.status-actions a {
+  text-decoration: none;
+}

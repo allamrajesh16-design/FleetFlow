@@ -1,0 +1,84 @@
+.error-boundary-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  width: 100%;
+  padding: var(--spacing-xl, 24px);
+  box-sizing: border-box;
+}
+
+.error-boundary-card {
+  max-width: 540px;
+  width: 100%;
+  background: var(--color-surface, var(--surface));
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  padding: var(--spacing-2xl, 32px);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.error-boundary-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--blue-50);
+  color: var(--color-primary, var(--primary));
+  margin-bottom: var(--spacing-lg, 16px);
+}
+
+.error-boundary-title {
+  font-size: var(--font-size-xl, 20px);
+  font-weight: 700;
+  color: var(--color-text-main, var(--text));
+  margin: 0 0 8px 0;
+}
+
+.error-boundary-subtitle {
+  font-size: var(--font-size-sm, 14px);
+  color: var(--color-text-muted, var(--text-muted));
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.error-boundary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: var(--spacing-md, 12px);
+}
+
+.error-boundary-details {
+  margin-top: var(--spacing-lg, 16px);
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.error-boundary-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--neutral-text);
+  outline: none;
+}
+
+.error-boundary-stack {
+  margin-top: 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--danger);
+  font-family: monospace;
+  font-size: 11px;
+  max-height: 200px;
+  overflow-y: auto;
+}

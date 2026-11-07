@@ -1,0 +1,54 @@
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-group>.btn,
+.btn-group>.icon-btn {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.btn-group>.btn:not(:first-child),
+.btn-group>.icon-btn:not(:first-child) {
+  margin-left: -1px;
+
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group>.btn:not(:last-child),
+.btn-group>.icon-btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group>.btn:hover,
+.btn-group>.btn:focus-visible,
+.btn-group>.icon-btn:hover,
+.btn-group>.icon-btn:focus-visible {
+  z-index: 2;
+}
+
+/* Vertical Button Group */
+.btn-group-vertical {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.btn-group-vertical>.btn:not(:first-child),
+.btn-group-vertical>.icon-btn:not(:first-child) {
+  margin-left: 0;
+  margin-top: -1px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.btn-group-vertical>.btn:not(:last-child),
+.btn-group-vertical>.icon-btn:not(:last-child) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}

@@ -1,0 +1,80 @@
+/* AuroraBackground Styles */
+.aurora-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.aurora-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.72) 0%,
+    rgba(15, 23, 42, 0.55) 40%,
+    rgba(15, 23, 42, 0.88) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.35;
+  will-change: transform;
+  z-index: 1;
+}
+
+.aurora-blob-1 {
+  width: 550px;
+  height: 550px;
+  top: -120px;
+  left: -80px;
+  background: radial-gradient(circle, var(--blue-600) 0%, transparent 70%);
+  animation: auroraDrift1 22s ease-in-out infinite alternate;
+}
+
+.aurora-blob-2 {
+  width: 650px;
+  height: 650px;
+  bottom: -150px;
+  right: -100px;
+  background: radial-gradient(circle, var(--cyan-500) 0%, transparent 70%);
+  animation: auroraDrift2 26s ease-in-out 3s infinite alternate;
+}
+
+.aurora-blob-3 {
+  width: 500px;
+  height: 500px;
+  top: 40%;
+  left: 25%;
+  background: radial-gradient(circle, var(--violet-500) 0%, transparent 70%);
+  animation: auroraDrift3 20s ease-in-out 6s infinite alternate;
+}
+
+@keyframes auroraDrift1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 80px) scale(1.15); }
+  100% { transform: translate(-40px, 120px) scale(0.95); }
+}
+
+@keyframes auroraDrift2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-80px, -60px) scale(1.12); }
+  100% { transform: translate(-30px, -110px) scale(0.9); }
+}
+
+@keyframes auroraDrift3 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, -50px) scale(1.18); }
+  100% { transform: translate(-60px, 40px) scale(0.92); }
+}
+
+/* Reduced motion or lite motion stops drifting */
+html[data-motion="off"] .aurora-blob,
+html[data-motion="lite"] .aurora-blob {
+  animation: none !important;
+}

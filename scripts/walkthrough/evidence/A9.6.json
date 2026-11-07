@@ -1,0 +1,63 @@
+{
+  "case_id": "A9.6",
+  "timestamp": "2026-11-04T06:31:28.146Z",
+  "channel": "UI",
+  "actions": [
+    "POST /api/payments/19/reject-proof/ with rejection reason",
+    "Verify status transitions back to UNPAID"
+  ],
+  "target_selector": "table tbody tr",
+  "visible_text": "Payment #19 rejected: UNPAID",
+  "api_status": 200,
+  "api_body": {
+    "id": 19,
+    "booking": 76,
+    "trip": 27,
+    "customer": 155,
+    "customer_name": "WT-Customer One",
+    "customer_email": "wt.customer+1@gmail.com",
+    "trip_source": "Wt Origin",
+    "trip_destination": "Wt Destination",
+    "vehicle_registration": "AP05WT0001",
+    "driver_name": "Suresh Kumar",
+    "amount": "3165.00",
+    "status": "UNPAID",
+    "payment_method": null,
+    "qr_token": null,
+    "qr_expires_at": null,
+    "qr_used": false,
+    "gateway_reference": null,
+    "transaction_reference": "UTR_INVALID_TEST",
+    "proof_screenshot": null,
+    "failure_reason": "Screenshot is blurry and UTR not verified.",
+    "paid_at": "2026-11-04T12:01:18.786284+05:30",
+    "refunded_at": null,
+    "receipt_number": "FF-2026-000019",
+    "created_at": "2026-11-03T20:55:04.040638+05:30",
+    "updated_at": "2026-11-04T12:01:24.663463+05:30"
+  },
+  "db_before": {
+    "id": 19,
+    "status": "PAYMENT_INITIATED"
+  },
+  "db_after": {
+    "id": 19,
+    "status": "UNPAID"
+  },
+  "assertions": [
+    {
+      "name": "Reject proof returns HTTP 200",
+      "condition": "rejectRes.status === 200",
+      "passed": true,
+      "details": "Status=200"
+    },
+    {
+      "name": "Database status reset to UNPAID",
+      "condition": "dbAfterReject.status === \"UNPAID\"",
+      "passed": true,
+      "details": "DB=UNPAID"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_6.png",
+  "screenshot_crop": null
+}

@@ -1,0 +1,584 @@
+/* ==========================================================================
+   FleetFlow Shared Form System CSS (forms.css)
+   Consistent 44px height, 8px radius, soft border, blue focus ring
+   ========================================================================== */
+
+:root {
+  --ff-input-height: 44px;
+  --ff-input-radius: 8px;
+  --ff-input-border: var(--border);
+  --ff-input-border-hover: var(--border);
+  --ff-input-border-focus: var(--primary);
+  --ff-input-ring: var(--focus-ring);
+  --ff-input-error-border: var(--danger);
+  --ff-input-error-ring: var(--danger-bg);
+  --ff-input-bg: var(--surface);
+  --ff-input-bg-disabled: var(--bg);
+  --ff-input-text: var(--text);
+  --ff-input-text-disabled: var(--text-subtle);
+  --ff-input-placeholder: var(--text-muted);
+}
+
+/* FormField wrapper */
+.ff-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 8px between a label and its field */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ff-form-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text-primary, var(--text));
+  user-select: none;
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.ff-form-field:focus-within .ff-form-label {
+  transform: translateY(-1.5px);
+  color: var(--color-primary, var(--primary));
+}
+
+.ff-required-star {
+  color: var(--danger);
+  font-weight: var(--font-weight-bold, 700);
+}
+
+.ff-field-hint {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, var(--text-muted));
+  line-height: 1.4;
+}
+
+.ff-field-error {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--danger);
+  line-height: 1.4;
+  font-weight: var(--font-weight-medium, 500);
+  animation: ffFadeSlideDown var(--dur-fast) var(--ease-out) 1;
+}
+
+/* Control wrapper for icons and toggles */
+.ff-control-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Base input control styling */
+.ff-control {
+  width: 100%;
+  height: var(--ff-input-height);
+  min-height: var(--ff-input-height);
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--ff-input-text);
+  background-color: var(--ff-input-bg);
+  border: 1px solid var(--ff-input-border);
+  border-radius: var(--ff-input-radius);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast, 150ms ease),
+              box-shadow var(--transition-fast, 150ms ease),
+              background-color var(--transition-fast, 150ms ease);
+}
+
+.ff-control::placeholder {
+  color: var(--ff-input-placeholder);
+  opacity: 1;
+}
+
+.ff-control:hover:not(:disabled):not(:read-only) {
+  border-color: var(--ff-input-border-hover);
+}
+
+.ff-control:focus {
+  border-color: var(--ff-input-border-focus);
+  box-shadow: 0 0 0 3px var(--ff-input-ring);
+}
+
+.ff-control:disabled {
+  background-color: var(--ff-input-bg-disabled);
+  color: var(--ff-input-text-disabled);
+  cursor: not-allowed;
+  border-color: var(--ff-input-border);
+}
+
+.ff-control:read-only:not(:disabled) {
+  background-color: var(--ff-input-bg-disabled);
+  cursor: default;
+}
+
+.ff-control.ff-error,
+.ff-has-error .ff-control {
+  border-color: var(--ff-input-error-border);
+  animation: ffShake 300ms var(--ease-out) 1;
+}
+
+.ff-control.ff-error:focus,
+.ff-has-error .ff-control:focus {
+  box-shadow: 0 0 0 3px var(--ff-input-error-ring);
+}
+
+/* Left & Right icon variations */
+.ff-control.ff-has-left-icon,
+input.ff-control.ff-has-left-icon {
+  padding-left: 40px !important;
+}
+
+.ff-control.ff-has-right-icon,
+input.ff-control.ff-has-right-icon {
+  padding-right: 48px !important;
+}
+
+.ff-icon-left {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, var(--text-muted));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ff-icon-right {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, var(--text-muted));
+  z-index: 1;
+}
+
+/* Password Toggle Button - locked vertical centering & clean transparent aesthetics */
+.btn.ff-password-toggle,
+.icon-btn.ff-password-toggle,
+.ff-password-toggle {
+  position: absolute !important;
+  right: 4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--color-text-muted, var(--text-muted)) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  transition: color 150ms ease, background-color 150ms ease !important;
+  z-index: 2 !important;
+}
+
+.btn.ff-password-toggle:hover:not(:disabled),
+.icon-btn.ff-password-toggle:hover:not(:disabled),
+.ff-password-toggle:hover {
+  transform: translateY(-50%) !important;
+  color: var(--color-primary, var(--primary)) !important;
+  background: var(--blue-50) !important;
+  box-shadow: none !important;
+}
+
+.btn.ff-password-toggle:active:not(:disabled),
+.icon-btn.ff-password-toggle:active:not(:disabled),
+.ff-password-toggle:active {
+  transform: translateY(-50%) scale(0.96) !important;
+}
+
+.btn.ff-password-toggle:focus-visible,
+.icon-btn.ff-password-toggle:focus-visible,
+.ff-password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary, var(--primary)) !important;
+  outline-offset: -2px !important;
+  box-shadow: none !important;
+}
+
+.btn.ff-password-toggle .btn-icon-left,
+.icon-btn.ff-password-toggle .icon-btn-icon,
+.ff-password-toggle .btn-icon-left {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Search input clear button */
+.btn.ff-search-clear-btn,
+.icon-btn.ff-search-clear-btn,
+.ff-search-clear-btn {
+  position: absolute !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--color-text-muted, var(--text-muted)) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  transition: color 150ms ease, background-color 150ms ease !important;
+  z-index: 2 !important;
+}
+
+.btn.ff-search-clear-btn:hover:not(:disabled),
+.icon-btn.ff-search-clear-btn:hover:not(:disabled),
+.ff-search-clear-btn:hover {
+  transform: translateY(-50%) !important;
+  color: var(--text) !important;
+  background: var(--neutral-bg) !important;
+  box-shadow: none !important;
+}
+
+.btn.ff-search-clear-btn .icon-btn-label,
+.icon-btn.ff-search-clear-btn .icon-btn-label {
+  display: none !important;
+}
+
+/* Select Control */
+.ff-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+
+.ff-select:disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  cursor: not-allowed;
+}
+
+/* Textarea */
+.ff-textarea {
+  min-height: 96px;
+  height: auto;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Date and DateTime Input */
+.ff-date-input,
+.ff-datetime-input {
+  color-scheme: light;
+}
+
+.ff-date-input::-webkit-calendar-picker-indicator,
+.ff-datetime-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.65;
+  filter: invert(30%) sepia(10%) saturate(1500%) hue-rotate(180deg);
+  transition: opacity var(--transition-fast, 150ms ease);
+}
+
+.ff-date-input::-webkit-calendar-picker-indicator:hover,
+.ff-datetime-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Number Input clean spin buttons */
+.ff-number-input::-webkit-inner-spin-button,
+.ff-number-input::-webkit-outer-spin-button {
+  opacity: 0.7;
+}
+
+/* Checkbox & Radio Controls */
+.ff-choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ff-choice-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-primary, var(--text));
+  font-weight: var(--font-weight-normal, 400);
+}
+
+.ff-choice-label.ff-disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled, var(--text-subtle));
+}
+
+.ff-checkbox,
+.ff-radio {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary, var(--primary));
+  cursor: pointer;
+}
+
+.ff-checkbox:disabled,
+.ff-radio:disabled {
+  cursor: not-allowed;
+}
+
+/* File Input component with preview & status */
+.ff-file-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ff-file-dropzone {
+  border: 2px dashed var(--ff-input-border);
+  border-radius: var(--ff-input-radius);
+  padding: 20px 16px;
+  background-color: var(--color-bg-page, var(--bg));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition-fast, 150ms ease), background-color var(--transition-fast, 150ms ease);
+}
+
+.ff-file-dropzone:hover {
+  border-color: var(--color-primary, var(--primary));
+  background-color: transparent;
+}
+
+.ff-file-dropzone.ff-dragover {
+  border-color: var(--color-primary, var(--primary));
+  background-color: var(--blue-50);
+}
+
+.ff-file-native-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.ff-file-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--ff-input-border);
+  border-radius: var(--ff-input-radius);
+}
+
+.ff-file-preview-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--ff-input-border);
+}
+
+.ff-file-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ff-file-preview-name {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text-primary, var(--text));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ff-file-preview-size {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, var(--text-muted));
+}
+
+.ff-file-remove-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ff-file-remove-btn:hover {
+  background-color: var(--danger-bg);
+}
+
+/* Two-column form grid responsiveness */
+.form-grid-2,
+.ff-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px; /* 20px between rows and columns */
+}
+
+@media (max-width: 600px) {
+  .form-grid-2,
+  .ff-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* PhoneInput Component */
+.ff-phone-wrapper {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  background-color: var(--ff-input-bg, var(--surface));
+  border: 1px solid var(--ff-input-border, var(--border));
+  border-radius: var(--ff-input-radius, 8px);
+  min-height: var(--ff-input-height, 44px);
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.ff-phone-wrapper:focus-within {
+  border-color: var(--ff-input-border-focus, var(--primary));
+  box-shadow: 0 0 0 3px var(--ff-input-ring, var(--focus-ring));
+}
+
+.ff-phone-wrapper.ff-error {
+  border-color: var(--ff-input-error-border, var(--danger));
+  box-shadow: 0 0 0 3px var(--ff-input-error-ring, var(--danger-bg));
+  animation: ffShake 300ms var(--ease-out) 1;
+}
+
+.ff-phone-prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--neutral-text);
+  background-color: var(--neutral-bg);
+  border-right: 1px solid var(--ff-input-border, var(--border));
+  user-select: none;
+  min-height: 42px;
+}
+
+.ff-phone-input {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  flex: 1;
+  padding: 0 12px;
+  min-height: 42px;
+  font-size: 0.95rem;
+  background: transparent !important;
+  color: var(--ff-input-text, var(--text));
+}
+
+.ff-phone-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ff-phone-status {
+  padding-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.ff-phone-tick {
+  color: var(--success);
+  font-weight: 800;
+  font-size: 1.15rem;
+  display: inline-block;
+  animation: ffPopIn 250ms var(--ease-spring);
+}
+
+.ff-phone-counter {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Password Toggle & Strength Meter */
+.ff-password-toggle svg {
+  transition: transform 180ms var(--ease-spring), opacity 180ms ease;
+}
+
+.ff-password-toggle:active svg {
+  transform: rotate(18deg) scale(0.9);
+}
+
+.ff-strength-meter {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.ff-strength-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+  width: 100%;
+}
+
+.ff-strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 250ms var(--ease-out), background-color 250ms ease;
+}
+
+.ff-strength-label {
+  font-size: 11px;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}

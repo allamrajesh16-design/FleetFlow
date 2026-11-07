@@ -1,0 +1,33 @@
+{
+  "case_id": "A2.1",
+  "timestamp": "2026-11-03T11:11:56.997Z",
+  "channel": "UI",
+  "actions": [
+    "Navigate to /admin/users",
+    "Read header title and row list"
+  ],
+  "target_selector": "table.datatable-table, .page-header-title",
+  "visible_text": "Users & Roles",
+  "api_status": null,
+  "api_body": null,
+  "db_before": 83,
+  "db_after": 83,
+  "assertions": [
+    {
+      "name": "Header matches Users & Roles",
+      "condition": "visible_text.includes('Users & Roles')",
+      "passed": true,
+      "details": "Read 'Users & Roles'"
+    },
+    {
+      "name": "Database user count is positive",
+      "condition": "db_after > 0",
+      "passed": true,
+      "details": "db_count=83"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a2_1_users_count.png",
+  "screenshot_crop": "docs/guide/images/admin/a2_1_users_count_crop.png",
+  "status": "PASS",
+  "notes": "Admin Users page loads with table displaying users."
+}

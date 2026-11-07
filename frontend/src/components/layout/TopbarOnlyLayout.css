@@ -1,0 +1,39 @@
+/* TopbarOnlyLayout styles - Full width topbar and content with no sidebar or bottom navigation */
+.dashboard-layout.topbar-only-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-page, var(--bg, #f8fafc));
+  position: relative;
+  width: 100%;
+}
+
+.dashboard-layout.topbar-only-layout .dashboard-main,
+.topbar-only-main {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  padding-top: 64px;
+  flex: 1;
+}
+
+.dashboard-layout.topbar-only-layout .topbar {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+.topbar-only-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-6, 24px);
+}
+
+@media (max-width: 768px) {
+  .topbar-only-content {
+    padding: var(--space-4, 16px);
+  }
+}
+

@@ -1,0 +1,215 @@
+/* ==========================================================================
+   FleetFlow IconButton System
+   ========================================================================== */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  line-height: 1;
+  font-family: var(--font-family-base, 'Inter', sans-serif);
+  font-weight: 500;
+  box-sizing: border-box;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Shapes */
+.icon-btn-round {
+  border-radius: 50%;
+}
+
+.icon-btn-square {
+  border-radius: 10px;
+}
+
+/* Sizing on Desktop (>= 768px) - minimum 36px */
+.icon-btn-sm,
+.icon-btn-small {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 13px;
+}
+
+.icon-btn-md {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.icon-btn-lg {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  font-size: 15px;
+}
+
+/* The label is hidden on desktop */
+.icon-btn-label {
+  display: none;
+  white-space: nowrap;
+}
+
+.icon-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* Focus ring & hover */
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-primary, var(--primary));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.icon-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.icon-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Variants */
+.icon-btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: var(--surface) !important;
+  border-color: var(--primary-hover);
+  box-shadow: 0 1px 2px var(--focus-ring);
+}
+
+.icon-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--blue-700) 100%);
+  box-shadow: 0 3px 8px var(--focus-ring);
+}
+
+.icon-btn-secondary,
+.icon-btn-outline {
+  background: var(--surface);
+  color: var(--neutral-text) !important;
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.icon-btn-secondary:hover:not(:disabled),
+.icon-btn-outline:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.07);
+}
+
+.icon-btn-ghost {
+  background: transparent;
+  color: var(--text-muted) !important;
+  border-color: transparent;
+}
+
+.icon-btn-ghost:hover:not(:disabled) {
+  background: var(--neutral-bg);
+  color: var(--text) !important;
+}
+
+.icon-btn-success {
+  background: var(--success-bg);
+  color: var(--success-text) !important;
+  border-color: var(--success-bg);
+}
+
+.icon-btn-success:hover:not(:disabled) {
+  background: var(--success);
+  color: var(--surface) !important;
+  border-color: var(--success-text);
+  box-shadow: 0 3px 8px var(--success-bg);
+}
+
+.icon-btn-danger {
+  background: var(--danger-bg);
+  color: var(--danger) !important;
+  border-color: var(--danger-bg);
+}
+
+.icon-btn-danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--surface) !important;
+  border-color: var(--danger);
+  box-shadow: 0 3px 8px var(--danger-bg);
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.icon-btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: iconBtnSpin 0.7s linear infinite;
+}
+
+@keyframes iconBtnSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Responsive: on screens below 768px, show icon WITH its text label
+   ========================================================================== */
+@media (max-width: 768px) {
+  .icon-btn {
+    width: auto !important;
+    min-width: 44px;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 12px;
+    border-radius: 8px !important;
+  }
+
+  .icon-btn-sm,
+  .icon-btn-small {
+    min-width: 44px;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .icon-btn-md {
+    min-width: 44px;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .icon-btn-lg {
+    min-width: 44px;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .icon-btn-label {
+    display: inline-block;
+    font-weight: 600;
+  }
+}

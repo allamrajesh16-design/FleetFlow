@@ -1,0 +1,33 @@
+{
+  "case_id": "S1.8",
+  "timestamp": "2026-11-04T07:10:52.511Z",
+  "channel": "UI",
+  "actions": [
+    "Customer uploads UPI transaction reference WTUTR_S1_PROOF_123 for Payment #22",
+    "POST /api/payments/{id}/submit-proof/"
+  ],
+  "target_selector": ".payment-card, table",
+  "visible_text": "Payment #22 status PAYMENT_INITIATED with reference WTUTR_S1_PROOF_123",
+  "api_status": 200,
+  "api_body": {
+    "status": "PAYMENT_INITIATED",
+    "reference": "WTUTR_S1_PROOF_123"
+  },
+  "db_before": {
+    "status": "UNPAID"
+  },
+  "db_after": {
+    "status": "PAYMENT_INITIATED",
+    "reference": "WTUTR_S1_PROOF_123"
+  },
+  "assertions": [
+    {
+      "name": "Payment status transitions to PAYMENT_INITIATED",
+      "condition": "paymentAfterInitiate.status === \"PAYMENT_INITIATED\"",
+      "passed": true,
+      "details": "Status=PAYMENT_INITIATED"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_08_cust_upi_proof.png",
+  "screenshot_crop": null
+}

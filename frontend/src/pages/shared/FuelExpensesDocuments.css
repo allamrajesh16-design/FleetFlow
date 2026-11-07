@@ -1,0 +1,730 @@
+/* ==========================================================================
+   FleetFlow: Shared Styles for Fuel, Expenses, Documents & Reports
+   Aesthetic: Clean modern fleet management dashboard with glassmorphism touches,
+              accessible typography, responsive layouts (1366, 1024, 768, 360px).
+   ========================================================================== */
+
+/* Main Page Container */
+.ff-page-container,
+.fed-page-container {
+  padding: var(--space-6, 24px);
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .ff-page-container,
+  .fed-page-container {
+    padding: var(--space-4, 16px);
+  }
+}
+
+/* Stat Cards Grid */
+.ff-stat-grid,
+.fed-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4, 16px);
+  margin-bottom: var(--space-6, 24px);
+}
+
+@media (max-width: 1024px) {
+  .ff-stat-grid,
+  .fed-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .ff-stat-grid,
+  .fed-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Generic FF Card */
+.ff-card,
+.fed-chart-card {
+  background: var(--color-surface, var(--surface));
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-5, 20px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ff-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Sub-table (Per-Vehicle Breakdown in Fuel) */
+.ff-subtable-card {
+  background: var(--surface);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-5, 20px);
+  margin-bottom: var(--space-6, 24px);
+}
+
+.ff-subtable-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ff-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ff-subtable th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--color-surface-hover, var(--bg));
+  color: var(--color-text-muted, var(--text-muted));
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--color-border, var(--border));
+}
+
+.ff-subtable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border-subtle, var(--neutral-bg));
+  color: var(--color-text-primary, var(--text));
+}
+
+.ff-subtable tr:hover td {
+  background: var(--color-surface-hover, var(--bg));
+}
+
+/* Filter Bar */
+.ff-filters-bar,
+.fed-filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 12px);
+  padding: 14px 18px;
+  margin-bottom: var(--space-5, 20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.ff-filters-left,
+.fed-filter-inputs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 1;
+}
+
+.ff-filters-left .ff-form-field,
+.fed-filter-inputs .ff-form-field {
+  width: auto !important;
+  min-width: 160px;
+  flex: 1 1 180px !important;
+  max-width: 240px;
+}
+
+.ff-filters-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .ff-filters-bar,
+  .fed-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ff-filters-left,
+  .fed-filter-inputs {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .ff-filters-left .ff-form-field,
+  .fed-filter-inputs .ff-form-field {
+    max-width: 100%;
+    width: 100%;
+    min-width: 100%;
+  }
+  .ff-filters-right {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+/* Tabs Bar */
+.ff-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid var(--color-border-subtle, var(--border));
+  margin-bottom: var(--space-5, 20px);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ff-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted, var(--text-muted));
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ff-tab-btn:hover {
+  color: var(--color-primary, var(--primary));
+  background: var(--color-surface-hover, var(--bg));
+}
+
+.ff-tab-btn.active {
+  color: var(--color-primary, var(--primary));
+  font-weight: 700;
+}
+
+.ff-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary, var(--primary));
+}
+
+.ff-tab-badge {
+  background: var(--color-surface-hover, var(--border));
+  color: var(--color-text-primary, var(--text));
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+
+.ff-tab-badge.warning {
+  background: var(--status-orange-bg, var(--warning-bg));
+  color: var(--status-orange-text, var(--warning-text));
+}
+
+/* Top Expiring Panel (Documents) */
+.ff-expiring-panel,
+.fed-expiring-panel {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface) 100%);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-5, 20px);
+  margin-bottom: var(--space-6, 24px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  gap: 24px;
+}
+
+.ff-expiring-counts {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.ff-expiring-stat-box {
+  background: var(--surface);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-md, 10px);
+  padding: 16px 20px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.ff-expiring-stat-box.expired {
+  border-left: 4px solid var(--status-red-text, var(--danger));
+  background: var(--surface);
+}
+
+.ff-expiring-stat-box.warning {
+  border-left: 4px solid var(--amber-500);
+  background: var(--surface);
+}
+
+.ff-expiring-num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.ff-expiring-stat-box.expired .ff-expiring-num {
+  color: var(--danger);
+}
+
+.ff-expiring-stat-box.warning .ff-expiring-num {
+  color: var(--amber-500);
+}
+
+.ff-expiring-lbl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted, var(--text-muted));
+  margin-top: 4px;
+}
+
+.ff-expiring-urgent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ff-expiring-urgent-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+  margin: 0 0 10px 0;
+}
+
+.ff-urgent-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.ff-urgent-item,
+.ff-urgent-card {
+  background: var(--surface);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ff-urgent-item:hover,
+.ff-urgent-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.ff-urgent-owner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ff-urgent-owner strong {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--color-text-primary, var(--text));
+}
+
+.ff-urgent-type,
+.ff-urgent-doc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, var(--text-muted));
+  font-weight: 500;
+}
+
+.ff-urgent-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.ff-urgent-date {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, var(--text-muted));
+}
+
+@media (max-width: 900px) {
+  .ff-expiring-panel {
+    flex-direction: column;
+  }
+  .ff-expiring-counts {
+    width: 100%;
+  }
+  .ff-expiring-stat-box {
+    flex: 1;
+  }
+}
+
+/* Expenses Summary Charts */
+.ff-expense-summary-grid,
+.fed-expense-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: var(--space-4, 16px);
+  margin-bottom: var(--space-6, 24px);
+}
+
+@media (max-width: 900px) {
+  .ff-expense-summary-grid,
+  .fed-expense-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ff-expense-summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.ff-expense-kpi-card {
+  min-height: auto !important;
+  height: fit-content !important;
+  justify-content: flex-start !important;
+}
+
+/* Donut Chart */
+.ff-donut-wrapper,
+.fed-donut-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.ff-donut-svg-container {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ff-donut-svg {
+  width: 170px;
+  height: 170px;
+  transform: rotate(-90deg);
+}
+
+.ff-donut-center-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.ff-donut-center-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+  line-height: 1.2;
+}
+
+.ff-donut-center-lbl {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-muted, var(--text-muted));
+  letter-spacing: 0.5px;
+}
+
+.ff-donut-ring {
+  transition: stroke-dasharray 0.5s ease;
+}
+
+.ff-donut-legend,
+.fed-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.ff-donut-legend-item,
+.fed-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--color-border-subtle, var(--neutral-bg));
+}
+
+.ff-donut-legend-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ff-donut-color-dot,
+.fed-legend-bullet {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.ff-donut-legend-label {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary, var(--neutral-text));
+}
+
+.ff-donut-legend-val {
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+}
+
+/* Bar List for Vehicles */
+.ff-bar-list,
+.fed-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.ff-bar-item,
+.fed-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ff-bar-info,
+.fed-bar-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, var(--neutral-text));
+}
+
+.ff-bar-track,
+.fed-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--color-border-subtle, var(--neutral-bg));
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ff-bar-fill,
+.fed-bar-fill {
+  height: 100%;
+  background: var(--color-primary, var(--primary));
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+/* Live Calculation Banner in Modal */
+.ff-form-calc-banner,
+.fed-live-calc-box {
+  background: var(--color-surface-hover, var(--bg));
+  border: 1px dashed var(--color-border, var(--border));
+  padding: 12px 16px;
+  border-radius: var(--radius-md, 8px);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ff-form-calc-label,
+.fed-live-calc-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, var(--text-muted));
+  font-weight: 500;
+}
+
+.ff-form-calc-value,
+.fed-live-calc-val {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-primary, var(--primary));
+}
+
+/* Card Views (Fuel, Expenses, Documents) */
+.ff-fuel-card,
+.ff-expense-card,
+.ff-doc-card {
+  background: var(--surface);
+  border: 1px solid var(--color-border, var(--border));
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ff-fuel-card:hover,
+.ff-expense-card:hover,
+.ff-doc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ff-fuel-card-top,
+.ff-expense-card-top,
+.ff-doc-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ff-fuel-card-reg,
+.ff-doc-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+}
+
+.ff-fuel-card-model,
+.ff-expense-card-veh,
+.ff-doc-card-type {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, var(--text-muted));
+  margin-top: 2px;
+}
+
+.ff-fuel-card-cost,
+.ff-expense-card-amount {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-primary, var(--primary));
+  text-align: right;
+}
+
+.ff-expense-card-cat {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+}
+
+.ff-fuel-card-details,
+.ff-expense-card-details,
+.ff-doc-card-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 14px;
+  font-size: 0.8125rem;
+  background: var(--color-surface-hover, var(--bg));
+  border-radius: var(--radius-md, 8px);
+  padding: 10px 12px;
+}
+
+@media (max-width: 480px) {
+  .ff-fuel-card-details,
+  .ff-expense-card-details,
+  .ff-doc-card-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ff-fuel-detail-item span,
+.ff-expense-card-details span,
+.ff-doc-card-details span {
+  color: var(--color-text-muted, var(--text-muted));
+  margin-right: 4px;
+}
+
+.ff-expense-card-desc {
+  grid-column: 1 / -1;
+  font-style: italic;
+  color: var(--color-text-secondary, var(--neutral-text));
+}
+
+.ff-expense-card-rejection {
+  grid-column: 1 / -1;
+  background: var(--status-red-bg, var(--danger-bg));
+  color: var(--status-red-text, var(--danger-text));
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.ff-fuel-card-footer,
+.ff-expense-card-footer,
+.ff-doc-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-subtle, var(--neutral-bg));
+}
+
+/* Horizontal Bar Chart (Reports Vehicle Cost) */
+.ff-report-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.ff-report-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.ff-report-bar-label {
+  font-weight: 600;
+  color: var(--color-text-primary, var(--text));
+}
+
+.ff-report-bar-values {
+  font-weight: 700;
+  color: var(--color-text-secondary, var(--neutral-text));
+  display: flex;
+  gap: 12px;
+}
+
+.ff-report-bar-track {
+  width: 100%;
+  height: 12px;
+  background: var(--color-border-subtle, var(--neutral-bg));
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ff-report-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue-600) 0%, var(--primary) 100%);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}

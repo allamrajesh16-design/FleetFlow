@@ -1,0 +1,1227 @@
+/* ==========================================================================
+   Driver Mobile Pages Styling (Matched to screens.png design)
+   ========================================================================== */
+
+.driver-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+/* Page Headers */
+.driver-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  min-height: 44px;
+}
+
+.driver-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.driver-greeting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--space-1);
+}
+
+.driver-greeting-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.driver-greeting-date {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 4px 0 0 0;
+}
+
+.driver-refresh-btn,
+.driver-back-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.driver-refresh-btn:hover,
+.driver-back-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+}
+
+/* Driver Status & License Expiry Card */
+.driver-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+}
+
+.driver-status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.driver-status-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.driver-license-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.driver-license-text {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.driver-license-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* 3 Stat Cards Row */
+.driver-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.driver-stat-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+}
+
+.driver-stat-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.driver-stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* Current / In-Progress Trip Card */
+.driver-active-trip-card {
+  border: 2px solid var(--color-primary) !important;
+  background: linear-gradient(180deg, var(--blue-50) 0%, var(--surface) 100%) !important;
+  box-shadow: 0 4px 14px var(--blue-50) !important;
+}
+
+.driver-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.driver-card-tag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.driver-card-tag.current {
+  background: var(--blue-100);
+  color: var(--blue-700);
+}
+
+.driver-card-tag.upcoming {
+  background: var(--purple-bg);
+  color: var(--purple-text);
+}
+
+.live-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 var(--success);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.driver-vehicle-reg {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.driver-trip-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 12px;
+}
+
+.driver-route-arrow {
+  color: var(--color-primary);
+}
+
+.driver-trip-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.driver-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.driver-fare-tag {
+  color: var(--color-success);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Upcoming Trip Card */
+.driver-upcoming-trip-card {
+  box-shadow: var(--shadow-sm);
+}
+
+.driver-no-upcoming-card {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+/* Tabs */
+.driver-tabs-container {
+  display: flex;
+  background: var(--border);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  gap: 4px;
+}
+
+.driver-tab-button {
+  flex: 1;
+  min-height: 42px;
+  border: none;
+  background: transparent !important;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary) !important;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.driver-tab-button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.driver-tab-button.active {
+  background: var(--surface) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Trip Card */
+.driver-trip-card {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.driver-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.driver-vehicle-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Location Status Banner */
+.driver-location-warning-banner {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-bg);
+  color: var(--warning-text);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.driver-location-active-badge {
+  background: var(--success-bg);
+  border: 1px solid var(--success-bg);
+  color: var(--success-text);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Route expanded in details */
+.driver-details-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.driver-trip-id-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.driver-route-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  padding: 6px 0;
+}
+
+.driver-route-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.route-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.route-dot.pickup {
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-bg);
+}
+
+.route-dot.drop {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.driver-route-line {
+  position: absolute;
+  top: 19px;
+  left: 6px;
+  width: 2px;
+  height: calc(100% - 38px);
+  background: var(--border);
+}
+
+.route-step-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.step-place {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+/* Info list in details card */
+.driver-info-list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.driver-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.driver-info-item.highlighted {
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px dashed var(--color-border);
+}
+
+.info-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-bg-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.info-value {
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.info-value.fare-text {
+  font-size: 18px;
+  color: var(--color-success);
+}
+
+.info-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.driver-action-container {
+  margin-top: 6px;
+  margin-bottom: 24px;
+}
+
+/* Odometer Form Pages */
+.driver-summary-card {
+  background: var(--bg);
+  border: 1px solid var(--color-border);
+  padding: 14px;
+}
+
+.driver-summary-route {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.driver-summary-arrow {
+  color: var(--color-primary);
+}
+
+.driver-summary-vehicle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.driver-form-card {
+  padding: 20px 16px;
+}
+
+.driver-readonly-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.driver-readonly-val {
+  background: var(--neutral-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.driver-calc-distance-box {
+  margin-top: 16px;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.calc-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.driver-field-error-message {
+  margin-top: 6px;
+  color: var(--color-error);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Trip Completed & Payment QR Page */
+.driver-completed-header-card {
+  background: var(--surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.driver-completed-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  color: var(--success-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.driver-completed-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.driver-completed-fare-box {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.driver-fare-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.driver-completed-fare {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.driver-qr-card {
+  padding: 20px;
+  text-align: center;
+}
+
+.driver-qr-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.driver-qr-image-wrapper {
+  background: var(--surface);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.driver-qr-image {
+  width: 190px;
+  height: 190px;
+  object-fit: contain;
+  display: block;
+}
+
+.driver-upi-id-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--neutral-bg);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.driver-qr-instruction {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.driver-no-qr-box {
+  text-align: center;
+  padding: 20px 10px;
+  color: var(--warning-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.driver-payments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.driver-section-subtitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 4px 0 0 0;
+}
+
+.driver-payment-item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.driver-customer-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.driver-payment-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.amount-label {
+  color: var(--color-text-muted);
+}
+
+.amount-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.driver-payment-status-unpaid {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-bg);
+  color: var(--warning-text);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.driver-payment-initiated-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.driver-txn-info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.txn-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.txn-ref {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  word-break: break-all;
+}
+
+.driver-proof-screenshot-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.screenshot-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.driver-screenshot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.driver-screenshot-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.driver-initiated-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.driver-btn-confirm-success {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.driver-btn-confirm-success:hover {
+  background-color: var(--success-text) !important;
+}
+
+.driver-payment-paid-card {
+  background: var(--success-bg);
+  border: 1px solid var(--success-bg);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.driver-paid-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.driver-receipt-number {
+  font-size: 12px;
+  color: var(--success-text);
+  font-weight: 500;
+}
+
+.driver-reject-modal-intro {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 14px;
+}
+
+.driver-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Trip History */
+.driver-filter-chips-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.driver-chip-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 40px;
+  transition: all var(--transition-fast);
+}
+
+.driver-chip-btn.active {
+  background: var(--color-primary);
+  color: var(--surface);
+  border-color: var(--color-primary);
+}
+
+.driver-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.driver-history-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.driver-history-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.driver-history-route {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.driver-history-view-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.driver-history-view-link:hover {
+  background: var(--blue-50);
+}
+
+.driver-history-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.driver-history-date {
+  color: var(--color-text-muted);
+}
+
+.driver-history-fare {
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.driver-load-more-container {
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   Desktop Responsive Layouts for Driver Pages (>= 1024px / >= 768px)
+   ========================================================================== */
+
+/* 1. Dashboard: Current and Upcoming Trips Side by Side */
+@media (min-width: 1024px) {
+  .driver-trips-side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .driver-trips-side-by-side > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* 2. Trip Details: Route and Vehicle Info Side by Side */
+  .driver-trip-details-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* 3. Start / Complete Trip Form: Centered form up to 640px with summary on the side */
+  .driver-trip-form-desktop-layout {
+    display: grid;
+    grid-template-columns: 360px minmax(auto, 640px);
+    gap: 24px;
+    align-items: start;
+    justify-content: center;
+  }
+
+  /* 4. Payment QR: QR Image on the left, payment status and buttons on the right */
+  .driver-payment-qr-desktop-split {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .driver-trips-side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .driver-trip-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+/* Trip History Desktop Table */
+.driver-history-table-container {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .driver-history-table-container {
+    display: block;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  .driver-history-mobile-cards {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .driver-history-table-container {
+    display: none;
+  }
+
+  .driver-history-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Floating round "+" button on phones */
+.driver-fab-add,
+.icon-btn.driver-fab-add {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .driver-fab-add,
+  .icon-btn.driver-fab-add {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: fixed !important;
+    bottom: 80px !important;
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
+    color: var(--surface) !important;
+    border: none !important;
+    box-shadow: 0 6px 18px var(--primary-glow), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    cursor: pointer;
+    z-index: 60 !important;
+    padding: 0 !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  .driver-fab-add:hover,
+  .icon-btn.driver-fab-add:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px var(--primary-glow) !important;
+  }
+
+  .driver-fab-add:active,
+  .icon-btn.driver-fab-add:active {
+    transform: scale(0.94) !important;
+  }
+
+  .icon-btn.driver-fab-add .icon-btn-label {
+    display: none !important;
+  }
+}
+
+/* Info banner when driver has no eligible trip */
+.driver-no-trips-banner {
+  background-color: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  color: var(--blue-700);
+  padding: 12px 16px;
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: var(--space-4, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.driver-no-trips-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .driver-no-trips-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   Driver Motion & WOW Moments
+   ============================================================ */
+/* 1. Radar Ring on Location Badge */
+.driver-radar-dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--success);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.driver-radar-ring {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--success);
+  animation: ffRadarRing 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+/* 2. Start Trip Button Sweep & Press */
+.btn-press-sweep {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.btn-press-sweep:active {
+  transform: scale(0.97);
+}
+
+.btn-press-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: transform 700ms var(--ease-out);
+  pointer-events: none;
+}
+
+.btn-press-sweep:hover::after {
+  transform: translateX(320%) skewX(-20deg);
+}
+
+/* 3. QR Card Scan Line Sweep */
+.driver-qr-image-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.driver-qr-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary), var(--sky-500), var(--primary), transparent);
+  box-shadow: 0 0 8px var(--primary);
+  animation: ffScanLineSweep 1.8s var(--ease-in-out) 1 forwards;
+  pointer-events: none;
+}
+
+/* 4. Confetti Burst Overlay (16 CSS elements, 1.2s, once) */
+.driver-confetti-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.driver-confetti-center-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px var(--success-bg);
+  animation: ffPopIn 400ms var(--ease-spring) forwards;
+}
+
+.driver-confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background-color: var(--clr, var(--success));
+  top: 50%;
+  left: 50%;
+  animation: ffConfettiBurst 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ffConfettiBurst {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0);
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--rot, 45deg)) translateY(calc(-1 * var(--dist, 80px))) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 5. Receipt Card Slide-up */
+.driver-receipt-slide-up {
+  animation: ffFadeRise 450ms var(--ease-out) forwards;
+}
+
+
+

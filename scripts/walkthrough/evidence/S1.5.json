@@ -1,0 +1,66 @@
+{
+  "case_id": "S1.5",
+  "timestamp": "2026-11-04T07:10:33.164Z",
+  "channel": "UI",
+  "actions": [
+    "Assign Booking #79 to vehicle AP05WT0001 and driver WT-Driver One",
+    "POST /api/trips/assign/"
+  ],
+  "target_selector": ".assignment-container, form, main",
+  "visible_text": "Trip assigned to driver WT-Driver One and vehicle AP05WT0001",
+  "api_status": 201,
+  "api_body": {
+    "id": 33,
+    "booking": 79,
+    "bus_schedule": null,
+    "vehicle": 31,
+    "vehicle_registration": "AP05WT0001",
+    "vehicle_type": "CAR",
+    "vehicle_brand_model": "TestBrand TestModel",
+    "driver": 32,
+    "driver_name": "WT-Driver One",
+    "driver_license": "WT-DL-2026-0001",
+    "source": "Kakinada Main Road",
+    "destination": "Rajahmundry Airport",
+    "pickup_location": "Kakinada Main Road",
+    "drop_location": "Rajahmundry Airport",
+    "customer_name": "WT Demo Customer",
+    "customer_email": "wt.demo.s1.cust@gmail.com",
+    "passengers": 2,
+    "scheduled_datetime": "2026-11-06T15:30:00+05:30",
+    "status": "SCHEDULED",
+    "start_odometer": null,
+    "end_odometer": null,
+    "distance_km": null,
+    "started_at": null,
+    "completed_at": null,
+    "total_fare": null,
+    "last_known_location": null,
+    "assigned_by": 157,
+    "assigned_by_name": "WT-Fleet Manager One",
+    "created_at": "2026-11-04T12:40:29.738489+05:30",
+    "updated_at": "2026-11-04T12:40:29.738494+05:30",
+    "warnings": [
+      "Vehicle AP05WT0001 has no compliance documents registered."
+    ]
+  },
+  "db_before": {
+    "trip_exists": false
+  },
+  "db_after": {
+    "trip_id": 33,
+    "status": "SCHEDULED",
+    "vehicle": "AP05WT0001",
+    "driver": "WT-Driver One"
+  },
+  "assertions": [
+    {
+      "name": "Trip created in SCHEDULED status",
+      "condition": "assignedTrip && assignedTrip.status === \"SCHEDULED\"",
+      "passed": true,
+      "details": "Trip #33, Status=SCHEDULED"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_05_trip_assigned.png",
+  "screenshot_crop": null
+}

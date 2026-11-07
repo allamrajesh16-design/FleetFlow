@@ -1,0 +1,74 @@
+{
+  "case_id": "S1.7",
+  "timestamp": "2026-11-04T07:10:44.679Z",
+  "channel": "UI",
+  "actions": [
+    "Driver posts GPS coordinate and completes trip with end odometer 14,565 km (65 km traveled)",
+    "POST /api/trips/{id}/complete/"
+  ],
+  "target_selector": ".trip-card, main",
+  "visible_text": "Trip completed: COMPLETED. Payment invoice generated: 22",
+  "api_status": 200,
+  "api_body": {
+    "id": 33,
+    "booking": 79,
+    "bus_schedule": null,
+    "vehicle": 31,
+    "vehicle_registration": "AP05WT0001",
+    "vehicle_type": "CAR",
+    "vehicle_brand_model": "TestBrand TestModel",
+    "driver": 32,
+    "driver_name": "WT-Driver One",
+    "driver_license": "WT-DL-2026-0001",
+    "source": "Kakinada Main Road",
+    "destination": "Rajahmundry Airport",
+    "pickup_location": "Kakinada Main Road",
+    "drop_location": "Rajahmundry Airport",
+    "customer_name": "WT Demo Customer",
+    "customer_email": "wt.demo.s1.cust@gmail.com",
+    "passengers": 2,
+    "scheduled_datetime": "2026-11-06T15:30:00+05:30",
+    "status": "COMPLETED",
+    "start_odometer": 14500,
+    "end_odometer": 14565,
+    "distance_km": 65,
+    "started_at": "2026-11-04T12:40:33.712371+05:30",
+    "completed_at": "2026-11-04T12:40:40.554956+05:30",
+    "total_fare": "975.00",
+    "last_known_location": {
+      "id": 17,
+      "latitude": "16.989100",
+      "longitude": "82.247500",
+      "recorded_at": "2026-11-04T12:40:40.481813+05:30"
+    },
+    "assigned_by": 157,
+    "assigned_by_name": "WT-Fleet Manager One",
+    "created_at": "2026-11-04T12:40:29.738489+05:30",
+    "updated_at": "2026-11-04T12:40:40.555038+05:30"
+  },
+  "db_before": {
+    "status": "IN_PROGRESS"
+  },
+  "db_after": {
+    "status": "COMPLETED",
+    "end_odometer": 14565,
+    "payment_id": 22,
+    "payment_status": "UNPAID"
+  },
+  "assertions": [
+    {
+      "name": "Trip status transitions to COMPLETED",
+      "condition": "tripCompleted.status === \"COMPLETED\"",
+      "passed": true,
+      "details": "Status=COMPLETED"
+    },
+    {
+      "name": "Payment record automatically created for customer",
+      "condition": "paymentCreated && paymentCreated.id > 0",
+      "passed": true,
+      "details": "Payment #22, Status=UNPAID, Amount=975"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_07_driver_completed_trip.png",
+  "screenshot_crop": null
+}

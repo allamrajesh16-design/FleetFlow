@@ -1,0 +1,33 @@
+{
+  "case_id": "A2.4",
+  "timestamp": "2026-11-03T11:15:18.266Z",
+  "channel": "UI",
+  "actions": [
+    "Type name \"WT-Created Customer\", email \"wt.user.4992@gmail.com\", phone \"9000004992\"",
+    "Click Submit button"
+  ],
+  "target_selector": ".toast-success, .toast-message, table.datatable-table tbody tr:first-child",
+  "visible_text": "WT-Pending Driver Two wt.pending.drv2@gmail.com \t9000000212\tDRIVER\tActive\t3 Nov 2026, 4:34 PM\t Deactivate",
+  "api_status": null,
+  "api_body": null,
+  "db_before": 83,
+  "db_after": 83,
+  "assertions": [
+    {
+      "name": "Database user count incremented by 1",
+      "condition": "db_after === db_before + 1",
+      "passed": false,
+      "details": "Count remained 83 (expected 84). Submission timed out before user creation completed."
+    },
+    {
+      "name": "Created user appears in top row",
+      "condition": "visible_text.includes('WT-Created Customer')",
+      "passed": false,
+      "details": "Visible row is 'WT-Pending Driver Two' instead of 'WT-Created Customer'"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a2_4_add_customer.png",
+  "screenshot_crop": "docs/guide/images/admin/a2_4_add_customer_crop.png",
+  "status": "FAIL",
+  "notes": "Add customer modal timed out; user was not created."
+}

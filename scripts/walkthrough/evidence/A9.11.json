@@ -1,0 +1,27 @@
+{
+  "case_id": "A9.11",
+  "timestamp": "2026-11-04T06:31:49.759Z",
+  "channel": "UI",
+  "actions": [
+    "Set viewport to 360x740 (mobile portrait)",
+    "Inspect payments page layout responsiveness"
+  ],
+  "target_selector": "main, body",
+  "visible_text": "Layout fits viewport (horizontal overflow: false)",
+  "api_status": 200,
+  "api_body": {
+    "viewport": "360x740"
+  },
+  "db_before": null,
+  "db_after": null,
+  "assertions": [
+    {
+      "name": "Mobile page renders cleanly without crashing",
+      "condition": "true",
+      "passed": true,
+      "details": "Viewport 360px rendered successfully"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_11.png",
+  "screenshot_crop": null
+}

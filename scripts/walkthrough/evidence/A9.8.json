@@ -1,0 +1,32 @@
+{
+  "case_id": "A9.8",
+  "timestamp": "2026-11-04T06:31:35.711Z",
+  "channel": "API-only",
+  "actions": [
+    "POST /api/payments/19/refund/ on UNPAID payment"
+  ],
+  "target_selector": null,
+  "visible_text": null,
+  "api_status": 400,
+  "api_body": {
+    "detail": "Cannot refund payment with status UNPAID."
+  },
+  "db_before": {
+    "id": 19,
+    "status": "UNPAID"
+  },
+  "db_after": {
+    "id": 19,
+    "status": "UNPAID"
+  },
+  "assertions": [
+    {
+      "name": "Refund on UNPAID payment rejected with HTTP 400",
+      "condition": "unpaidRefundRes.status === 400",
+      "passed": true,
+      "details": "HTTP 400: {\"detail\":\"Cannot refund payment with status UNPAID.\"}"
+    }
+  ],
+  "screenshot_full": null,
+  "screenshot_crop": null
+}

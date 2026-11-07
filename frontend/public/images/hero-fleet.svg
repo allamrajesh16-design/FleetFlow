@@ -1,0 +1,117 @@
+<svg viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="100%" stop-color="#DBEAFE" />
+    </linearGradient>
+    <linearGradient id="busBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F8FAFC" />
+    </linearGradient>
+    <linearGradient id="busBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <linearGradient id="carBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="windowTint" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#1E293B" stop-opacity="0.95" />
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0B192C" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Sky Canvas -->
+  <rect width="800" height="500" rx="16" fill="url(#skyGrad)" />
+
+  <!-- Skyline Silhouettes -->
+  <rect x="80" y="180" width="60" height="180" rx="4" fill="#BFDBFE" fill-opacity="0.5" />
+  <rect x="160" y="140" width="80" height="220" rx="4" fill="#93C5FD" fill-opacity="0.45" />
+  <rect x="260" y="200" width="70" height="160" rx="4" fill="#BFDBFE" fill-opacity="0.4" />
+  <rect x="520" y="160" width="75" height="200" rx="4" fill="#93C5FD" fill-opacity="0.45" />
+  <rect x="615" y="190" width="65" height="170" rx="4" fill="#BFDBFE" fill-opacity="0.5" />
+  <rect x="700" y="220" width="50" height="140" rx="4" fill="#93C5FD" fill-opacity="0.35" />
+
+  <!-- Roadway Base -->
+  <rect x="30" y="340" width="740" height="90" rx="12" fill="#0B192C" />
+  <!-- Road Center Dashes -->
+  <line x1="60" y1="385" x2="140" y2="385" stroke="#F8FAFC" stroke-width="4" stroke-dasharray="24 16" stroke-opacity="0.4" />
+  <line x1="200" y1="385" x2="340" y2="385" stroke="#F8FAFC" stroke-width="4" stroke-dasharray="24 16" stroke-opacity="0.4" />
+  <line x1="400" y1="385" x2="540" y2="385" stroke="#F8FAFC" stroke-width="4" stroke-dasharray="24 16" stroke-opacity="0.4" />
+  <line x1="600" y1="385" x2="720" y2="385" stroke="#F8FAFC" stroke-width="4" stroke-dasharray="24 16" stroke-opacity="0.4" />
+
+  <!-- ==================== BUS (FLEETFLOW COACH) ==================== -->
+  <g filter="url(#softShadow)">
+    <!-- Bus Main Hull -->
+    <path d="M70 210 C70 185, 95 180, 130 180 L520 180 C565 180, 580 195, 580 230 L580 340 C580 348, 572 355, 560 355 L85 355 C75 355, 70 348, 70 340 Z" fill="url(#busBody)" />
+
+    <!-- Windshield -->
+    <path d="M510 190 L565 190 C570 190, 574 196, 574 206 L574 260 L510 260 Z" fill="url(#windowTint)" />
+    <!-- Passenger Windows -->
+    <rect x="420" y="190" width="75" height="70" rx="6" fill="url(#windowTint)" />
+    <rect x="330" y="190" width="75" height="70" rx="6" fill="url(#windowTint)" />
+    <rect x="240" y="190" width="75" height="70" rx="6" fill="url(#windowTint)" />
+    <rect x="150" y="190" width="75" height="70" rx="6" fill="url(#windowTint)" />
+    <rect x="85" y="190" width="50" height="70" rx="6" fill="url(#windowTint)" />
+
+    <!-- Blue Brand Stripe -->
+    <path d="M70 280 L580 280 L580 305 L70 305 Z" fill="url(#busBlue)" />
+    <text x="210" y="298" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13" font-weight="800" letter-spacing="2">
+      FLEETFLOW EXPRESS
+    </text>
+
+    <!-- Headlight Beam & Lens -->
+    <polygon points="580,295 660,270 660,345 580,325" fill="#FDE047" fill-opacity="0.3" />
+    <circle cx="575" cy="310" r="7" fill="#FEF08A" />
+
+    <!-- Bus Wheels -->
+    <g>
+      <!-- Rear Wheel -->
+      <circle cx="160" cy="355" r="28" fill="#1E293B" stroke="#0F172A" stroke-width="5" />
+      <circle cx="160" cy="355" r="16" fill="#94A3B8" />
+      <circle cx="160" cy="355" r="7" fill="#2563EB" />
+      <!-- Front Wheel -->
+      <circle cx="490" cy="355" r="28" fill="#1E293B" stroke="#0F172A" stroke-width="5" />
+      <circle cx="490" cy="355" r="16" fill="#94A3B8" />
+      <circle cx="490" cy="355" r="7" fill="#2563EB" />
+    </g>
+  </g>
+
+  <!-- ==================== CAR (SEDAN IN FOREGROUND) ==================== -->
+  <g filter="url(#softShadow)">
+    <!-- Car Body -->
+    <path d="M480 310 C500 285, 540 270, 590 270 L650 270 C690 270, 720 290, 735 315 L745 330 C755 335, 755 345, 755 355 L755 370 C755 376, 750 380, 740 380 L470 380 C465 380, 460 376, 460 370 L460 340 C460 325, 470 315, 480 310 Z" fill="url(#carBody)" />
+
+    <!-- Car Windows -->
+    <path d="M530 280 L595 280 L595 312 L510 312 Z" fill="url(#windowTint)" />
+    <path d="M605 280 L650 280 C675 280, 695 295, 705 312 L605 312 Z" fill="url(#windowTint)" />
+
+    <!-- Car Headlight -->
+    <polygon points="745,340 780,335 780,365 745,355" fill="#FDE047" fill-opacity="0.35" />
+    <circle cx="742" cy="346" r="5" fill="#FEF08A" />
+
+    <!-- Car Wheels -->
+    <g>
+      <circle cx="515" cy="380" r="22" fill="#0F172A" stroke="#334155" stroke-width="4" />
+      <circle cx="515" cy="380" r="12" fill="#E2E8F0" />
+      <circle cx="515" cy="380" r="5" fill="#2563EB" />
+
+      <circle cx="695" cy="380" r="22" fill="#0F172A" stroke="#334155" stroke-width="4" />
+      <circle cx="695" cy="380" r="12" fill="#E2E8F0" />
+      <circle cx="695" cy="380" r="5" fill="#2563EB" />
+    </g>
+  </g>
+
+  <!-- Floating Badge: Smart Connected Fleet -->
+  <g transform="translate(60, 60)">
+    <rect width="180" height="48" rx="24" fill="#FFFFFF" filter="url(#softShadow)" />
+    <circle cx="26" cy="24" r="14" fill="#22C55E" />
+    <path d="M21 24 L24 27 L31 20" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="48" y="22" fill="#0F172A" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Fleet Active</text>
+    <text x="48" y="36" fill="#64748B" font-family="system-ui, sans-serif" font-size="10">Real-time Telemetry</text>
+  </g>
+</svg>

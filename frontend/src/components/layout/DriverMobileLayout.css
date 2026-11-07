@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Driver Responsive Layout Styles
+   ========================================================================== */
+
+/* Mobile view wrapper (< 768px) */
+.driver-mobile-view-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-page, var(--bg));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+/* Top Bar for Mobile */
+.driver-header {
+  height: 64px;
+  background: var(--color-surface, var(--surface));
+  border-bottom: 1px solid var(--color-border, var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4, 16px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.driver-header-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.driver-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+.driver-header-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md, 8px);
+  color: var(--color-text-secondary, var(--neutral-text));
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.driver-header-icon:hover {
+  background: var(--color-surface-hover, var(--bg));
+  color: var(--color-primary, var(--primary));
+}
+
+.driver-bell-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background-color: var(--danger);
+  color: var(--surface);
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+/* Main Content Area */
+.driver-content {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  padding: var(--space-4, 16px);
+  padding-bottom: 84px; /* Space for bottom nav */
+  box-sizing: border-box;
+}
+
+/* Bottom Navigation Bar for Mobile */
+.driver-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: var(--color-surface, var(--surface));
+  border-top: 1px solid var(--color-border, var(--border));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.driver-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--color-text-muted, var(--text-muted));
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  height: 100%;
+  transition: color 0.15s ease;
+}
+
+.driver-nav-item:hover {
+  color: var(--color-primary, var(--primary));
+}
+
+.driver-nav-item.active {
+  color: var(--color-primary, var(--primary));
+  font-weight: 600;
+}
+
+.driver-nav-item.active svg {
+  color: var(--color-primary, var(--primary));
+}
+
+/* Desktop layout additions */
+.driver-desktop-layout {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.driver-desktop-content {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* More Bottom Sheet for Mobile */
+.driver-more-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.driver-more-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface, var(--surface));
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 16px 20px 32px 20px;
+  z-index: 101;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.driver-more-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px auto;
+}
+
+.driver-more-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, var(--text));
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--neutral-bg);
+}
+
+.driver-more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.driver-more-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: var(--color-text-primary, var(--text));
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--bg);
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.driver-more-item:hover,
+.driver-more-item:active {
+  background: var(--blue-50);
+  color: var(--primary);
+}
+
+.driver-more-item.danger {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.driver-more-item.danger:hover {
+  background: var(--danger-bg);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

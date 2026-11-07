@@ -1,0 +1,917 @@
+/* ==========================================================================
+   FleetFlow Core Motion System (motion.css)
+   Pure CSS animations & transitions. Animate only transform and opacity.
+   Strict reduced-motion and zero-motion support. Extra size < 10KB.
+   ========================================================================== */
+
+:root {
+  /* Global scale factor to speed up or slow down all animations */
+  --motion-scale: 1;
+
+  /* Durations scaled by --motion-scale */
+  --dur-fast: calc(150ms * var(--motion-scale));
+  --dur-base: calc(250ms * var(--motion-scale));
+  --dur-slow: calc(450ms * var(--motion-scale));
+  --dur-hero: calc(900ms * var(--motion-scale));
+
+  /* Standard Easings */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Page transition */
+  --page-transition-dur: calc(200ms * var(--motion-scale));
+}
+
+/* ==========================================================================
+   Accessibility & Motion Kill Switches
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0.0001 !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Explicit REACT_APP_MOTION=off switch */
+[data-motion="off"],
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Pause ambient animations when document is hidden or off-screen */
+.motion-paused,
+.motion-paused *,
+.motion-paused *::before,
+.motion-paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* Smooth anchor scrolling when motion enabled */
+html:not([data-motion="off"]) {
+  scroll-behavior: smooth;
+}
+
+/* ==========================================================================
+   Keyframe Primitives (transform & opacity only)
+   ========================================================================== */
+
+@keyframes ffFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ffFadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ffFadeRiseLg {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ffFadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ffFadeSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ffScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ffScaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes ffPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  70% {
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ffShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+@keyframes ffGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--primary-glow);
+  }
+  50% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+@keyframes ffBellSwing {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(14deg); }
+  40% { transform: rotate(-14deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes ffBadgePop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Ambient Live Dot (Trip in progress / Live telemetry) */
+@keyframes ffLivePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
+/* Expiring / Expired badge pulse: max 2 pulses, then still */
+@keyframes ffSoftPulse2 {
+  0% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.55; transform: scale(1.04); }
+  50% { opacity: 1; transform: scale(1); }
+  75% { opacity: 0.55; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Ambient Floating (Empty state illustration) */
+@keyframes ffFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Radar ripple for Location Sharing ON */
+@keyframes ffRadarRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Skeleton shimmer */
+@keyframes ffShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Confetti burst piece */
+@keyframes ffConfettiPiece {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--confetti-x, 0px), var(--confetti-y, 0px)) scale(0.3) rotate(var(--confetti-rot, 360deg));
+    opacity: 0;
+  }
+}
+
+/* QR Scanner Line sweep */
+@keyframes ffScanLineSweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220px);
+    opacity: 0;
+  }
+}
+
+/* Toast Progress Bar depletion */
+@keyframes ffToastDeplete {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Checkmark draw */
+@keyframes ffStrokeDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Hero Fleet Bus driving loop (14s) */
+@keyframes ffBusLoop {
+  0% {
+    transform: translateX(-15%);
+  }
+  100% {
+    transform: translateX(115%);
+  }
+}
+
+@keyframes ffWheelTurn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ffCloudDriftSlow {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(24px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Ken Burns slow one-time zoom (20s) */
+@keyframes ffKenBurnsOnce {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+/* Route transition fade and 8px rise */
+.page-transition-wrap {
+  animation: ffFadeRise var(--page-transition-dur) var(--ease-out) both;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Reusable Motion Helper Classes
+   ========================================================================== */
+
+.motion-fade-in {
+  animation: ffFadeIn var(--dur-base) var(--ease-out) both;
+}
+
+.motion-fade-rise {
+  animation: ffFadeRise var(--dur-base) var(--ease-out) both;
+}
+
+.motion-scale-in {
+  animation: ffScaleIn var(--dur-base) var(--ease-out) both;
+}
+
+.motion-pop-in {
+  animation: ffPopIn var(--dur-base) var(--ease-spring) both;
+}
+
+.motion-float {
+  animation: ffFloat 4s ease-in-out infinite;
+}
+
+.motion-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: ffLivePulse 1.8s ease-in-out infinite;
+}
+
+.motion-pulse-expiring {
+  animation: ffSoftPulse2 1.6s ease-in-out 1 forwards;
+}
+
+/* Ripple effect inside buttons */
+.btn-ripple-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.btn-ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: translate(-50%, -50%) scale(0);
+  animation: btnRippleAnim 450ms var(--ease-out) forwards;
+}
+
+@keyframes btnRippleAnim {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* Button glow pulse (3s on load) */
+.btn-glow-pulse-3s {
+  animation: ffGlowPulse 1.5s ease-in-out 2;
+}
+
+/* Checkbox tick draw */
+.ff-draw-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: ffStrokeDraw 250ms var(--ease-out) forwards;
+}
+
+/* 16-element CSS Confetti Container */
+.motion-confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.motion-confetti-piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: ffConfettiPiece 1.2s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+}
+
+
+/* ==========================================================================
+   Motion System Enhancements: Motion Levels, Living Colors & Signatures
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Motion Levels Rules
+   - "full": All transitions and ambient loops active
+   - "lite": Disables ambient loops, tilt, aurora and gradient drift; keeps
+             hover, focus, entrance and state-change transitions
+   - "off": Prefers-reduced-motion: zero transitions and instant changes
+   - Tab hidden / off-screen: Ambient animations automatically pause
+   -------------------------------------------------------------------------- */
+html[data-motion="off"],
+html[data-motion="off"] * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="lite"] .aurora-blob,
+html[data-motion="lite"] .ambient-loop,
+html[data-motion="lite"] .tilt-active,
+html[data-motion="lite"] .radar-ring,
+html[data-motion="lite"] .gradient-drift,
+html[data-motion="lite"] .empty-state-breathe,
+html[data-motion="lite"] .progress-stripes-live {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Pause ambient loops when tab is hidden or element is off screen */
+html.tab-hidden .aurora-blob,
+html.tab-hidden .ambient-loop,
+html.tab-hidden .radar-ring,
+html.tab-hidden .gradient-drift,
+html.tab-hidden .empty-state-breathe,
+.is-off-screen {
+  animation-play-state: paused !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. SIGNATURE EFFECT 1: Aurora Background
+   Used on: Landing hero, Login/Register left panel, 404 & 403 pages
+   Pure radial gradients (NO filter:blur). Navy overlay protects readability.
+   -------------------------------------------------------------------------- */
+.aurora-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.35;
+  will-change: transform;
+}
+
+.aurora-blob-1 {
+  width: 500px;
+  height: 500px;
+  top: -100px;
+  left: -80px;
+  background: radial-gradient(circle, var(--blue-600) 0%, transparent 70%);
+  animation: auroraDrift1 22s ease-in-out infinite alternate;
+}
+
+.aurora-blob-2 {
+  width: 600px;
+  height: 600px;
+  bottom: -150px;
+  right: -100px;
+  background: radial-gradient(circle, var(--cyan-500) 0%, transparent 70%);
+  animation: auroraDrift2 26s ease-in-out 3s infinite alternate;
+}
+
+.aurora-blob-3 {
+  width: 450px;
+  height: 450px;
+  top: 40%;
+  left: 30%;
+  background: radial-gradient(circle, var(--violet-500) 0%, transparent 70%);
+  animation: auroraDrift3 20s ease-in-out 6s infinite alternate;
+}
+
+@keyframes auroraDrift1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 80px) scale(1.15); }
+  100% { transform: translate(-40px, 120px) scale(0.95); }
+}
+
+@keyframes auroraDrift2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-80px, -60px) scale(1.12); }
+  100% { transform: translate(-30px, -110px) scale(0.9); }
+}
+
+@keyframes auroraDrift3 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, -50px) scale(1.18); }
+  100% { transform: translate(-60px, 40px) scale(0.92); }
+}
+
+/* Landing headline sweep shine */
+.landing-shine-text {
+  background: linear-gradient(120deg, var(--blue-600) 0%, var(--cyan-600) 40%, var(--surface) 50%, var(--cyan-600) 60%, var(--blue-600) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShineSweep 2.2s ease-out 1;
+  transition: background-position 0.6s ease;
+}
+
+.landing-shine-text:hover {
+  background-position: right center;
+}
+
+@keyframes textShineSweep {
+  0% { background-position: 200% center; }
+  100% { background-position: 0% center; }
+}
+
+/* --------------------------------------------------------------------------
+   2. SIGNATURE EFFECT 2: Living Buttons Enhancements
+   -------------------------------------------------------------------------- */
+.btn-living-primary {
+  background-size: 200% auto !important;
+  background-position: left center;
+  transition: background-position 0.6s var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              transform 150ms var(--ease-out) !important;
+}
+
+.btn-living-primary:hover:not(:disabled) {
+  background-position: right center !important;
+  box-shadow: 0 4px 18px var(--accent-glow) !important;
+}
+
+.btn-living-primary:active:not(:disabled) {
+  transform: scale(0.98) !important;
+}
+
+/* Light sweep across primary button on hover */
+.btn-living-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  transition: left 0.6s ease;
+}
+
+.btn-living-primary:hover:not(:disabled)::after {
+  left: 150%;
+}
+
+/* Secondary Button sweep fill from left */
+.btn-living-secondary {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-living-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms var(--ease-out);
+  z-index: -1;
+}
+
+.btn-living-secondary:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
+
+.btn-living-secondary:hover:not(:disabled) {
+  color: var(--surface) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Growing underline link */
+.accent-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.accent-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent);
+  transition: width 200ms var(--ease-out);
+}
+
+.accent-link:hover::after {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   3. SIGNATURE EFFECT 3: Role Theme & Time-of-Day Strip
+   -------------------------------------------------------------------------- */
+.dashboard-header-strip {
+  position: relative;
+  overflow: hidden;
+  transition: background 1.5s ease;
+}
+
+/* Slow diagonal light sweep (3 sweeps max, then idle) */
+.dashboard-header-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: skewX(-25deg);
+  pointer-events: none;
+  animation: stripShine 10s ease 3 forwards;
+}
+
+@keyframes stripShine {
+  0% { left: -100%; }
+  12% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.tod-greeting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--surface);
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   4. DATA & STATUS COLOUR TRANSITIONS
+   -------------------------------------------------------------------------- */
+/* Status change pop and expanding ring */
+.status-changed-animate {
+  animation: statusBadgePop 300ms var(--ease-spring) 1;
+  position: relative;
+}
+
+.status-changed-animate::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--radius-pill);
+  border: 2px solid currentColor;
+  animation: badgeRingExpand 450ms var(--ease-out) 1 forwards;
+  pointer-events: none;
+}
+
+@keyframes statusBadgePop {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes badgeRingExpand {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Flash numbers briefly on change (<= 2 times per second) */
+.number-flash-up {
+  animation: flashGreen 1.2s ease 1;
+}
+
+.number-flash-down {
+  animation: flashRed 1.2s ease 1;
+}
+
+@keyframes flashGreen {
+  0% { background-color: var(--success-bg); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+  0% { background-color: var(--danger-bg); }
+  100% { background-color: transparent; }
+}
+
+/* Progressive Living Progress Bar */
+.living-progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--neutral-bg);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
+}
+
+.living-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 400ms var(--ease-out), background-color 300ms ease;
+  position: relative;
+}
+
+/* Diagonal moving stripes for loading / live state */
+.progress-stripes-live {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 16px 16px;
+  animation: progressStripesMove 1s linear infinite;
+}
+
+@keyframes progressStripesMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 16px 0; }
+}
+
+/* Target reached celebration sweep */
+.progress-target-met {
+  animation: progressTargetPop 400ms var(--ease-spring) 1;
+}
+
+@keyframes progressTargetPop {
+  0% { transform: scaleY(1); }
+  50% { transform: scaleY(1.3); }
+  100% { transform: scaleY(1); }
+}
+
+/* Radar pulse for Driver location sharing */
+.radar-ring-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--teal-600);
+  animation: radarRingAnim 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes radarRingAnim {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Bell count pulse */
+.bell-pulse-once {
+  animation: bellRedPulse 600ms ease 1;
+}
+
+@keyframes bellRedPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); background-color: var(--danger); }
+  100% { transform: scale(1); }
+}
+
+/* In-progress table row animated flowing gradient line */
+.table-tr.in-progress-flow::before {
+  transform: scaleY(1) !important;
+  background: linear-gradient(180deg, var(--primary), var(--cyan-500), var(--primary)) !important;
+  background-size: 100% 200% !important;
+  animation: rowGradientFlow 2s linear infinite;
+}
+
+@keyframes rowGradientFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 200%; }
+}
+
+/* Table row highlight on update */
+.table-tr-just-updated {
+  animation: rowGlowHighlight 2s ease 1;
+}
+
+@keyframes rowGlowHighlight {
+  0% { background-color: var(--accent-soft); }
+  100% { background-color: transparent; }
+}
+
+/* Form field valid check pop */
+.field-valid-tick {
+  color: var(--success);
+  animation: validTickPop 250ms var(--ease-spring) 1;
+  filter: drop-shadow(0 0 4px var(--success-bg));
+}
+
+@keyframes validTickPop {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Form invalid shake */
+.field-shake-error {
+  animation: inputErrorShake 350ms ease 1;
+  border-color: var(--danger) !important;
+}
+
+@keyframes inputErrorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-3px); }
+}
+
+/* Marching ants for file drag & drop */
+.file-drop-dragging {
+  background-color: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+  background-image: linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+                    linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+                    linear-gradient(0deg, var(--accent) 50%, transparent 50%),
+                    linear-gradient(0deg, var(--accent) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 15px 2px, 15px 2px, 2px 15px, 2px 15px;
+  background-position: left top, right bottom, left bottom, right top;
+  animation: marchingAnts 1s linear infinite;
+}
+
+@keyframes marchingAnts {
+  0% { background-position: left top, right bottom, left bottom, right top; }
+  100% { background-position: left 15px top, right 15px bottom, left bottom 15px, right top 15px; }
+}
+
+/* Empty state soft breathing glow */
+.empty-state-breathe {
+  animation: emptyBreathe 4s ease-in-out infinite alternate;
+}
+
+@keyframes emptyBreathe {
+  0% { transform: scale(1); opacity: 0.92; }
+  100% { transform: scale(1.03); opacity: 1; }
+}
+
+/* Rotating conic-gradient border on hover for feature cards */
+.feature-card-conic {
+  position: relative;
+  border-radius: var(--radius-xl);
+}
+
+.feature-card-conic::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius-xl) + 2px);
+  background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), var(--accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.feature-card-conic:hover::before {
+  opacity: 1;
+  animation: rotateConic 3s linear infinite;
+}
+
+@keyframes rotateConic {
+  to {
+    --angle: 360deg;
+  }
+}

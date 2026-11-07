@@ -1,0 +1,82 @@
+/* SmartImage Styles */
+.smart-image-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-page, var(--bg));
+}
+
+.smart-image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    var(--neutral-bg) 0%,
+    var(--border) 50%,
+    var(--neutral-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: smartImageShimmer 1.5s infinite;
+  z-index: 1;
+}
+
+@keyframes smartImageShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.smart-image-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity 0.25s ease-in-out, transform 0.3s ease;
+}
+
+.smart-image-img.loading {
+  opacity: 0;
+}
+
+.smart-image-img.loaded {
+  opacity: 1;
+}
+
+.smart-image-icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-primary-light, var(--blue-50));
+  color: var(--color-primary, var(--primary));
+  z-index: 2;
+}
+
+.smart-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.smart-image-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,57 @@
+/* ExpiryBadge styles */
+.expiry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: var(--font-weight-bold, 600);
+  border-radius: var(--radius-pill, 9999px);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.expiry-badge-sm {
+  padding: 2px 8px;
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+.expiry-badge-md {
+  padding: 4px 10px;
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+.expiry-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: currentColor;
+}
+
+/* Green (Valid) */
+.expiry-badge-green {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-bg);
+}
+
+/* Orange (Expiring Soon) */
+.expiry-badge-orange {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-bg);
+  animation: ffSoftPulse2 1.6s ease-in-out 1 forwards;
+}
+
+/* Red (Expired) */
+.expiry-badge-red {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-bg);
+}
+
+/* Grey (No Expiry Date) */
+.expiry-badge-grey {
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
+  border: 1px solid var(--border);
+}

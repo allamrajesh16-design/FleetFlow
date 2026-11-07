@@ -1,0 +1,58 @@
+# Environment & Secrets
+.env
+*.env
+!.env.example
+*.pem
+*.key
+
+# Python Virtual Environments & Cache
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js & Frontend Builds
+node_modules/
+frontend/node_modules/
+frontend/build/
+build/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Uploads & Media
+media/
+private_media/
+backend/media/
+backend/private_media/
+
+# Logs & Temporary Files
+logs/
+backend/logs/
+*.log
+tmp_emails/
+backend/tmp_emails/
+
+# Database Backups & Dumps
+backups/
+*.dump
+*.sql
+*.sqlite3
+
+# Scope Guard Snapshots
+docs/scope/before/
+docs/scope/after/
+docs/scope/diff/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

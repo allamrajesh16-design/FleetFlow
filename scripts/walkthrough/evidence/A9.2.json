@@ -1,0 +1,32 @@
+{
+  "case_id": "A9.2",
+  "timestamp": "2026-11-04T06:31:13.880Z",
+  "channel": "UI",
+  "actions": [
+    "Select \"PAID\" in status filter dropdown",
+    "Count rendered payment rows in table"
+  ],
+  "target_selector": "table tbody tr",
+  "visible_text": "Rendered rows: 5",
+  "api_status": 200,
+  "api_body": {
+    "row_count": 5,
+    "db_paid_count": 5
+  },
+  "db_before": {
+    "paid_count": 5
+  },
+  "db_after": {
+    "paid_count": 5
+  },
+  "assertions": [
+    {
+      "name": "Rendered paid payments count matches DB PAID records count",
+      "condition": "tableRowsCount === dbPaidCount",
+      "passed": true,
+      "details": "Rendered=5, DB=5"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_2.png",
+  "screenshot_crop": "docs/guide/images/admin/a9_2_crop.png"
+}

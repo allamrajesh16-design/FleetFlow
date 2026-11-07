@@ -1,0 +1,61 @@
+{
+  "case_id": "S1.6",
+  "timestamp": "2026-11-04T07:10:40.434Z",
+  "channel": "UI",
+  "actions": [
+    "Driver logs in and starts Trip #33 with start odometer 14,500 km",
+    "POST /api/trips/{id}/start/"
+  ],
+  "target_selector": ".trip-card, .status-badge, main",
+  "visible_text": "Trip #33 IN_PROGRESS with start odometer 14500",
+  "api_status": 200,
+  "api_body": {
+    "id": 33,
+    "booking": 79,
+    "bus_schedule": null,
+    "vehicle": 31,
+    "vehicle_registration": "AP05WT0001",
+    "vehicle_type": "CAR",
+    "vehicle_brand_model": "TestBrand TestModel",
+    "driver": 32,
+    "driver_name": "WT-Driver One",
+    "driver_license": "WT-DL-2026-0001",
+    "source": "Kakinada Main Road",
+    "destination": "Rajahmundry Airport",
+    "pickup_location": "Kakinada Main Road",
+    "drop_location": "Rajahmundry Airport",
+    "customer_name": "WT Demo Customer",
+    "customer_email": "wt.demo.s1.cust@gmail.com",
+    "passengers": 2,
+    "scheduled_datetime": "2026-11-06T15:30:00+05:30",
+    "status": "IN_PROGRESS",
+    "start_odometer": 14500,
+    "end_odometer": null,
+    "distance_km": null,
+    "started_at": "2026-11-04T12:40:33.712371+05:30",
+    "completed_at": null,
+    "total_fare": null,
+    "last_known_location": null,
+    "assigned_by": 157,
+    "assigned_by_name": "WT-Fleet Manager One",
+    "created_at": "2026-11-04T12:40:29.738489+05:30",
+    "updated_at": "2026-11-04T12:40:33.712455+05:30"
+  },
+  "db_before": {
+    "status": "SCHEDULED"
+  },
+  "db_after": {
+    "status": "IN_PROGRESS",
+    "start_odometer": 14500
+  },
+  "assertions": [
+    {
+      "name": "Trip status transitions to IN_PROGRESS with recorded start odometer",
+      "condition": "tripStarted.status === \"IN_PROGRESS\" && tripStarted.start_odometer === 14500",
+      "passed": true,
+      "details": "Status=IN_PROGRESS, Odo=14500"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_06_driver_started_trip.png",
+  "screenshot_crop": null
+}

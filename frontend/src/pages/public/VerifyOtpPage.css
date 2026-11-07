@@ -1,0 +1,133 @@
+/* Verify OTP 6-Digit Grid Styles */
+.otp-digit-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-6);
+  transition: transform var(--dur-base) ease;
+}
+
+.otp-digit-grid.has-error {
+  animation: ffShake 300ms var(--ease-out) 1;
+}
+
+.otp-digit-box {
+  width: 52px;
+  height: 60px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-page);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.otp-digit-box:focus {
+  border-color: var(--color-primary);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+  transform: translateY(-2px);
+}
+
+.otp-digit-box.filled {
+  border-color: var(--color-primary-border);
+  background-color: var(--surface);
+  animation: ffPopIn 160ms var(--ease-spring);
+}
+
+.otp-digit-box.otp-box-success {
+  border-color: var(--success) !important;
+  background-color: var(--success-bg) !important;
+  color: var(--success-text) !important;
+  animation: ffPopIn 300ms var(--ease-spring) both;
+}
+
+.otp-resend-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: var(--space-4);
+}
+
+.otp-countdown-ring-box {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-countdown-ring-svg {
+  transform: rotate(-90deg);
+  width: 32px;
+  height: 32px;
+}
+
+.otp-countdown-ring-bg {
+  stroke: var(--border);
+}
+
+.otp-countdown-ring-prog {
+  stroke: var(--color-primary, var(--primary));
+  transition: stroke-dashoffset 1s linear;
+}
+
+.otp-countdown-ring-sec {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary, var(--primary));
+}
+
+.otp-countdown-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.otp-dev-note {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-bg);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  margin: var(--space-3) 0;
+}
+
+.otp-spam-tip {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 6px 0 16px;
+}
+
+.otp-error-message {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-bg);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: center;
+  margin: var(--space-3) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  animation: ffFadeSlideDown var(--dur-fast) var(--ease-out) 1;
+}
+
+@media (max-width: 480px) {
+  .otp-digit-box {
+    width: 42px;
+    height: 52px;
+    font-size: 20px;
+  }
+}

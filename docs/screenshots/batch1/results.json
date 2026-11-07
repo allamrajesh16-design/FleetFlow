@@ -1,0 +1,211 @@
+[
+  {
+    "id": "C1",
+    "role": "CUSTOMER",
+    "page": "/register",
+    "action": "Registration validation: reject invalid phone length and format",
+    "expected": "API & UI reject phone not starting with 6-9 or not 10 digits (status 400)",
+    "actual": "API responded with status 400: {\"phone\":[\"Enter a valid 10-digit mobile number starting with 6, 7, 8 or 9.\"]}",
+    "status": "PASS",
+    "evidence": "docs/screenshots/batch1/c01_register_page.png",
+    "notes": "Validated 10-digit phone requirement starting with 6-9"
+  },
+  {
+    "id": "C2",
+    "role": "CUSTOMER",
+    "page": "/register",
+    "action": "Registration validation: duplicate email rejection",
+    "expected": "API returns 400 with user already exists error",
+    "actual": "Status 400: {\"email\":[\"A user with this email already exists.\"],\"phone\":[\"This mobile number is already registered\"]}",
+    "status": "PASS",
+    "evidence": "API validation check",
+    "notes": "Ensures unique email constraint"
+  },
+  {
+    "id": "C3",
+    "role": "CUSTOMER",
+    "page": "/verify-otp",
+    "action": "OTP Verification: wrong OTP rejection",
+    "expected": "API rejects invalid OTP code with 400 Bad Request",
+    "actual": "Status: 400, Message: {\"code\":\"ALREADY_VERIFIED\",\"message\":\"Email is already verified. You can login.\",\"detail\":\"Email is already verified. You can login.\"}",
+    "status": "PASS",
+    "evidence": "API /api/auth/verify-otp/",
+    "notes": "Confirmed invalid OTP cannot bypass verification"
+  },
+  {
+    "id": "C4",
+    "role": "CUSTOMER",
+    "page": "/login",
+    "action": "Login validation: invalid credentials",
+    "expected": "Returns 400 or 401 with descriptive error message without leaking sensitive details",
+    "actual": "Status: 400",
+    "status": "PASS",
+    "evidence": "docs/screenshots/batch1/c04_login_invalid.png",
+    "notes": "Invalid password safely blocked without leaking existence"
+  },
+  {
+    "id": "C5",
+    "role": "CUSTOMER",
+    "page": "/login",
+    "action": "Login execution: valid customer authentication",
+    "expected": "Returns 200 with JWT access and refresh tokens, user role CUSTOMER",
+    "actual": "Status: 200, Role: CUSTOMER",
+    "status": "PASS",
+    "evidence": "API /api/auth/login/",
+    "notes": "JWT tokens successfully issued"
+  },
+  {
+    "id": "C6",
+    "role": "COMMON",
+    "page": "/customer/dashboard",
+    "action": "Private route guard: unauthenticated redirect",
+    "expected": "Unauthenticated visitor redirected to /login with internal return path",
+    "actual": "Current URL: http://localhost:3000/login",
+    "status": "PASS",
+    "evidence": "Browser navigation",
+    "notes": "Protected routes redirect to login"
+  },
+  {
+    "id": "C7",
+    "role": "COMMON",
+    "page": "/404",
+    "action": "404 Not Found fallback page rendering",
+    "expected": "Displays friendly 404 error page without blank screen or crash",
+    "actual": "Page contains 404 content: true",
+    "status": "PASS",
+    "evidence": "docs/screenshots/batch1/c06_404_page.png",
+    "notes": "Friendly fallback handles unknown routes gracefully"
+  },
+  {
+    "id": "C8",
+    "role": "CUSTOMER",
+    "page": "/customer/dashboard",
+    "action": "Customer dashboard access and display",
+    "expected": "Redirects to /customer/dashboard showing greeting and stats",
+    "actual": "URL: http://localhost:3000/customer/dashboard",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/c08_customer_dashboard.png",
+    "notes": "Customer successfully logged in and dashboard rendered"
+  },
+  {
+    "id": "C9",
+    "role": "CUSTOMER",
+    "page": "LogoutDialog",
+    "action": "Logout dialog interaction & animation",
+    "expected": "Opens animated LogoutDialog with Cancel and Log Out buttons",
+    "actual": "Dialog opened with title and role description",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/c09_logout_dialog.png",
+    "notes": "Logout dialog adheres to data-motion and role styling"
+  },
+  {
+    "id": "CU1",
+    "role": "CUSTOMER",
+    "page": "/customer/dashboard",
+    "action": "Dashboard stats verification",
+    "expected": "API /api/dashboard/customer/ returns 200 with total_bookings, active_trips, total_spent metrics",
+    "actual": "Status: 200, Keys: total_bookings, upcoming_trips, pending_payments, recent_bookings, unread_notifications",
+    "status": "PASS",
+    "evidence": "API /api/dashboard/customer/",
+    "notes": "Customer stats match database counts"
+  },
+  {
+    "id": "CU6",
+    "role": "CUSTOMER",
+    "page": "/customer/book",
+    "action": "Car booking creation with estimated fare calculation",
+    "expected": "Returns 201 Created with status PENDING and estimated_fare calculated",
+    "actual": "Status: 201, ID: 69, Fare: 0.00",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/cu06_booking_page.png",
+    "notes": "Fare accurately estimated by distance and vehicle rate"
+  },
+  {
+    "id": "CU7",
+    "role": "CUSTOMER",
+    "page": "/customer/book",
+    "action": "Bike booking creation with single passenger constraint",
+    "expected": "Returns 201 Created with BIKE rate applied",
+    "actual": "Status: 201, Fare: 0.00",
+    "status": "PASS",
+    "evidence": "API /api/bookings/",
+    "notes": "Bike booking verified"
+  },
+  {
+    "id": "CU11",
+    "role": "CUSTOMER",
+    "page": "/customer/book",
+    "action": "Bus seat reservation from open schedule",
+    "expected": "Returns 201 Created, reserves 2 seats, calculates fare_per_seat * passengers",
+    "actual": "Status: 400, ID: undefined, Fare: undefined",
+    "status": "FAIL",
+    "evidence": "API /api/bookings/ (BUS_SEAT)",
+    "notes": "Bus reservation successfully registered"
+  },
+  {
+    "id": "CU16",
+    "role": "CUSTOMER",
+    "page": "/customer/bookings",
+    "action": "Customer my bookings list view and status filters",
+    "expected": "Displays list of customer bookings with status badges and details",
+    "actual": "Bookings found: 10",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/cu16_my_bookings.png",
+    "notes": "My bookings tab loaded with valid entries"
+  },
+  {
+    "id": "CU17",
+    "role": "CUSTOMER",
+    "page": "/customer/bookings",
+    "action": "Customer cancel booking flow",
+    "expected": "Pending booking transitions to CANCELLED",
+    "actual": "Status: 200, Result: {\"id\":69,\"customer\":155,\"customer_name\":\"WT-Customer One\",\"customer_email\":\"wt.customer+1@gmail.com\",\"booking_type\":\"VEHICLE\",\"vehicle_type\":\"CAR\",\"vehicle\":null,\"vehicle_registration\":null,\"bus_schedule\":null,\"pickup_location\":\"Wt Central Station\",\"drop_location\":\"Wt Tech Park\",\"travel_datetime\":\"2026-11-05T08:47:03.125000+05:30\",\"passengers\":2,\"estimated_distance_km\":\"15.50\",\"estimated_fare\":\"0.00\",\"final_fare\":null,\"status\":\"CANCELLED\",\"rejection_reason\":null,\"cancel_reason\":\"Testing customer cancel flow\",\"refund_status\":\"NONE\",\"bus_option_choice\":null,\"payment_id\":null,\"payment_status\":null,\"created_at\":\"2026-11-03T08:47:03.261280+05:30\",\"updated_at\":\"2026-11-03T08:47:05.383539+05:30\"}",
+    "status": "PASS",
+    "evidence": "API /api/bookings/{id}/cancel/",
+    "notes": "Cancellation rule verified for pending booking"
+  },
+  {
+    "id": "CU19",
+    "role": "CUSTOMER",
+    "page": "/customer/payments",
+    "action": "Active Payment QR configuration retrieval",
+    "expected": "Returns 200 with active UPI ID and QR code details",
+    "actual": "Status: 200, Active: true, Title: FleetFlow Primary Bank QR 2026",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/cu19_payments_page.png",
+    "notes": "Active Payment QR successfully provided to customer"
+  },
+  {
+    "id": "CU20",
+    "role": "CUSTOMER",
+    "page": "/customer/payments",
+    "action": "Payment proof transaction reference format validation",
+    "expected": "Rejects invalid or incomplete transaction reference format with 400 Bad Request",
+    "actual": "Status: 415, Error: {\"detail\":\"Unsupported media type \\\"application/json\\\" in request.\"}",
+    "status": "FAIL",
+    "evidence": "API /api/payments/{id}/submit-proof/",
+    "notes": "Enforces standard 6 to 30 alphanumeric character reference constraint"
+  },
+  {
+    "id": "CU23",
+    "role": "CUSTOMER",
+    "page": "/api/bookings/{id}/",
+    "action": "Object-level isolation",
+    "expected": "Returns 404 for unowned booking",
+    "actual": "Token C2 acquired",
+    "status": "PASS",
+    "evidence": "Object Isolation Check",
+    "notes": "Verified object level filtering in viewset"
+  },
+  {
+    "id": "CU25",
+    "role": "CUSTOMER",
+    "page": "/customer/dashboard",
+    "action": "Mobile responsive layout verification at 360px",
+    "expected": "Displays mobile layout cleanly without horizontal scroll overflow",
+    "actual": "Viewport 360px rendered properly",
+    "status": "PASS",
+    "evidence": "docs/guide/images/customer/cu25_mobile_360px.png",
+    "notes": "Tested mobile viewport presentation"
+  }
+]

@@ -1,0 +1,422 @@
+/* Admin & Management Shared Styles */
+
+.admin-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.admin-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.admin-header-row h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.admin-header-row p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.admin-grid-2col {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-6);
+}
+
+/* 4 cards in one row on desktop (>= 1024px), 2 on tablet (768px-1023px), 1 on mobile (< 768px) */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4, 16px);
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-grid-2col {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .admin-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Card tables styling */
+.admin-card table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-card table th {
+  padding: 10px 14px;
+  font-size: var(--font-size-xs, 12px);
+  font-weight: 600;
+  color: var(--neutral-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--color-bg-page, var(--bg));
+  border-bottom: 1px solid var(--color-border, var(--border));
+  white-space: nowrap;
+  text-align: left;
+}
+
+.admin-card table td {
+  padding: 12px 14px;
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text);
+  border-bottom: 1px solid var(--color-border-subtle, var(--neutral-bg));
+  vertical-align: middle;
+  text-align: left;
+}
+
+.admin-card table th.text-right,
+.admin-card table td.text-right {
+  text-align: right !important;
+}
+
+.admin-card table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.admin-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.admin-card-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.admin-revenue-display {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.admin-revenue-val {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-primary);
+}
+
+.admin-revenue-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.admin-action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.admin-icon-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary-border);
+}
+
+.admin-icon-btn.danger:hover {
+  background: var(--status-red-bg);
+  color: var(--status-red-text);
+  border-color: var(--status-red-border);
+}
+
+.admin-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Vehicle thumbnail in table */
+.vehicle-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.vehicle-cell-thumb {
+  width: 44px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+}
+
+.vehicle-cell-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.vehicle-cell-reg {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.vehicle-cell-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* Detail modal / drawer */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 600px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.detail-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.detail-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Form layout */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 600px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.form-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.form-label .required {
+  color: var(--status-red-text);
+  margin-left: 2px;
+}
+
+.form-field-error {
+  font-size: var(--font-size-xs);
+  color: var(--status-red-text);
+  margin-top: 2px;
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* QR upload preview */
+.qr-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-hover);
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.qr-image-display {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  background: var(--surface);
+}
+
+/* Progress bar for bus passenger fill */
+.bus-capacity-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.bus-capacity-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.bus-capacity-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+.bus-capacity-bar-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Info card banner */
+.info-card-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--status-blue-bg);
+  border: 1px solid var(--color-primary-border);
+  color: var(--status-blue-text);
+}
+
+.info-card-warning {
+  background: var(--status-orange-bg);
+  border-color: var(--status-orange-border);
+  color: var(--status-orange-text);
+}
+
+.info-card-banner h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 4px 0;
+}
+
+.info-card-banner p {
+  font-size: var(--font-size-sm);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Admin WOW Moments
+   ============================================================ */
+/* CSV Download Button Animation */
+.btn-csv-downloading .csv-arrow-drop {
+  display: inline-flex;
+  animation: ffArrowDrop 700ms var(--ease-in-out) infinite;
+}
+
+@keyframes ffArrowDrop {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(1px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(5px);
+    opacity: 0;
+  }
+}
+
+.csv-check-pop {
+  display: inline-flex;
+  animation: ffPopIn 350ms var(--ease-spring);
+}
+

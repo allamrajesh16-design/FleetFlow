@@ -1,0 +1,323 @@
+/* ==========================================================================
+   FleetFlow Shared Button System (Living Buttons)
+   - Primary: background-size 200%, gradient slides on hover (0.6s), glow grows
+     with --accent-glow, light sweep passes once, pressed scales 0.98, tinted ripple.
+   - Secondary: sweep fill from left with transform scaleX, text turns white.
+   - Danger and Success: deepen smoothly.
+   - Disabled = grey, never brand colour. Links use --primary.
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-family-base, 'Inter', -apple-system, sans-serif);
+  font-weight: 600;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  min-width: fit-content !important;
+  user-select: none;
+  border: 1px solid transparent;
+  outline: none;
+  text-decoration: none;
+  line-height: 1;
+  box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+}
+
+/* Minimum Heights & Sizing */
+.btn-sm {
+  padding: 0 14px;
+  font-size: 13px;
+  min-height: 36px;
+  height: 36px;
+}
+
+.btn-md {
+  padding: 0 18px;
+  font-size: 14px;
+  min-height: 40px;
+  height: 40px;
+}
+
+.btn-lg {
+  padding: 0 24px;
+  font-size: 15px;
+  min-height: 46px;
+  height: 46px;
+}
+
+/* Mobile minimum height 44px for touch accessibility */
+@media (max-width: 768px) {
+  .btn {
+    min-height: 44px !important;
+  }
+  .btn-sm {
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 0 12px;
+  }
+  .btn-md {
+    min-height: 44px !important;
+    height: auto !important;
+  }
+  .btn-lg {
+    min-height: 48px !important;
+    height: auto !important;
+  }
+}
+
+.btn-full-width {
+  width: 100%;
+}
+
+/* Visible focus ring */
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+/* Pressed effect scales 0.98 */
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   Variants
+   ========================================================================== */
+
+/* Primary - Living Brand Gradient */
+.btn-primary {
+  background: var(--gradient-brand);
+  background-size: 200% auto;
+  background-position: left center;
+  color: var(--surface) !important;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+  transition: background-position 0.6s var(--ease-out, ease),
+              box-shadow 0.2s ease,
+              transform 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-position: right center;
+  box-shadow: 0 6px 20px var(--accent-glow, var(--primary-glow));
+}
+
+/* Light sweep across primary button once on hover */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  transition: left 0.6s ease;
+}
+
+.btn-primary:hover:not(:disabled)::after {
+  left: 160%;
+}
+
+/* Loading state gradient flow */
+.btn-loading.btn-primary {
+  animation: btnGradientFlow 1.2s linear infinite;
+  background-size: 200% auto;
+}
+
+@keyframes btnGradientFlow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Secondary / Outline: sweep fill from left with transform scaleX */
+.btn-secondary,
+.btn-outline {
+  background: var(--surface);
+  color: var(--primary) !important;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+}
+
+.btn-secondary::before,
+.btn-outline::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.btn-secondary:hover:not(:disabled)::before,
+.btn-outline:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-outline:hover:not(:disabled) {
+  color: var(--surface) !important;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Ghost */
+.btn-ghost {
+  background: transparent;
+  color: var(--neutral-text) !important;
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--neutral-bg);
+  color: var(--text) !important;
+  box-shadow: none;
+}
+
+/* Danger - Red (deepens smoothly) */
+.btn-danger {
+  background: var(--danger);
+  color: var(--surface) !important;
+  border-color: var(--danger-text);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-text);
+  box-shadow: 0 4px 14px var(--danger-bg);
+}
+
+/* Success - Green (deepens smoothly) */
+.btn-success {
+  background: var(--success);
+  color: var(--surface) !important;
+  border-color: var(--success-text);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--success-text);
+  box-shadow: 0 4px 14px var(--success-bg);
+}
+
+/* Success confirmed pop state */
+.btn-success-state {
+  background: var(--success) !important;
+  border-color: var(--success-text) !important;
+  color: var(--surface) !important;
+  animation: btnSuccessPop 300ms var(--ease-spring, ease) 1;
+}
+
+@keyframes btnSuccessPop {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Disabled = grey, never brand colour */
+.btn:disabled,
+.btn[aria-disabled="true"],
+.btn-disabled {
+  background: var(--neutral-bg) !important;
+  color: var(--text-subtle) !important;
+  border-color: var(--border) !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Spinner and Elements */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: btnSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btnSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.btn-icon-left,
+.btn-icon-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-text {
+  display: inline-block;
+  white-space: nowrap;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.btn-text-loading {
+  opacity: 0.85;
+}
+
+.btn-success-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  animation: ffPopIn 250ms var(--ease-spring, ease) both;
+}
+
+/* Tinted Click Ripple */
+.btn-ripple-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.btn-ripple-circle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transform: translate(-50%, -50%) scale(0);
+  animation: btnRippleAnim 450ms var(--ease-out, ease) forwards;
+}
+
+.btn-secondary .btn-ripple-circle,
+.btn-outline .btn-ripple-circle {
+  background: var(--focus-ring);
+}
+
+@keyframes btnRippleAnim {
+  to {
+    transform: translate(-50%, -50%) scale(12);
+    opacity: 0;
+  }
+}

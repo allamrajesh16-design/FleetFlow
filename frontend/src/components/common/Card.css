@@ -1,0 +1,49 @@
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 14px);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal, 200ms ease),
+    box-shadow var(--transition-normal, 200ms ease),
+    border-color var(--transition-normal, 200ms ease);
+}
+
+.card:hover,
+.card-hoverable:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong, var(--border));
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Padding variants */
+.card-p-none {
+  padding: 0;
+}
+
+.card-p-tight {
+  padding: var(--space-3, 12px);
+}
+
+.card-p-normal {
+  padding: var(--space-6, 24px);
+}
+
+.card-accent-top {
+  border-top: 3px solid var(--accent, var(--primary));
+}
+
+.card-accent-left {
+  border-left: 3px solid var(--accent, var(--primary));
+}
+
+.card-accent-success {
+  border-left: 3px solid var(--success);
+}
+
+.card-accent-warning {
+  border-left: 3px solid var(--warning-text);
+}
+
+.card-accent-danger {
+  border-left: 3px solid var(--danger);
+}

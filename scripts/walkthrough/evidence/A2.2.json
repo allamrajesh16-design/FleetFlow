@@ -1,0 +1,27 @@
+{
+  "case_id": "A2.2",
+  "timestamp": "2026-11-03T11:11:58.353Z",
+  "channel": "UI",
+  "actions": [
+    "Type \"WT-\" in search input",
+    "Wait 1000ms"
+  ],
+  "target_selector": "table.datatable-table tbody tr:first-child",
+  "visible_text": "WT-Pending Driver Two wt.pending.drv2@gmail.com \t9000000212\tDRIVER\tActive\t3 Nov 2026, 4:34 PM\t Deactivate",
+  "api_status": null,
+  "api_body": null,
+  "db_before": null,
+  "db_after": null,
+  "assertions": [
+    {
+      "name": "Visible row contains WT- prefix",
+      "condition": "visible_text.includes('WT-')",
+      "passed": true,
+      "details": "Row text begins with 'WT-Pending Driver Two'"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a2_2_search_wt.png",
+  "screenshot_crop": "docs/guide/images/admin/a2_2_search_wt_crop.png",
+  "status": "PASS",
+  "notes": "Search filter filters user table rows to WT- accounts."
+}

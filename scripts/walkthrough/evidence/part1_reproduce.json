@@ -1,0 +1,981 @@
+{
+  "pageDetails": {
+    "isListLoading": true,
+    "isRightLoading": true,
+    "badgeText": "10",
+    "snippet": "Fleet\nFlow\nDashboard\nApprovals\nBookings\nAssignments\nTrip Monitoring\nBus Monitor\nFleet\nMaintenance\nFuel\nExpenses\nDocuments\nPayments\nReports\nNotifications\nProfile\nLogout\n8\nFM\nFleet Manager Rajesh\nFleet Manager\nTrip Assignments\n\nPair approved customer reservations and bus trips with active vehicles and licensed drivers\n\nWaiting for Assignment\n10\nSelect an option\nSoonest Departure First\nLatest Departure First\nLoading...\n\nLoading...\n\nLoading...\n\nChecking real-time vehicle and driver availability...\n\n"
+  },
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8000/api/auth/login/",
+      "method": "OPTIONS",
+      "startTime": 1793857995708,
+      "status": 200,
+      "duration": 3
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/login/",
+      "method": "POST",
+      "startTime": 1793857995709,
+      "status": 200,
+      "duration": 703
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/profile/",
+      "method": "GET",
+      "startTime": 1793857996412,
+      "status": 200,
+      "duration": 3
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/profile/",
+      "method": "OPTIONS",
+      "startTime": 1793857996413,
+      "status": 200,
+      "duration": 62
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/notifications/",
+      "method": "OPTIONS",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 2
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/notifications/",
+      "method": "GET",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 73
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/dashboard/fleet-manager/",
+      "method": "GET",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 5
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/profile/",
+      "method": "GET",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 87
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/notifications/",
+      "method": "GET",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 272
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/dashboard/fleet-manager/",
+      "method": "GET",
+      "startTime": 1793857996507,
+      "status": 200,
+      "duration": 5
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/dashboard/fleet-manager/",
+      "method": "OPTIONS",
+      "startTime": 1793857996510,
+      "status": 200,
+      "duration": 131
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/dashboard/fleet-manager/",
+      "method": "OPTIONS",
+      "startTime": 1793857996510,
+      "status": 200,
+      "duration": 284
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=50",
+      "method": "OPTIONS",
+      "startTime": 1793857996791,
+      "status": 200,
+      "duration": 6
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=5&ordering=-created_at",
+      "method": "OPTIONS",
+      "startTime": 1793857996792,
+      "status": 200,
+      "duration": 5
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=50",
+      "method": "GET",
+      "startTime": 1793857996793,
+      "status": 200,
+      "duration": 5
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=5&ordering=-created_at",
+      "method": "GET",
+      "startTime": 1793857996793,
+      "status": 200,
+      "duration": 11
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=50",
+      "method": "GET",
+      "startTime": 1793857996793,
+      "status": 200,
+      "duration": 122
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=5&ordering=-created_at",
+      "method": "GET",
+      "startTime": 1793857996793,
+      "status": 200,
+      "duration": 179
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=50",
+      "method": "OPTIONS",
+      "startTime": 1793857996793,
+      "status": 200,
+      "duration": 255
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=5&ordering=-created_at",
+      "method": "OPTIONS",
+      "startTime": 1793857996796,
+      "status": 200,
+      "duration": 282
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=50",
+      "method": "GET",
+      "startTime": 1793857996949,
+      "status": 200,
+      "duration": 213
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?booking=71&include_unavailable=false",
+      "method": "GET",
+      "startTime": 1793857996950,
+      "status": 200,
+      "duration": 5
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?booking=71&include_unavailable=false",
+      "method": "OPTIONS",
+      "startTime": 1793857996951,
+      "status": 200,
+      "duration": 187
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?booking=71&include_unavailable=false",
+      "method": "GET",
+      "startTime": 1793857997052,
+      "status": 200,
+      "duration": 195
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?booking=71&include_unavailable=false",
+      "method": "GET",
+      "startTime": 1793857997164,
+      "status": 200,
+      "duration": 183
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/profile/",
+      "method": "GET",
+      "startTime": 1793857997949,
+      "status": 200,
+      "duration": 61
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/auth/profile/",
+      "method": "GET",
+      "startTime": 1793857997950,
+      "status": 200,
+      "duration": 114
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=10&ordering=-created_at",
+      "method": "OPTIONS",
+      "startTime": 1793857998132,
+      "status": 200,
+      "duration": 29
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/notifications/",
+      "method": "GET",
+      "startTime": 1793857998134,
+      "status": 200,
+      "duration": 118
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=10&ordering=-created_at",
+      "method": "GET",
+      "startTime": 1793857998134,
+      "status": 200,
+      "duration": 33
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998134,
+      "status": 200,
+      "duration": 27
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998135,
+      "status": 200,
+      "duration": 26
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/notifications/",
+      "method": "GET",
+      "startTime": 1793857998135,
+      "status": 200,
+      "duration": 207
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=10&ordering=-created_at",
+      "method": "GET",
+      "startTime": 1793857998135,
+      "status": 200,
+      "duration": 215
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998135,
+      "status": 200,
+      "duration": 44
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998136,
+      "status": 200,
+      "duration": 26
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "OPTIONS",
+      "startTime": 1793857998160,
+      "status": 200,
+      "duration": 182
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "OPTIONS",
+      "startTime": 1793857998160,
+      "status": 200,
+      "duration": 132
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/?page=1&page_size=10&ordering=-created_at",
+      "method": "OPTIONS",
+      "startTime": 1793857998160,
+      "status": 200,
+      "duration": 366
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "OPTIONS",
+      "startTime": 1793857998161,
+      "status": 200,
+      "duration": 320
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "OPTIONS",
+      "startTime": 1793857998161,
+      "status": 200,
+      "duration": 239
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998379,
+      "status": 200,
+      "duration": 299
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998379,
+      "status": 200,
+      "duration": 147
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857998379,
+      "status": 200,
+      "duration": 2
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "OPTIONS",
+      "startTime": 1793857998379,
+      "status": 200,
+      "duration": 197
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998525,
+      "status": 200,
+      "duration": 264
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998526,
+      "status": 200,
+      "duration": 92
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857998526,
+      "status": 200,
+      "duration": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998711,
+      "status": 200,
+      "duration": 188
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998711,
+      "status": 200,
+      "duration": 93
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857998711,
+      "status": 200,
+      "duration": 167
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998815,
+      "status": 200,
+      "duration": 163
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998815,
+      "status": 200,
+      "duration": 167
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857998815,
+      "status": 200,
+      "duration": 296
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998928,
+      "status": 200,
+      "duration": 142
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857998928,
+      "status": 200,
+      "duration": 238
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857998928,
+      "status": 200,
+      "duration": 315
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999012,
+      "status": 200,
+      "duration": 150
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999013,
+      "status": 200,
+      "duration": 319
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999013,
+      "status": 200,
+      "duration": 361
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999195,
+      "status": 200,
+      "duration": 87
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999195,
+      "status": 200,
+      "duration": 215
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999195,
+      "status": 200,
+      "duration": 337
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999362,
+      "status": 200,
+      "duration": 116
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999363,
+      "status": 200,
+      "duration": 126
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999363,
+      "status": 200,
+      "duration": 303
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999439,
+      "status": 200,
+      "duration": 239
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999439,
+      "status": 200,
+      "duration": 122
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999439,
+      "status": 200,
+      "duration": 389
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999513,
+      "status": 200,
+      "duration": 266
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999513,
+      "status": 200,
+      "duration": 111
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999513,
+      "status": 200,
+      "duration": 458
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999707,
+      "status": 200,
+      "duration": 181
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999707,
+      "status": 200,
+      "duration": 82
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999707,
+      "status": 200,
+      "duration": 517
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999807,
+      "status": 200,
+      "duration": 187
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999808,
+      "status": 200,
+      "duration": 78
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999808,
+      "status": 200,
+      "duration": 560
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999911,
+      "status": 200,
+      "duration": 161
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793857999911,
+      "status": 200,
+      "duration": 167
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793857999911,
+      "status": 200,
+      "duration": 700
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000021,
+      "status": 200,
+      "duration": 151
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000022,
+      "status": 200,
+      "duration": 130
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000022,
+      "status": 200,
+      "duration": 724
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000107,
+      "status": 200,
+      "duration": 169
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000107,
+      "status": 200,
+      "duration": 128
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000107,
+      "status": 200,
+      "duration": 791
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000195,
+      "status": 200,
+      "duration": 276
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000195,
+      "status": 200,
+      "duration": 116
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000195,
+      "status": 200,
+      "duration": 822
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000304,
+      "status": 200,
+      "duration": 264
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000304,
+      "status": 200,
+      "duration": 84
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000304,
+      "status": 200,
+      "duration": 993
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000499,
+      "status": 200,
+      "duration": 162
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000500,
+      "status": 200,
+      "duration": 171
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000500,
+      "status": 200,
+      "duration": 946
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000594,
+      "status": 200,
+      "duration": 170
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000594,
+      "status": 200,
+      "duration": 249
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000594,
+      "status": 200,
+      "duration": 994
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000694,
+      "status": 200,
+      "duration": 176
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000694,
+      "status": 200,
+      "duration": 323
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000694,
+      "status": 200,
+      "duration": 1019
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000868,
+      "status": 200,
+      "duration": 94
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858000869,
+      "status": 200,
+      "duration": 226
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858000869,
+      "status": 200,
+      "duration": 999
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001047,
+      "status": 200,
+      "duration": 95
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001047,
+      "status": 200,
+      "duration": 128
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001047,
+      "status": 200,
+      "duration": 974
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001122,
+      "status": 200,
+      "duration": 138
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001123,
+      "status": 200,
+      "duration": 124
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001123,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001197,
+      "status": 200,
+      "duration": 170
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001197,
+      "status": 200,
+      "duration": 134
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001197,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001290,
+      "status": 200,
+      "duration": 269
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001291,
+      "status": 200,
+      "duration": 114
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001291,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001394,
+      "status": 200,
+      "duration": 272
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001395,
+      "status": 200,
+      "duration": 74
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001395,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001580,
+      "status": 200,
+      "duration": 191
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001580,
+      "status": 200,
+      "duration": 69
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001580,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001695,
+      "status": 200,
+      "duration": 188
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001696,
+      "status": 200,
+      "duration": 86
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001696,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001795,
+      "status": 200,
+      "duration": 188
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001795,
+      "status": 200,
+      "duration": 87
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001795,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001910,
+      "status": 200,
+      "duration": 157
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858001910,
+      "status": 200,
+      "duration": 64
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858001910,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858002007,
+      "status": 200,
+      "duration": 143
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858002007,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858002007,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bookings/?status=APPROVED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858002150,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/bus-schedules/?status=CONFIRMED&has_trip=false&page_size=100",
+      "method": "GET",
+      "startTime": 1793858002150,
+      "status": null,
+      "duration": null
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/trips/assignable/?include_unavailable=false&booking=71",
+      "method": "GET",
+      "startTime": 1793858002150,
+      "status": null,
+      "duration": null
+    }
+  ],
+  "logs": [
+    "[info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+    "[info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+  ],
+  "screenshotPath": "C:\\Users\\RAJESH\\Desktop\\FleetFlow\\scripts\\walkthrough\\reproduce_assignments_stuck.png"
+}

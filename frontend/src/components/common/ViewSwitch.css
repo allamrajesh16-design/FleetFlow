@@ -1,0 +1,11 @@
+/* ViewSwitch Styles - Hidden on mobile, shown on desktop (>= 768px) */
+.view-switch-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .view-switch-container {
+    display: none !important;
+  }
+}

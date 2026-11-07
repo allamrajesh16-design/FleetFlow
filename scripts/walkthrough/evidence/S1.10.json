@@ -1,0 +1,38 @@
+{
+  "case_id": "S1.10",
+  "timestamp": "2026-11-04T07:11:02.794Z",
+  "channel": "UI",
+  "actions": [
+    "Extract and verify PDF receipt for Payment #22 using pypdf",
+    "Verify customer name, driver name, route, amount, and IST date formatting"
+  ],
+  "target_selector": "table, .payment-card",
+  "visible_text": "FleetFlow Trip Receipt\r\nReceipt: FF-2026-000022\r\nPayment & Trip Details\r\nCustomer Name:\r\nWT Demo Customer\r\nCustomer Email:\r\nwt.demo.s1.cust@gmail.com\r\nRoute:\r\nKakinada Main Road to Rajahmundry Airport\r\nAssigned Vehicle:\r\nAP05WT0001 (TestBrand TestModel)\r\nAssigned Driver:\r\nWT-Driver One (WT-DL-2026-0",
+  "api_status": 200,
+  "api_body": {
+    "receipt": "FF-2026-000022",
+    "length": 565
+  },
+  "db_before": {
+    "receipt_exists": true
+  },
+  "db_after": {
+    "receipt_exists": true
+  },
+  "assertions": [
+    {
+      "name": "Receipt text contains FleetFlow branding and Receipt header",
+      "condition": "pdfText.includes(\"FleetFlow Trip Receipt\")",
+      "passed": true,
+      "details": "Has Header: true"
+    },
+    {
+      "name": "Receipt text contains exact route: Kakinada Main Road to Rajahmundry Airport",
+      "condition": "pdfText.includes(\"Kakinada Main Road\") && pdfText.includes(\"Rajahmundry Airport\")",
+      "passed": true,
+      "details": "Contains Route: true"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_10_pdf_receipt.png",
+  "screenshot_crop": null
+}

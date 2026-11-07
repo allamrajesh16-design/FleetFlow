@@ -1,0 +1,524 @@
+/* ==========================================================================
+   FleetFlow Signature Design Language Components
+   Tokens, route lines, vehicle plates, tickets, status dots, and odometer
+   ========================================================================== */
+
+/* 1. ROUTE LINE COMPONENT */
+.route-line-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  margin: var(--space-2) 0;
+}
+
+.route-line-track {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: 24px;
+}
+
+.route-point {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.route-point.start .route-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 3px solid var(--accent, var(--primary));
+  box-shadow: 0 0 0 2px var(--accent-soft, var(--primary-soft));
+}
+
+.route-point.end .route-diamond {
+  width: 11px;
+  height: 11px;
+  background: var(--accent, var(--primary));
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 2px var(--accent-soft, var(--primary-soft));
+}
+
+.route-road {
+  flex: 1;
+  position: relative;
+  height: 2px;
+  margin: 0 6px;
+  display: flex;
+  align-items: center;
+}
+
+.route-road-dash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent, var(--primary)) 0px,
+    var(--accent, var(--primary)) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.65;
+}
+
+.route-vehicle-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 9999px;
+  padding: 2px 4px;
+  font-size: 13px;
+  z-index: 3;
+  transition: left 0.4s ease-out;
+}
+
+.route-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.route-label-source,
+.route-label-dest {
+  max-width: 48%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-line-container.compact .route-line-track {
+  height: 16px;
+}
+.route-line-container.compact .route-point.start .route-dot {
+  width: 8px;
+  height: 8px;
+  border-width: 2px;
+}
+.route-line-container.compact .route-point.end .route-diamond {
+  width: 7px;
+  height: 7px;
+}
+
+/* 2. VEHICLE PLATE COMPONENT (Indian Style Monospace Plate) */
+.vehicle-plate-chip {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 700;
+  overflow: hidden;
+  user-select: all;
+  vertical-align: middle;
+  line-height: 1;
+  white-space: nowrap !important;
+  min-width: fit-content !important;
+  flex-shrink: 0 !important;
+}
+
+.plate-number-text {
+  white-space: nowrap !important;
+}
+
+.plate-ind-strip {
+  background: var(--blue-700);
+  color: var(--color-text-inverse);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-right: 1px solid var(--border);
+}
+
+.plate-chakra-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-text-inverse);
+  opacity: 0.85;
+  margin-bottom: 1px;
+}
+
+.plate-ind-text {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.plate-number-text {
+  padding: 4px 7px;
+  color: var(--color-text-primary);
+  letter-spacing: 1.2px;
+  font-size: var(--font-size-xs);
+}
+
+.vehicle-plate-chip.plate-sm .plate-number-text {
+  padding: 2px 5px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+.vehicle-plate-chip.plate-sm .plate-ind-strip {
+  padding: 0 3px;
+}
+.vehicle-plate-chip.plate-sm .plate-ind-text {
+  font-size: 7px;
+}
+
+.vehicle-plate-chip.plate-lg .plate-number-text {
+  padding: 6px 10px;
+  font-size: var(--font-size-base);
+  letter-spacing: 1.8px;
+}
+
+/* 3. STATUS DOTS */
+.status-dot-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.status-dot-circle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neutral-text);
+  box-shadow: 0 0 0 2px var(--border);
+}
+
+.status-dot-wrapper.status-active .status-dot-circle,
+.status-dot-wrapper.status-completed .status-dot-circle,
+.status-dot-wrapper.status-paid .status-dot-circle,
+.status-dot-wrapper.status-approved .status-dot-circle {
+  background: var(--success);
+  box-shadow: 0 0 0 2px var(--success-bg);
+}
+
+.status-dot-wrapper.status-pending .status-dot-circle,
+.status-dot-wrapper.status-in_progress .status-dot-circle,
+.status-dot-wrapper.status-started .status-dot-circle {
+  background: var(--warning-text);
+  box-shadow: 0 0 0 2px var(--warning-bg);
+}
+
+.status-dot-wrapper.status-cancelled .status-dot-circle,
+.status-dot-wrapper.status-rejected .status-dot-circle,
+.status-dot-wrapper.status-failed .status-dot-circle {
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--danger-bg);
+}
+
+.status-dot-wrapper.status-scheduled .status-dot-circle {
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+
+/* 4. DRIVER CHIP */
+.driver-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.driver-avatar-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  border: 2px solid var(--border);
+}
+
+.driver-avatar-initials {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.driver-status-pip {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--neutral-text);
+  border: 2px solid var(--surface);
+}
+
+.driver-chip.status-free .driver-avatar-ring {
+  border-color: var(--success);
+}
+.driver-chip.status-free .driver-status-pip {
+  background: var(--success);
+}
+
+.driver-chip.status-on_trip .driver-avatar-ring {
+  border-color: var(--warning-text);
+}
+.driver-chip.status-on_trip .driver-status-pip {
+  background: var(--warning-text);
+}
+
+.driver-chip-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* 5. ODOMETER MECHANICAL DISPLAY */
+.odometer-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--navy-900);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--navy-800);
+}
+
+.odometer-tiles {
+  display: flex;
+  gap: 2px;
+}
+
+.odometer-tile {
+  background: var(--navy-800);
+  color: var(--color-text-inverse);
+  font-family: ui-monospace, monospace;
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.odometer-tile.last-digit {
+  background: var(--danger);
+  color: var(--color-text-inverse);
+}
+
+.odometer-unit {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* 6. EXPIRY RING GAUGE */
+.expiry-ring-widget {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.expiry-svg {
+  transform: rotate(-90deg);
+}
+
+.expiry-circle-bg {
+  fill: none;
+  stroke: var(--border);
+}
+
+.expiry-circle-bar {
+  fill: none;
+  stroke: var(--success);
+  transition: stroke-dashoffset 0.6s ease;
+  stroke-linecap: round;
+}
+
+.expiry-ring-widget.status-orange .expiry-circle-bar {
+  stroke: var(--warning-text);
+}
+.expiry-ring-widget.status-red .expiry-circle-bar {
+  stroke: var(--danger);
+}
+
+.expiry-ring-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.expiry-ring-number {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.expiry-ring-unit {
+  font-size: 9px;
+  color: var(--color-text-secondary);
+}
+
+.expiry-ring-label {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+/* 7. TICKET CARD PASS */
+.ticket-pass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.ticket-body {
+  padding: var(--space-4) var(--space-5);
+}
+
+.ticket-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.ticket-booking-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-ref-label {
+  background: var(--surface-muted);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.ticket-ref-id {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.ticket-status-pill {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
+}
+
+.ticket-status-pill.status-approved,
+.ticket-status-pill.status-confirmed,
+.ticket-status-pill.status-completed {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.ticket-status-pill.status-pending {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.ticket-route {
+  margin: var(--space-3) 0;
+}
+
+.ticket-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.ticket-detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.ticket-detail-val {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ticket-detail-val.fare {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.ticket-perforation {
+  position: relative;
+  height: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.ticket-dash-line {
+  flex: 1;
+  border-top: 1.5px dashed var(--border);
+  margin: 0 10px;
+}
+
+.ticket-notch {
+  width: 14px;
+  height: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ticket-notch.notch-left {
+  left: -8px;
+}
+
+.ticket-notch.notch-right {
+  right: -8px;
+}
+
+.ticket-stub-actions {
+  background: var(--surface-muted);
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

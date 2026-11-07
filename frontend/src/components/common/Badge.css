@@ -1,0 +1,90 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  transition: background-color var(--dur-base, 200ms) ease, color var(--dur-base, 200ms) ease, border-color var(--dur-base, 200ms) ease, transform var(--dur-base, 200ms) var(--ease-spring, ease);
+  animation: ffPopIn var(--dur-base, 200ms) var(--ease-spring, ease) both;
+}
+
+.badge-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--cyan-500);
+  box-shadow: 0 0 6px var(--cyan-500);
+  animation: ffLivePulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.badge-sm {
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  /* 11px */
+}
+
+.badge-md {
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  /* 12px */
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Green (Active, Approved, Completed, Paid, Valid, Confirmed) */
+.badge-green,
+.badge-success {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-bg);
+}
+
+/* Orange/Warning (Pending, In Progress, Maintenance, Payment Initiated, Refund Pending, Expiring Soon) */
+.badge-orange,
+.badge-warning {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+  border-color: var(--warning-bg);
+}
+
+/* Red/Danger (Rejected, Cancelled, Failed, Expired) */
+.badge-red,
+.badge-danger {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-bg);
+}
+
+/* Blue/Info (Scheduled, Open) */
+.badge-blue,
+.badge-info {
+  background-color: var(--info-bg);
+  color: var(--info-text);
+  border-color: var(--info-bg);
+}
+
+/* Purple (On Trip) */
+.badge-purple {
+  background-color: var(--purple-bg);
+  color: var(--purple-text);
+  border-color: var(--purple-bg);
+}
+
+/* Grey/Neutral (Inactive, Unpaid) */
+.badge-grey,
+.badge-neutral {
+  background-color: var(--neutral-bg);
+  color: var(--neutral-text);
+  border-color: var(--border);
+}

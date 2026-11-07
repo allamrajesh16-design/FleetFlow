@@ -1,0 +1,38 @@
+{
+  "case_id": "A9.10",
+  "timestamp": "2026-11-04T06:31:47.267Z",
+  "channel": "UI",
+  "actions": [
+    "Log in as Fleet Manager wt.manager+1@gmail.com",
+    "Navigate to payments view",
+    "Verify Refund button is NOT rendered in UI and API returns 403 Forbidden"
+  ],
+  "target_selector": "button:has-text(\"Refund\")",
+  "visible_text": "Refund button present: false",
+  "api_status": 403,
+  "api_body": {
+    "detail": "You do not have permission to perform this action."
+  },
+  "db_before": {
+    "fm_role": "FLEET_MANAGER"
+  },
+  "db_after": {
+    "fm_role": "FLEET_MANAGER"
+  },
+  "assertions": [
+    {
+      "name": "Refund action button is NOT visible for Fleet Manager",
+      "condition": "!hasRefundButton",
+      "passed": true,
+      "details": "hasRefundButton=false"
+    },
+    {
+      "name": "Fleet Manager refund API call rejected with HTTP 403 Forbidden",
+      "condition": "fmRefundApi.status === 403",
+      "passed": true,
+      "details": "Status=403"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_10.png",
+  "screenshot_crop": null
+}

@@ -1,0 +1,32 @@
+{
+  "case_id": "S1.11",
+  "timestamp": "2026-11-04T07:11:05.592Z",
+  "channel": "UI",
+  "actions": [
+    "Navigate to Admin Payments Dashboard",
+    "Assert total revenue includes newly confirmed payment amount"
+  ],
+  "target_selector": ".dashboard-stats-grid, main",
+  "visible_text": "Total Collected: Rs. 7330",
+  "api_status": 200,
+  "api_body": {
+    "total_collected": 7330,
+    "pending_amount": 0,
+    "failed_count": 0,
+    "refunded_amount": 2015
+  },
+  "db_before": null,
+  "db_after": {
+    "total_collected": 7330
+  },
+  "assertions": [
+    {
+      "name": "Admin Dashboard reflects total collected revenue greater than 0",
+      "condition": "admDashboardRes.data.total_collected > 0",
+      "passed": true,
+      "details": "Total collected = Rs. 7330"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_11_admin_dashboard_updated.png",
+  "screenshot_crop": null
+}

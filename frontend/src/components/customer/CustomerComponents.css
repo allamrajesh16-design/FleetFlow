@@ -1,0 +1,77 @@
+/* Customer Component Styles */
+
+.customer-rules-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.customer-rules-card.bus-rules-card {
+  background: linear-gradient(180deg, var(--success-bg) 0%, var(--surface) 100%);
+  border-color: var(--success-bg);
+}
+
+.customer-rules-card.payment-rules-card {
+  background: linear-gradient(180deg, var(--blue-50) 0%, var(--surface) 100%);
+  border-color: var(--blue-100);
+}
+
+.rules-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.rules-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rules-icon-badge.bus {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.rules-icon-badge.payment {
+  background: var(--blue-100);
+  color: var(--primary-hover);
+}
+
+.rules-card-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rules-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.rule-bullet {
+  color: var(--color-primary);
+  font-weight: 800;
+}

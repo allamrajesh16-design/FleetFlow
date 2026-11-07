@@ -1,0 +1,35 @@
+{
+  "case_id": "A9.3",
+  "timestamp": "2026-11-04T06:31:18.722Z",
+  "channel": "UI",
+  "actions": [
+    "Locate Payment #19 with status PAYMENT_INITIATED",
+    "Inspect UTR transaction reference and status badge"
+  ],
+  "target_selector": "table tbody tr:has-text(\"19\")",
+  "visible_text": "WT-Customer One\nWt Origin → Wt Destination • Ref: UTR9988776655\n\tRs. 3,165\tUPI / QR\tPayment Initiated\t4 Nov 2026, 11:59 AM\t\nConfirm\nReject Proof",
+  "api_status": 200,
+  "api_body": {
+    "payment_id": 19,
+    "status": "PAYMENT_INITIATED",
+    "reference": "UTR9988776655"
+  },
+  "db_before": {
+    "status": "PAYMENT_INITIATED",
+    "ref": "UTR9988776655"
+  },
+  "db_after": {
+    "status": "PAYMENT_INITIATED",
+    "ref": "UTR9988776655"
+  },
+  "assertions": [
+    {
+      "name": "Visible row contains transaction reference UTR9988776655 or Payment #19",
+      "condition": "paymentRowText.includes(\"19\") || paymentRowText.includes(\"UTR9988776655\")",
+      "passed": true,
+      "details": "Read: WT-Customer One\nWt Origin → Wt Destination • Ref: UTR9988776655\n\tRs. 3,165\tUPI / QR\tPayment Initiate"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/admin/a9_3.png",
+  "screenshot_crop": "docs/guide/images/admin/a9_3_crop.png"
+}

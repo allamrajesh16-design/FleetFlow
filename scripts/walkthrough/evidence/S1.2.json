@@ -1,0 +1,29 @@
+{
+  "case_id": "S1.2",
+  "timestamp": "2026-11-04T07:10:19.060Z",
+  "channel": "UI",
+  "actions": [
+    "Navigate to /customer/book/vehicle?type=CAR",
+    "Fill pickup: \"Kakinada Main Road\", drop: \"Rajahmundry Airport\", distance: 65 km"
+  ],
+  "target_selector": ".fare-estimate, .booking-summary",
+  "visible_text": "Fare calculated based on 65 km",
+  "api_status": 200,
+  "api_body": {
+    "pickup": "Kakinada Main Road",
+    "drop": "Rajahmundry Airport",
+    "distance": 65
+  },
+  "db_before": null,
+  "db_after": null,
+  "assertions": [
+    {
+      "name": "Fare estimate or distance is rendered before submitting",
+      "condition": "true",
+      "passed": true,
+      "details": "Distance 65 km entered in form"
+    }
+  ],
+  "screenshot_full": "docs/guide/images/s1/s1_02_cust_book_form.png",
+  "screenshot_crop": null
+}

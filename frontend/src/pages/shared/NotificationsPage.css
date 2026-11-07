@@ -1,0 +1,200 @@
+/* Notifications Page Styles */
+.notifications-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+}
+
+.notifications-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.notifications-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.notifications-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.notifications-filters {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.filter-tab-btn {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-tab-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.filter-tab-btn.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.notifications-list-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.notifications-skeletons {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.notification-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.notification-items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background var(--dur-slow) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  cursor: pointer;
+  position: relative;
+  animation: ffFadeSlideDown var(--dur-base) var(--ease-out) both;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.notification-item.unread {
+  background: var(--blue-50);
+  transition: background var(--dur-slow) var(--ease-out);
+}
+
+.notification-item.unread:hover {
+  background: var(--blue-50);
+}
+
+/* Colored Icon Box per type */
+.notification-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-icon-wrapper.type-booking {
+  background: var(--blue-100);
+  color: var(--primary-hover);
+}
+
+.notification-icon-wrapper.type-payment {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.notification-icon-wrapper.type-trip {
+  background: var(--blue-100);
+  color: var(--indigo-600);
+}
+
+.notification-icon-wrapper.type-maintenance {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.notification-icon-wrapper.type-document {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.notification-icon-wrapper.type-expense {
+  background: var(--blue-100);
+  color: var(--indigo-600);
+}
+
+.notification-icon-wrapper.type-system {
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
+.notification-item-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.notification-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.notification-item-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
