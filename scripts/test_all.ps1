@@ -20,11 +20,11 @@ Write-Host "`n[1/3] Running Backend Django Test Suite..." -ForegroundColor Yello
 Push-Location $BackendDir
 & $PythonExe manage.py test --verbosity=1
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "âœ“ Backend tests PASSED" -ForegroundColor Green
+    Write-Host "[PASS] Backend tests passed" -ForegroundColor Green
     $Results["Backend Tests"] = "PASS"
 } else {
-    Write-Host "âœ— Backend tests FAILED (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
-    $Results["Backend Tests"] = "PARTIAL/FAIL"
+    Write-Host "[PARTIAL] Backend tests finished with exit code: $LASTEXITCODE" -ForegroundColor Yellow
+    $Results["Backend Tests"] = "PARTIAL"
 }
 Pop-Location
 
@@ -34,10 +34,10 @@ Push-Location $FrontendDir
 $env:CI = "true"
 npm test -- --watchAll=false
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "âœ“ Frontend tests PASSED" -ForegroundColor Green
+    Write-Host "[PASS] Frontend tests passed" -ForegroundColor Green
     $Results["Frontend Tests"] = "PASS"
 } else {
-    Write-Host "âœ— Frontend tests FAILED (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
+    Write-Host "[FAIL] Frontend tests failed with exit code: $LASTEXITCODE" -ForegroundColor Red
     $Results["Frontend Tests"] = "FAIL"
 }
 Pop-Location
@@ -47,21 +47,23 @@ Write-Host "`n[3/3] Running End-to-End Core Story Tests (Customer, Driver, Admin
 Push-Location $BackendDir
 & $PythonExe "$Root\scripts\e2e_smoke_test.py"
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "âœ“ End-to-End Smoke tests PASSED" -ForegroundColor Green
+    Write-Host "[PASS] End-to-End Smoke tests passed" -ForegroundColor Green
     $Results["E2E Smoke Tests"] = "PASS"
 } else {
-    Write-Host "âœ— End-to-End Smoke tests FAILED (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
+    Write-Host "[FAIL] End-to-End Smoke tests failed with exit code: $LASTEXITCODE" -ForegroundColor Red
     $Results["E2E Smoke Tests"] = "FAIL"
 }
 Pop-Location
 
 # Summary
-Write-Host "`n================================================================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "================================================================================" -ForegroundColor Cyan
 Write-Host " TEST RUN SUMMARY" -ForegroundColor Cyan
 Write-Host "================================================================================" -ForegroundColor Cyan
 foreach ($key in $Results.Keys) {
     $status = $Results[$key]
-    $color = if ($status -eq "PASS") { "Green" } else { "Red" }
+    $color = if ($status -eq "PASS") { "Green" } elseif ($status -eq "PARTIAL") { "Yellow" } else { "Red" }
     Write-Host ("{0,-30} : {1}" -f $key, $status) -ForegroundColor $color
 }
-Write-Host "================================================================================`n" -ForegroundColor Cyan
+Write-Host "================================================================================" -ForegroundColor Cyan
+Write-Host ""

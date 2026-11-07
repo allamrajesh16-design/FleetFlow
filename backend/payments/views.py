@@ -593,7 +593,7 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
         # Idempotent check: if already PAID, return receipt directly
         if payment.status == Payment.Status.PAID:
             receipt = create_payment_receipt(payment)
-            logger.info(f"Payment #{payment.id} verified as PAID. Amount: Rs. {payment.amount}, Ref: {gateway_reference}")
+            logger.info(f"Payment #{payment.id} already PAID. Amount: Rs. {payment.amount}, Ref: {payment.transaction_reference or payment.gateway_reference}")
             return Response(ReceiptSerializer(receipt).data, status=status.HTTP_200_OK)
 
         if payment.status != Payment.Status.PAYMENT_INITIATED:
@@ -609,7 +609,7 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
             # Create immutable receipt
             receipt = create_payment_receipt(payment)
-            logger.info(f"Payment #{payment.id} verified as PAID. Amount: Rs. {payment.amount}, Ref: {gateway_reference}")
+            logger.info(f"Payment #{payment.id} confirmed as PAID. Amount: Rs. {payment.amount}, Ref: {payment.transaction_reference or payment.gateway_reference}")
 
             # Notify customer
             notify(
