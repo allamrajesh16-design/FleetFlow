@@ -69,3 +69,4 @@ powershell -ExecutionPolicy Bypass -File scripts\test_backup_restore.ps1
 - The `backups/` directory is strictly excluded from Git tracking via `.gitignore`.
 - Database dumps and media archives are stored locally or synced to encrypted off-site cloud storage (e.g., AWS S3 with KMS encryption).
 - Passwords and database credentials must never be committed to Git.
+

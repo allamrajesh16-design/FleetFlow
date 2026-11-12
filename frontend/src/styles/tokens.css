@@ -97,6 +97,11 @@
   --text-muted: #64748B;
   --text-subtle: #94A3B8;
 
+  /* On-photo tokens: constant light colors over photo panels & dark gradient overlays */
+  --on-photo-text: #FFFFFF;
+  --on-photo-muted: rgba(255, 255, 255, 0.82);
+  --on-photo-accent: #93C5FD;
+
   /* Default role accent variables (defaults to manager/brand blue) */
   --accent: #2563EB;
   --accent-2: #1D4ED8;
@@ -303,6 +308,11 @@
   --card-bg: #111827;
   --color-surface-hover: #162032;
   --color-surface-active: #1D2A40;
+
+  /* On-photo tokens stay crisp white/light in dark mode */
+  --on-photo-text: #FFFFFF;
+  --on-photo-muted: rgba(255, 255, 255, 0.82);
+  --on-photo-accent: #93C5FD;
 
   /* Layer 2: Recessed Surfaces & Nested Inputs */
   --surface-muted: #080D16;

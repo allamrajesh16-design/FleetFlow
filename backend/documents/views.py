@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 import mimetypes
 import os
@@ -21,8 +22,11 @@ from vehicles.models import Vehicle
 
 from .filters import DocumentFilter
 from .models import Document
-from .permissions import DocumentPermission
+from .permissions import DocumentPermission, can_view_document, get_driver_accessible_vehicle_ids
 from .serializers import DocumentSerializer, DocumentRejectSerializer
+from .services import check_and_notify_expired_documents
+
+logger = logging.getLogger(__name__)
 
 
 class StandardPagination(PageNumberPagination):
@@ -94,16 +98,26 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if user.role == User.Role.DRIVER:
             driver_profile = getattr(user, "driver_profile", None)
             if driver_profile:
-                # Include driver documents and documents for vehicles driven by driver on trips
-                driven_vehicle_ids = Trip.objects.filter(driver=driver_profile).values_list("vehicle_id", flat=True)
+                # Include driver documents and documents for vehicles driven by driver on trips within policy
+                driven_vehicle_ids = get_driver_accessible_vehicle_ids(driver_profile)
                 return self.queryset.filter(
                     models.Q(driver=driver_profile) |
+                    models.Q(driver__user=user) |
                     models.Q(vehicle_id__in=driven_vehicle_ids) |
                     models.Q(uploaded_by=user)
                 ).distinct()
             return Document.objects.none()
 
         return Document.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated and (user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER] or user.is_superuser):
+            try:
+                check_and_notify_expired_documents()
+            except Exception as e:
+                logger.error("Error checking expired documents on list: %s", e)
+        return super().list(request, *args, **kwargs)
 
     @extend_schema(
         tags=["Documents"],
@@ -222,18 +236,29 @@ class DocumentViewSet(viewsets.ModelViewSet):
     )
     @action(detail=True, methods=["get"], url_path="download")
     def download(self, request, pk=None):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response(
+                {"detail": "Authentication credentials were not provided."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if user.role == User.Role.CUSTOMER:
+            return Response(
+                {"detail": "You do not have permission to download this document."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         try:
-            document = Document.objects.select_related("driver", "driver__user").get(pk=pk)
+            document = Document.objects.select_related("driver", "driver__user", "vehicle", "uploaded_by").get(pk=pk)
         except Document.DoesNotExist:
             raise Http404("Document not found.")
 
-        user = request.user
-        has_permission = (
-            user.is_superuser
-            or user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER]
-            or (user.role == User.Role.DRIVER and document.driver and document.driver.user_id == user.id)
-        )
-        if not has_permission:
+        if user.role == User.Role.DRIVER:
+            if not can_view_document(user, document):
+                # 404 for driver to not leak document existence
+                raise Http404("Document not found.")
+        elif not can_view_document(user, document):
             return Response(
                 {"detail": "You do not have permission to download this document."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -249,10 +274,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
         filename = os.path.basename(document.file.name)
         content_type, _ = mimetypes.guess_type(filename)
+        inline = request.query_params.get("inline", "").lower() in ("true", "1", "yes")
         return FileResponse(
             file_handle,
             content_type=content_type or "application/octet-stream",
-            as_attachment=True,
+            as_attachment=not inline,
             filename=filename,
         )
 
@@ -268,6 +294,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 {"detail": "You do not have permission to view expiring documents."},
                 status=status.HTTP_403_FORBIDDEN,
             )
+
+        # Trigger automatic check & notification for any expired documents
+        try:
+            check_and_notify_expired_documents()
+        except Exception as e:
+            logger.error("Error checking expired documents on expiring endpoint: %s", e)
 
         today = timezone.localdate()
         cutoff_date = today + timedelta(days=30)

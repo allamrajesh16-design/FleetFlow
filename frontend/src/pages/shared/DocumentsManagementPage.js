@@ -8,6 +8,7 @@ import {
   approveDocumentApi,
   rejectDocumentApi,
   deleteDocumentApi,
+  updateDocumentApi,
   getDocumentDownloadUrl,
 } from '../../api/documents';
 import DataTable from '../../components/common/DataTable';
@@ -19,7 +20,7 @@ import ExpiryBadge from '../../components/common/ExpiryBadge';
 import FormModal from '../../components/common/FormModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import ErrorBoundary from '../../components/common/ErrorBoundary';
-import ReceiptViewer from '../../components/common/ReceiptViewer';
+import DocumentPreviewModal from '../../components/common/DocumentPreviewModal';
 import { downloadPrivateFile } from '../../utils/fileDownloader';
 import {
   DocumentIcon,
@@ -29,8 +30,11 @@ import {
 import {
   Select,
   Textarea,
+  FileInput,
 } from '../../components/forms';
+import Input from '../../components/common/Input';
 import { formatDate, formatDocType } from '../../utils/formatters';
+import { VehiclePlate } from '../../components/common/SignatureDesign';
 import './FuelExpensesDocuments.css';
 
 const VEHICLE_DOC_TYPES = [
@@ -131,6 +135,64 @@ export default function DocumentsManagementPage() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Replace / Update Document State
+  const [replacingDoc, setReplacingDoc] = useState(null);
+  const [replaceFile, setReplaceFile] = useState(null);
+  const [replaceDocNumber, setReplaceDocNumber] = useState('');
+  const [replaceExpiryDate, setReplaceExpiryDate] = useState('');
+  const [replaceNotes, setReplaceNotes] = useState('');
+  const [replaceSubmitting, setReplaceSubmitting] = useState(false);
+
+  const handleOpenReplace = (doc) => {
+    setReplacingDoc(doc);
+    setReplaceDocNumber(doc.document_number || '');
+    setReplaceExpiryDate(doc.expiry_date || '');
+    setReplaceNotes(doc.notes || '');
+    setReplaceFile(null);
+  };
+
+  const handleReplaceSubmit = async (e) => {
+    e.preventDefault();
+    if (!replacingDoc) return;
+
+    if (replacingDoc.doc_type !== 'PROFILE_PHOTO' && !replaceExpiryDate) {
+      toast.error('Expiry date is required for this document type.');
+      return;
+    }
+
+    setReplaceSubmitting(true);
+    try {
+      const formData = new FormData();
+      if (replaceFile) {
+        formData.append('file', replaceFile);
+      }
+      if (replaceDocNumber.trim()) {
+        formData.append('document_number', replaceDocNumber.trim());
+      }
+      if (replaceExpiryDate) {
+        formData.append('expiry_date', replaceExpiryDate);
+      }
+      if (replaceNotes.trim()) {
+        formData.append('notes', replaceNotes.trim());
+      }
+
+      const updated = await updateDocumentApi(replacingDoc.id, formData);
+      toast.success(`Document #${replacingDoc.id} (${formatDocType(replacingDoc.doc_type)}) updated successfully!`);
+      setReplacingDoc(null);
+      setReplaceFile(null);
+      refresh();
+      fetchExpiring();
+      if (activePreview && activePreview.id === replacingDoc.id) {
+        setActivePreview(updated);
+      }
+    } catch (err) {
+      const errMsg = err?.response?.data?.detail || err?.response?.data?.file?.[0] || 'Failed to update document.';
+      toast.error(errMsg);
+    } finally {
+      setReplaceSubmitting(false);
+    }
+  };
+
   const handleDownload = async (doc) => {
     const url = getDocumentDownloadUrl(doc.id);
     const targetName = doc.vehicle_registration || doc.driver_name || 'doc';
@@ -193,14 +255,29 @@ export default function DocumentsManagementPage() {
     {
       header: 'Target',
       accessor: 'target',
+      width: '22%',
+      minWidth: '180px',
       render: (doc) => (
-        <div>
-          <strong>
-            {doc.vehicle_registration ? `Vehicle: ${doc.vehicle_registration}` : `Driver: ${doc.driver_name || 'Self'}`}
-          </strong>
-          {doc.uploaded_by_name && (
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-              Uploaded by: {doc.uploaded_by_name}
+        <div style={{ whiteSpace: 'nowrap' }}>
+          {doc.vehicle_registration ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+              <VehiclePlate registrationNumber={doc.vehicle_registration} size="sm" />
+              {doc.uploaded_by_name && (
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                  Uploaded by: {doc.uploaded_by_name}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <strong style={{ display: 'block', color: 'var(--color-text-primary)' }}>
+                Driver: {doc.driver_name || 'Self'}
+              </strong>
+              {doc.uploaded_by_name && (
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                  Uploaded by: {doc.uploaded_by_name}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -209,9 +286,13 @@ export default function DocumentsManagementPage() {
     {
       header: 'Type',
       accessor: 'doc_type',
+      width: '18%',
+      minWidth: '150px',
       render: (doc) => (
         <div>
-          <strong>{formatDocType(doc.doc_type)}</strong>
+          <strong style={{ display: 'block', color: 'var(--color-text-primary)' }}>
+            {formatDocType(doc.doc_type)}
+          </strong>
           <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
             #{doc.document_number}
           </div>
@@ -221,16 +302,19 @@ export default function DocumentsManagementPage() {
     {
       header: 'Review Status',
       accessor: 'review_status',
+      width: '14%',
+      minWidth: '120px',
       render: (doc) => {
         const st = doc.review_status || 'PENDING';
         const color = st === 'APPROVED' ? 'var(--success)' : st === 'REJECTED' ? 'var(--danger)' : 'var(--warning)';
         return (
-          <div>
-            <span style={{ fontWeight: 700, color, fontSize: 'var(--font-size-xs)' }}>
+          <div style={{ whiteSpace: 'nowrap' }}>
+            <span style={{ fontWeight: 700, color, fontSize: 'var(--font-size-xs)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: color, display: 'inline-block' }} />
               {st}
             </span>
             {st === 'REJECTED' && doc.rejection_reason && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '2px', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {doc.rejection_reason}
               </div>
             )}
@@ -241,9 +325,11 @@ export default function DocumentsManagementPage() {
     {
       header: 'Expiry Date',
       accessor: 'expiry_date',
+      width: '18%',
+      minWidth: '160px',
       render: (doc) => (
-        <div>
-          <span>{formatDate(doc.expiry_date)}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start', whiteSpace: 'nowrap' }}>
+          <span style={{ fontWeight: 600 }}>{formatDate(doc.expiry_date)}</span>
           <ExpiryBadge status={doc.expiry_status} daysLeft={doc.days_left} />
         </div>
       ),
@@ -251,19 +337,16 @@ export default function DocumentsManagementPage() {
     {
       header: 'File',
       accessor: 'file',
+      width: '12%',
+      minWidth: '110px',
       render: (doc) => (
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '6px', whiteSpace: 'nowrap' }}>
           <Button
             size="small"
             variant="ghost"
             title="View Document"
             aria-label="View Document"
-            onClick={() =>
-              setActivePreview({
-                url: getDocumentDownloadUrl(doc.id),
-                title: `${formatDocType(doc.doc_type)} Preview`,
-              })
-            }
+            onClick={() => setActivePreview(doc)}
           >
             <DocumentIcon size={16} /> View
           </Button>
@@ -282,8 +365,19 @@ export default function DocumentsManagementPage() {
     {
       header: 'Actions',
       align: 'right',
+      width: '20%',
+      minWidth: '200px',
       render: (doc) => (
-        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', whiteSpace: 'nowrap' }}>
+          <Button
+            size="small"
+            variant="outline"
+            title="Update / Replace Document"
+            aria-label="Update / Replace Document"
+            onClick={() => handleOpenReplace(doc)}
+          >
+            Replace
+          </Button>
           {doc.review_status === 'PENDING' && (
             <>
               <Button
@@ -442,6 +536,63 @@ export default function DocumentsManagementPage() {
           emptyDescription="Documents uploaded by drivers will appear here for verification and approval."
         />
 
+        {/* Update / Replace Document FormModal */}
+        <FormModal
+          isOpen={Boolean(replacingDoc)}
+          title={`Update / Replace Document #${replacingDoc?.id}`}
+          onClose={() => setReplacingDoc(null)}
+          onSubmit={handleReplaceSubmit}
+          submitLabel={replaceSubmitting ? 'Updating Document...' : 'Save & Update Document'}
+          submitting={replaceSubmitting}
+        >
+          {replacingDoc && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ background: 'var(--color-surface-hover, #f8fafc)', border: '1px solid var(--color-border, #e2e8f0)', padding: '12px 14px', borderRadius: '8px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                  {formatDocType(replacingDoc.doc_type)} for {replacingDoc.vehicle_registration ? `Vehicle: ${replacingDoc.vehicle_registration}` : `Driver: ${replacingDoc.driver_name || 'Driver'}`}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                  Select a replacement file (PDF or Image) and update the expiry date. The existing compliance record will be updated.
+                </div>
+              </div>
+
+              <FileInput
+                label="New Document File (PDF, PNG, JPG)"
+                accept="application/pdf,image/png,image/jpeg,image/jpg"
+                maxSizeMB={10}
+                onChange={(file) => setReplaceFile(file)}
+                helperText="Upload official renewal copy or replacement scan (Max 10MB)"
+              />
+
+              <Input
+                label="Document Number"
+                value={replaceDocNumber}
+                onChange={(e) => setReplaceDocNumber(e.target.value)}
+                placeholder="e.g. DL-9876543210 or POL-449102"
+              />
+
+              {replacingDoc.doc_type !== 'PROFILE_PHOTO' && (
+                <Input
+                  label="Expiry Date *"
+                  type="date"
+                  required
+                  value={replaceExpiryDate}
+                  onChange={(e) => setReplaceExpiryDate(e.target.value)}
+                  helperText="New expiry date from renewed certificate"
+                />
+              )}
+
+              <Textarea
+                label="Update Notes / Reason (Optional)"
+                rows={2}
+                value={replaceNotes}
+                onChange={(e) => setReplaceNotes(e.target.value)}
+                placeholder="e.g. Annual insurance policy renewal completed"
+              />
+            </div>
+          )}
+        </FormModal>
+
         {/* Reject Dialog */}
         <FormModal
           isOpen={Boolean(rejectingDoc)}
@@ -478,14 +629,15 @@ export default function DocumentsManagementPage() {
           />
         )}
 
-        {/* Receipt / File Viewer */}
+        {/* Document Preview Modal */}
         {activePreview && (
-          <ReceiptViewer
+          <DocumentPreviewModal
             isOpen={Boolean(activePreview)}
             onClose={() => setActivePreview(null)}
-            downloadUrl={activePreview.url}
-            title={activePreview.title}
-            fileName={`document_${Date.now()}`}
+            document={activePreview}
+            downloadUrl={getDocumentDownloadUrl(activePreview.id)}
+            onReplace={handleOpenReplace}
+            onDownload={handleDownload}
           />
         )}
       </div>

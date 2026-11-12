@@ -53,3 +53,4 @@ class SensitiveDataLoggingFilter(logging.Filter):
             for pattern, replacement in self.PATTERNS:
                 record.msg = pattern.sub(replacement, record.msg)
         return True
+

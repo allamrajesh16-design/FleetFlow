@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
@@ -60,6 +60,8 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [emailValid, setEmailValid] = useState(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [emailSuggestion, setEmailSuggestion] = useState(null);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -89,84 +91,90 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (name === 'email') {
       setEmailValid(null);
+      setEmailSuggestion(null);
     }
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
 
-  // Real-time debounced email validation while typing (400ms delay)
+  const performCheckEmail = useCallback(async (emailToTest) => {
+    if (!emailToTest) {
+      setEmailValid(null);
+      setCheckingEmail(false);
+      setEmailSuggestion(null);
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setCheckingEmail(true);
+
+    try {
+      const res = await checkEmailApi(emailToTest, { signal: controller.signal });
+      if (res && res.valid) {
+        setEmailValid(true);
+        setFieldErrors((prev) => ({ ...prev, email: null }));
+        setEmailSuggestion(null);
+      } else {
+        setEmailValid(false);
+        const msg = res?.message || 'Invalid email address.';
+        setFieldErrors((prev) => ({ ...prev, email: msg }));
+        if (res?.code === 'DOMAIN_TYPO' && res?.suggestion) {
+          setEmailSuggestion(res.suggestion);
+        } else {
+          setEmailSuggestion(null);
+        }
+      }
+    } catch (err) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+        return;
+      }
+      // DNS timeout or network issue does not block user as OTP is proof
+      setEmailValid(null);
+    } finally {
+      setCheckingEmail(false);
+    }
+  }, []);
+
+  // Real-time debounced email validation while typing (600ms delay)
   useEffect(() => {
     const emailToTest = formData.email.trim();
     if (!emailToTest) {
       setEmailValid(null);
       setCheckingEmail(false);
+      setEmailSuggestion(null);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       return;
     }
 
-    const timer = setTimeout(async () => {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToTest)) {
-        if (emailToTest.includes('@') && emailToTest.length > 5) {
-          setEmailValid(false);
-          setFieldErrors((prev) => ({ ...prev, email: 'Enter a valid email address format.' }));
-        }
-        return;
-      }
-
-      setCheckingEmail(true);
-      try {
-        const res = await checkEmailApi(emailToTest);
-        if (res && res.valid) {
-          setEmailValid(true);
-          setFieldErrors((prev) => ({ ...prev, email: null }));
-        } else {
-          setEmailValid(false);
-          setFieldErrors((prev) => ({
-            ...prev,
-            email: (res && res.message) ? res.message : 'Invalid or disposable email domain.',
-          }));
-        }
-      } catch (err) {
-        // DNS timeout or network issue does not block user
-        setEmailValid(null);
-      } finally {
-        setCheckingEmail(false);
-      }
-    }, 400);
+    const timer = setTimeout(() => {
+      performCheckEmail(emailToTest);
+    }, 600);
 
     return () => clearTimeout(timer);
-  }, [formData.email]);
+  }, [formData.email, performCheckEmail]);
 
-  const handleEmailBlur = async () => {
+  const handleEmailBlur = () => {
     const emailToTest = formData.email.trim();
     if (!emailToTest) {
       setEmailValid(null);
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToTest)) {
-      setEmailValid(false);
-      setFieldErrors((prev) => ({ ...prev, email: 'Enter a valid email address.' }));
-      return;
-    }
-    setCheckingEmail(true);
-    try {
-      const res = await checkEmailApi(emailToTest);
-      if (res && res.valid) {
-        setEmailValid(true);
-        setFieldErrors((prev) => ({ ...prev, email: null }));
-      } else {
-        setEmailValid(false);
-        setFieldErrors((prev) => ({
-          ...prev,
-          email: (res && res.message) ? res.message : 'Invalid or disposable email domain.',
-        }));
-      }
-    } catch (err) {
-      // Network/timeout error does not block the user as OTP is real proof
-      setEmailValid(null);
-    } finally {
-      setCheckingEmail(false);
-    }
+    performCheckEmail(emailToTest);
+  };
+
+  const handleUseSuggestion = (suggested) => {
+    setFormData((prev) => ({ ...prev, email: suggested }));
+    setEmailSuggestion(null);
+    setFieldErrors((prev) => ({ ...prev, email: null }));
+    performCheckEmail(suggested);
   };
 
   const handleSubmit = async (e) => {
@@ -249,8 +257,14 @@ export default function RegisterPage() {
             newFieldErrors[key] = val;
           }
         }
+        if (data.detail && !data.email) {
+          const detailLower = String(data.detail).toLowerCase();
+          if (detailLower.includes('email') || detailLower.includes('deliver') || detailLower.includes('spelling')) {
+            newFieldErrors.email = data.detail;
+          }
+        }
         setFieldErrors(newFieldErrors);
-        toast?.error(MESSAGES.REGISTER_SUMMARY_ERROR);
+        toast?.error(data.detail || (newFieldErrors.email ? newFieldErrors.email : MESSAGES.REGISTER_SUMMARY_ERROR));
       } else {
         const msg = sanitizeAuthErrorMessage(err, MESSAGES.REGISTER_SUMMARY_ERROR);
         setError(msg);
@@ -347,21 +361,55 @@ export default function RegisterPage() {
               onBlur={handleEmailBlur}
               error={fieldErrors.email}
               helperText={
-                checkingEmail
-                  ? 'Verifying email domain...'
-                  : emailValid === true
-                  ? '✓ Email domain verified'
-                  : null
+                checkingEmail ? (
+                  <span style={{ color: 'var(--color-text-muted, #64748b)' }}>Checking email...</span>
+                ) : emailValid === true ? (
+                  <span style={{ color: '#16a34a', fontWeight: 500 }}>
+                    Looks fine. We will send a code to confirm it.
+                  </span>
+                ) : null
               }
               rightElement={
                 checkingEmail ? (
-                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Checking...</span>
+                  <span
+                    className="ff-email-spinner"
+                    role="status"
+                    aria-label="Checking email"
+                    style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid rgba(37,99,235,0.2)',
+                      borderTopColor: '#2563eb',
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                    }}
+                  />
                 ) : emailValid === true ? (
-                  <span style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '18px' }} title="Valid email domain">✓</span>
+                  <span style={{ color: '#16a34a', fontWeight: 'bold', fontSize: '16px' }} title="Looks fine">✓</span>
                 ) : null
               }
               required
             />
+
+            {emailSuggestion && (
+              <div style={{ marginTop: '-4px', marginBottom: '12px' }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="small"
+                  className="btn-use-suggestion"
+                  onClick={() => handleUseSuggestion(emailSuggestion)}
+                  style={{
+                    fontSize: '12px',
+                    padding: '4px 10px',
+                    fontWeight: 600,
+                  }}
+                >
+                  Use {emailSuggestion}
+                </Button>
+              </div>
+            )}
 
             <PhoneInput
               id="phone"
@@ -495,7 +543,7 @@ export default function RegisterPage() {
               variant="primary"
               size="large"
               loading={loading}
-              disabled={loading}
+              disabled={loading || checkingEmail || emailValid === false || !formData.email.trim()}
               fullWidth
             >
               Register Account

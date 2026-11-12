@@ -55,15 +55,17 @@ class RegisterSerializer(serializers.Serializer):
     license_expiry = serializers.DateField(required=False, allow_null=True)
 
     def validate_email(self, value):
-        from .email_validation import validate_real_email
+        from .email_validation import validate_real_email, EmailValidationError
         from django.core.exceptions import ValidationError as DjangoValidationError
 
         try:
             normalized = validate_real_email(value)
-        except DjangoValidationError as err:
-            raise serializers.ValidationError(err.message)
+        except (EmailValidationError, DjangoValidationError) as err:
+            msg = err.message if hasattr(err, "message") else str(err)
+            raise serializers.ValidationError(msg)
 
-        if User.objects.filter(email__iexact=normalized).exists():
+        existing = User.objects.filter(email__iexact=normalized).first()
+        if existing and existing.is_email_verified:
             raise serializers.ValidationError("A user with this email already exists.")
         return normalized
 

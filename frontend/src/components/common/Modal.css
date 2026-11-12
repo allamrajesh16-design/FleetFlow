@@ -20,6 +20,8 @@
   z-index: 99999;
   padding: 24px 16px;
   box-sizing: border-box;
+  overscroll-behavior: contain;
+  touch-action: none;
   animation: modalFadeIn 180ms ease-out forwards;
 }
 
@@ -40,6 +42,7 @@
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
   overflow: hidden;
   box-sizing: border-box;
+  overscroll-behavior: contain;
   animation: modalSlideIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -97,6 +100,8 @@
   flex: 1 1 auto;
   padding: 24px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
 }
 

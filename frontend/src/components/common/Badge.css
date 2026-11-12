@@ -9,8 +9,7 @@
   line-height: 1;
   white-space: nowrap;
   user-select: none;
-  transition: background-color var(--dur-base, 200ms) ease, color var(--dur-base, 200ms) ease, border-color var(--dur-base, 200ms) ease, transform var(--dur-base, 200ms) var(--ease-spring, ease);
-  animation: ffPopIn var(--dur-base, 200ms) var(--ease-spring, ease) both;
+  transition: background-color var(--dur-base, 200ms) ease, color var(--dur-base, 200ms) ease, border-color var(--dur-base, 200ms) ease;
 }
 
 .badge-live-dot {
@@ -18,8 +17,7 @@
   height: 7px;
   border-radius: 50%;
   background-color: var(--cyan-500);
-  box-shadow: 0 0 6px var(--cyan-500);
-  animation: ffLivePulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 4px var(--cyan-500);
   flex-shrink: 0;
 }
 

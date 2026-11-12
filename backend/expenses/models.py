@@ -54,7 +54,7 @@ class Expense(models.Model):
         decimal_places=2,
     )
     date = models.DateField()
-    description = models.TextField()
+    description = models.TextField(blank=True, default="")
     receipt_image = models.FileField(
         upload_to=random_expense_receipt_path,
         storage=private_file_storage,

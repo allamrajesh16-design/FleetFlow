@@ -15,8 +15,9 @@ try {
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const ROOT_DIR = path.resolve(__dirname, '..');
 const BEFORE_JSON_PATH = path.resolve(__dirname, 'scope_before.json');
-const DOCS_SCOPE_BEFORE = path.resolve(ROOT_DIR, 'docs/scope/before');
-const DOCS_SCOPE_AFTER = path.resolve(ROOT_DIR, 'docs/scope/after');
+const SCOPE_TAG = process.env.SCOPE_TAG || process.argv[3] || 'scope32';
+const DOCS_SCOPE_BEFORE = path.resolve(ROOT_DIR, 'docs', SCOPE_TAG, 'before');
+const DOCS_SCOPE_AFTER = path.resolve(ROOT_DIR, 'docs', SCOPE_TAG, 'after');
 
 const SKIP_DIRS = new Set([
   'node_modules',
@@ -167,6 +168,7 @@ async function captureAllPages(outputDir) {
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
     headless: 'new',
+    pipe: true,
     userDataDir: tempUserDir,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
@@ -181,6 +183,8 @@ async function captureAllPages(outputDir) {
       await page.evaluate(() => {
         localStorage.clear();
         sessionStorage.clear();
+        localStorage.setItem('fleetflow_theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'light');
       });
       await page.goto('http://localhost:3000/login', { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('input[name="identifier"], #login-identifier-input, input[type="text"]', {
@@ -204,6 +208,9 @@ async function captureAllPages(outputDir) {
         await page.goto(`http://localhost:3000${p.path}`, {
           waitUntil: 'domcontentloaded',
           timeout: 15000,
+        });
+        await page.evaluate(() => {
+          document.documentElement.setAttribute('data-theme', 'light');
         });
         await sleep(1200);
         await page.screenshot({ path: destPath });
@@ -269,17 +276,39 @@ async function runCompare() {
   console.log(`Deleted files: ${deleted.length}`);
   console.log(`Changed files: ${changed.length}`);
 
-  // Mapping rules for items 1 to 4
+  // Mapping rules for Registration Email Validation & Security Scope
   function getItemForFile(file) {
     const lower = file.toLowerCase();
-    if (lower.includes('assignment') || lower.includes('assignedtripstable') || (lower.includes('trips') && lower.includes('views.py'))) {
-      return 'SCOPE-LOCKED ASSIGNMENTS REBUILD (/manager/assignments & GET /api/trips/assignable/)';
+    if (lower.includes('tripmap')) {
+      return 'ITEM 2: Shared TripMap Component';
     }
-    if (lower.includes('expense')) return 'ITEM 1 (Admin/Manager Expenses)';
-    if (lower.includes('fleet') || lower.includes('vehicle') || lower.includes('signaturedesign') || lower.includes('adminpages')) return 'ITEM 2 (Shared Fleet Page & VehiclePlate)';
-    if (lower.includes('forgot') || lower.includes('reset') || lower.includes('password')) return 'ITEM 3 (Forgot Password OTP flow)';
-    if (lower.includes('navbar') || lower.includes('header') || lower.includes('sidebar') || lower.includes('dashboardlayout') || lower.includes('topbar') || lower.includes('drivermobilelayout') || lower.includes('tokens.css')) return 'ITEM 4 (Top Nav Bar sticky/profile)';
-    if (lower.includes('app.js') || lower.includes('routes')) return 'ITEMS 2 & 3 (Routing)';
+    if (lower.includes('managertripspage') || lower.includes('admintripspage') || lower.includes('tripsrebuild') || lower.includes('tripmonitoring')) {
+      return 'ITEM 3: Trip Monitoring Page (/manager/trips & /admin/trips)';
+    }
+    if (lower.includes('usedriverlocation') || lower.includes('driverlocation')) {
+      return 'ITEM 1: Driver Location Sharing Hook (speed, heading, accuracy)';
+    }
+    if (lower.includes('geocache') || lower.includes('simulate_trip_gps') || lower.includes('test_trip_monitor') || lower.includes('trips/services.py') || lower.includes('trips/views.py') || lower.includes('trips/models.py') || lower.includes('trips/serializers.py') || lower.includes('trips/urls.py') || lower.includes('trips/migrations')) {
+      return 'ITEM 1 & 4: Places & Routes Backend, Monitor/Track Endpoints & GPS Simulator';
+    }
+    if (lower.includes('validator') || lower.includes('email_validation') || lower.includes('dummy_local_parts') || lower.includes('disposable_domains') || lower.includes('check-email') || lower.includes('check_email') || lower.includes('accounts/views.py') || lower.includes('accounts/serializers.py') || lower.includes('accounts/tests.py') || lower.includes('registerpage') || lower.includes('api/auth.js') || lower.includes('test_email_delivery.py') || lower.includes('test_permission_matrix.py')) {
+      return 'ITEM 1 & 3 & 5: Shared Registration Email Validator, Tests & Register Page Field';
+    }
+    if (lower.includes('emails.py') || lower.includes('purge_unverified') || lower.includes('run_scheduled_jobs') || lower.includes('rollback')) {
+      return 'ITEM 2: OTP Proof, Refusal Handling & Unverified 24h Purge';
+    }
+    if (lower.includes('readme.md') || lower.includes('docs/guide') || lower.includes('guide')) {
+      return 'ITEM 4: Documentation (What can and cannot be checked)';
+    }
+    if (lower.includes('datatable') || lower.includes('driverdocumentspage')) {
+      return 'RESOLVED ISSUE: Driver documents table layout & column sizing';
+    }
+    if (lower.includes('repair_demo_files') || lower.includes('seed_demo_data') || lower.includes('can_view_document') || (lower.includes('document') && !lower.includes('driverdocumentspage.css')) || lower.includes('item1')) {
+      return 'PRIOR SCOPE: Driver documents';
+    }
+    if (lower.includes('assignment') || lower.includes('trips/views.py') || lower.includes('item3')) {
+      return 'PRIOR SCOPE: Assignments roster';
+    }
     return 'UNASSIGNED (Check justification)';
   }
 
@@ -303,6 +332,7 @@ async function runCompare() {
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
     headless: 'new',
+    pipe: true,
     userDataDir: tempUserDir,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
@@ -403,7 +433,9 @@ async function runCompare() {
       file.includes('expense') ||
       file.includes('vehicle') ||
       file.includes('fleet') ||
-      file.includes('forgot_password');
+      file.includes('forgot_password') ||
+      file.includes('manager_trips') ||
+      file.includes('admin_trips');
 
     let verdict = 'PASS';
     if (!isIntentionalPage && diffResult.diffPercent > 0.5) {

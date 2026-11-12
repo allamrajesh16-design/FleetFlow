@@ -9,7 +9,10 @@
   flex-direction: column;
   gap: var(--space-2);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin: var(--space-2) 0;
+  box-sizing: border-box;
 }
 
 .route-line-track {
@@ -17,7 +20,10 @@
   align-items: center;
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 24px;
+  box-sizing: border-box;
 }
 
 .route-point {
@@ -90,6 +96,9 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   font-weight: 500;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .route-label-source,
@@ -98,6 +107,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .route-line-container.compact .route-line-track {
@@ -236,6 +246,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .driver-avatar-ring {
@@ -248,6 +260,7 @@
   border-radius: 50%;
   background: var(--surface-muted);
   border: 2px solid var(--border);
+  flex-shrink: 0;
 }
 
 .driver-avatar-initials {
@@ -285,6 +298,10 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* 5. ODOMETER MECHANICAL DISPLAY */

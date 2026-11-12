@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import useApiList from '../../hooks/useApiList';
 import { approveBookingApi, rejectBookingApi } from '../../api/adminManager';
 import apiClient from '../../api/client';
@@ -16,6 +16,7 @@ import { formatMoney, formatDateTime } from '../../utils/formatters';
 import './AdminPages.css';
 
 export default function AdminBookingsPage() {
+  const navigate = useNavigate();
   const toast = useToast();
   const [searchParams] = useSearchParams();
   const openId = searchParams.get('open');
@@ -66,7 +67,10 @@ export default function AdminBookingsPage() {
     setActionLoading(true);
     try {
       await approveBookingApi(bkg.id);
-      toast.success(`Booking BKG-${String(bkg.id).padStart(4, '0')} approved.`);
+      toast.success(`Booking BKG-${String(bkg.id).padStart(4, '0')} approved.`, 6000, {
+        label: 'Assign now',
+        onClick: () => navigate(`/manager/assignments?booking=${bkg.id}`),
+      });
       setSelectedBooking(null);
       refresh();
     } catch (err) {

@@ -127,6 +127,10 @@ export default function FleetManagementPage() {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingVehicle) return;
+    if (formData.status === 'ACTIVE' && editingVehicle.operational_status === 'ON_TRIP') {
+      toast.error('Vehicle is currently on an active trip and cannot be marked Available.');
+      return;
+    }
     setSubmitting(true);
     setFieldErrors({});
     try {
@@ -139,7 +143,7 @@ export default function FleetManagementPage() {
       if (typeof errors === 'object') {
         setFieldErrors(errors);
       }
-      toast.error(errors.detail || errors.non_field_errors?.[0] || 'Failed to update vehicle.');
+      toast.error(errors.detail || errors.status?.[0] || errors.non_field_errors?.[0] || 'Failed to update vehicle.');
     } finally {
       setSubmitting(false);
     }
@@ -162,6 +166,10 @@ export default function FleetManagementPage() {
   const handleSaveStatus = async (e) => {
     e.preventDefault();
     if (!statusVehicle) return;
+    if (selectedStatus === 'ACTIVE' && statusVehicle.operational_status === 'ON_TRIP') {
+      toast.error('Vehicle is currently on an active trip and cannot be marked Available.');
+      return;
+    }
     setSubmitting(true);
     try {
       await updateVehicleApi(statusVehicle.id, { status: selectedStatus });
@@ -169,7 +177,7 @@ export default function FleetManagementPage() {
       setStatusVehicle(null);
       refresh();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || 'Failed to update vehicle status.');
+      toast.error(err?.response?.data?.status || err?.response?.data?.detail || 'Failed to update vehicle status.');
     } finally {
       setSubmitting(false);
     }
@@ -268,10 +276,21 @@ export default function FleetManagementPage() {
     },
     {
       key: 'status',
-      label: 'Status',
-      width: '140px',
-      minWidth: '120px',
-      render: (v) => <StatusDot status={v.status} label={v.status} />,
+      label: 'Operational Status',
+      width: '160px',
+      minWidth: '140px',
+      render: (v) => {
+        const opStatus = v.operational_status || v.status;
+        const statusMap = {
+          AVAILABLE: 'Available',
+          ACTIVE: 'Available',
+          ASSIGNED_TODAY: 'Assigned Today',
+          ON_TRIP: 'On Trip',
+          MAINTENANCE: 'Maintenance',
+          INACTIVE: 'Inactive',
+        };
+        return <StatusDot status={opStatus} label={statusMap[opStatus] || opStatus} />;
+      },
     },
     {
       key: 'actions',
@@ -369,7 +388,19 @@ export default function FleetManagementPage() {
               <div className="admin-grid-card-body">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <VehiclePlate registrationNumber={v.registration_number} size="sm" />
-                  <StatusDot status={v.status} label={v.status} />
+                  <StatusDot
+                    status={v.operational_status || v.status}
+                    label={
+                      {
+                        AVAILABLE: 'Available',
+                        ACTIVE: 'Available',
+                        ASSIGNED_TODAY: 'Assigned Today',
+                        ON_TRIP: 'On Trip',
+                        MAINTENANCE: 'Maintenance',
+                        INACTIVE: 'Inactive',
+                      }[v.operational_status || v.status] || (v.operational_status || v.status)
+                    }
+                  />
                 </div>
                 <h4 style={{ margin: '0 0 4px', fontSize: '1rem', fontWeight: 600 }}>
                   {v.brand} {v.model}
@@ -412,13 +443,14 @@ export default function FleetManagementPage() {
           },
           {
             key: 'status',
-            label: 'Status',
+            label: 'Operational Status',
             value: filters.status,
             options: [
-              { value: '', label: 'All Status' },
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'MAINTENANCE', label: 'Maintenance' },
+              { value: '', label: 'All Statuses' },
+              { value: 'AVAILABLE', label: 'Available' },
+              { value: 'ASSIGNED_TODAY', label: 'Assigned Today' },
               { value: 'ON_TRIP', label: 'On Trip' },
+              { value: 'MAINTENANCE', label: 'Maintenance' },
               { value: 'INACTIVE', label: 'Inactive' },
             ],
             onChange: (val) => setFilter('status', val),
@@ -624,6 +656,18 @@ export default function FleetManagementPage() {
               Vehicle: <strong>{statusVehicle?.brand} {statusVehicle?.model}</strong> ({statusVehicle?.vehicle_type})
             </p>
           </div>
+
+          {statusVehicle?.operational_status === 'ON_TRIP' && (
+            <div style={{ padding: '10px 14px', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '8px', color: '#92400e', fontSize: '13px', marginBottom: '14px' }}>
+              ⚠️ <strong>Trip in Progress:</strong> This vehicle is currently on an active trip. It cannot be marked Available until the trip is completed.
+            </div>
+          )}
+
+          {statusVehicle?.operational_status === 'MAINTENANCE' && (
+            <div style={{ padding: '10px 14px', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '8px', color: '#92400e', fontSize: '13px', marginBottom: '14px' }}>
+              ⚠️ <strong>Under Maintenance:</strong> This vehicle is undergoing maintenance. Please verify servicing is complete before setting Available.
+            </div>
+          )}
 
           <Select
             label="Operating Status"

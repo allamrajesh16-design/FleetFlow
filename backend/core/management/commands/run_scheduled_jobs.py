@@ -35,6 +35,7 @@ class Command(BaseCommand):
         )
 
         iteration = 0
+        last_purge_time = None
         while True:
             iteration += 1
             now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -68,6 +69,22 @@ class Command(BaseCommand):
                 jobs_run.append("document_alerts")
             except Exception as e:
                 errors.append(f"document_alerts failed: {e}")
+
+            # 5. Purge unverified registrations older than 24h (runs hourly or on run-once)
+            if last_purge_time is None or (time.time() - last_purge_time) >= 3600 or run_once:
+                try:
+                    call_command("purge_unverified", apply=True)
+                    jobs_run.append("purge_unverified")
+                    last_purge_time = time.time()
+                except Exception as e:
+                    errors.append(f"purge_unverified failed: {e}")
+
+            # 6. Notify unstarted trips whose scheduled date has passed
+            try:
+                call_command("notify_unstarted_trips")
+                jobs_run.append("notify_unstarted_trips")
+            except Exception as e:
+                errors.append(f"notify_unstarted_trips failed: {e}")
 
             # Single summary line per run
             if errors:

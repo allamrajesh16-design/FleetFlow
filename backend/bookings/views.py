@@ -77,6 +77,13 @@ class BusScheduleViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated or user.role == User.Role.DRIVER:
             return BusSchedule.objects.none()
 
+        # Real-time sync of expired schedules and unstarted scheduled trips
+        try:
+            from .services import sync_expired_bus_schedules
+            sync_expired_bus_schedules()
+        except Exception:
+            pass
+
         qs = (
             BusSchedule.objects.all()
             .select_related("vehicle")
@@ -96,7 +103,7 @@ class BusScheduleViewSet(viewsets.ModelViewSet):
             return qs.filter(
                 status__in=[BusSchedule.Status.OPEN, BusSchedule.Status.CONFIRMED],
                 departure_datetime__gt=timezone.now(),
-            )
+            ).exclude(status=BusSchedule.Status.EXPIRED)
 
         return qs
 

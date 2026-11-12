@@ -65,6 +65,7 @@
 
 .datatable-table {
   width: 100%;
+  min-width: 820px;
   table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
@@ -125,6 +126,7 @@
   vertical-align: middle;
   text-align: left;
   white-space: normal;
+  overflow: visible;
 }
 
 .datatable-th.align-right,
@@ -308,31 +310,43 @@
   margin-top: auto;
 }
 
-/* Visibility Switching Rules */
-/* 1. Auto responsive (default): Table on >= 768px, Cards on < 768px */
-.datatable-auto-responsive .datatable-responsive-table {
-  display: block;
+/* Visibility & Container-Query Switching Rules */
+/* 1. Container mode: Cards (below 720px or explicitly requested) */
+.datatable-wrapper[data-container-mode="cards"] .datatable-responsive-table {
+  display: none !important;
 }
 
-.datatable-auto-responsive .datatable-cards-view {
-  display: none;
+.datatable-wrapper[data-container-mode="cards"] .datatable-cards-view {
+  display: block !important;
 }
 
-@media (max-width: 767px) {
-  .datatable-auto-responsive .datatable-responsive-table {
-    display: none !important;
-  }
-  .datatable-auto-responsive .datatable-cards-view {
-    display: block !important;
-  }
-  .datatable-cards-grid {
-    grid-template-columns: 1fr;
-    padding: 12px;
-    gap: 12px;
-  }
+/* 2. Container mode: Table (720px - 1000px medium or > 1000px wide) */
+.datatable-wrapper[data-container-mode="table-medium"] .datatable-responsive-table,
+.datatable-wrapper[data-container-mode="table-wide"] .datatable-responsive-table {
+  display: block !important;
 }
 
-/* 2. Forced Cards view */
+.datatable-wrapper[data-container-mode="table-medium"] .datatable-cards-view,
+.datatable-wrapper[data-container-mode="table-wide"] .datatable-cards-view {
+  display: none !important;
+}
+
+/* Sticky first column in medium table container (720px to 1000px) */
+.datatable-wrapper[data-container-mode="table-medium"] .datatable-table th:first-child,
+.datatable-wrapper[data-container-mode="table-medium"] .datatable-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--color-surface);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+}
+
+.datatable-wrapper[data-container-mode="table-medium"] .datatable-table th:first-child {
+  z-index: 4;
+  background: var(--color-bg-page);
+}
+
+/* Fallback for legacy class-based forced modes */
 .datatable-force-cards .datatable-responsive-table {
   display: none !important;
 }
@@ -341,13 +355,37 @@
   display: block !important;
 }
 
-/* 3. Forced Table view */
 .datatable-force-table .datatable-responsive-table {
   display: block !important;
 }
 
 .datatable-force-table .datatable-cards-view {
   display: none !important;
+}
+
+/* Cell wrapping rules */
+.datatable-td {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vehicle-plate-chip,
+.plate-number-text,
+.driver-date-chip,
+.badge,
+.status-badge,
+.expiry-badge {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  flex-shrink: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .datatable-cards-grid {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
 }
 
 /* Pagination Bar */

@@ -2,6 +2,7 @@ import csv
 from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.db.models import Count, Sum, Avg, F, Q, ExpressionWrapper, IntegerField, Subquery, OuterRef
 from django.db.models.functions import TruncMonth, Coalesce
 from django.http import HttpResponse
@@ -496,6 +497,64 @@ class DriverDashboardView(APIView):
             status=Expense.Status.PENDING,
         ).count()
 
+        # Cash to hand over: cash payments collected by this driver that are PAID and not yet cash_settled
+        cash_to_hand_over = (
+            Payment.objects.filter(
+                collected_by=user,
+                payment_method=Payment.PaymentMethod.CASH,
+                status=Payment.Status.PAID,
+                cash_settled=False,
+            ).aggregate(total=Sum("amount"))["total"]
+            or Decimal("0.00")
+        )
+
+        # Pending payment trip (resumption)
+        pending_payment_trip = None
+        unpaid_p = (
+            Payment.objects.filter(
+                trip__driver=driver,
+                trip__status=Trip.Status.COMPLETED,
+                status__in=[Payment.Status.UNPAID, Payment.Status.PAYMENT_INITIATED],
+            )
+            .select_related("trip", "customer", "trip__vehicle")
+            .order_by("-created_at")
+            .first()
+        )
+        if unpaid_p and unpaid_p.trip:
+            pending_payment_trip = {
+                "id": unpaid_p.trip.id,
+                "payment_id": unpaid_p.id,
+                "source": unpaid_p.trip.source,
+                "destination": unpaid_p.trip.destination,
+                "fare": str(unpaid_p.amount),
+                "customer_name": unpaid_p.customer.full_name if unpaid_p.customer else "Customer",
+                "vehicle_registration": unpaid_p.trip.vehicle.registration_number if unpaid_p.trip.vehicle else "",
+            }
+
+        if upcoming_trip_obj and upcoming_trip:
+            rule = getattr(settings, "TRIP_START_RULE", "same_day")
+            trip_date = timezone.localdate(upcoming_trip_obj.scheduled_datetime)
+            can_start = (rule == "any") or (today == trip_date)
+            diff = (trip_date - today).days
+            if diff == 0:
+                date_status = "TODAY"
+                date_label = "Today"
+            elif diff == 1:
+                date_status = "TOMORROW"
+                date_label = "Tomorrow"
+            elif diff > 1:
+                date_status = "FUTURE"
+                date_label = f"in {diff} days"
+            else:
+                date_status = "PASSED"
+                date_label = "Date passed"
+
+            upcoming_trip["can_start"] = can_start
+            upcoming_trip["start_date_status"] = date_status
+            upcoming_trip["start_date_label"] = date_label
+            upcoming_trip["scheduled_date_formatted"] = f"{trip_date.day} {trip_date.strftime('%b %Y')}"
+            upcoming_trip["trip_start_rule"] = rule
+
         data = {
             "todays_trips": todays_trips,
             "upcoming_trip": upcoming_trip,
@@ -504,6 +563,8 @@ class DriverDashboardView(APIView):
             "current_trip": current_trip,
             "own_fuel_logs_this_month": own_fuel_logs_this_month,
             "own_pending_expenses_count": own_pending_expenses_count,
+            "cash_to_hand_over": cash_to_hand_over,
+            "pending_payment_trip": pending_payment_trip,
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -721,8 +782,9 @@ class PaymentsReportView(BaseReportView):
             response = HttpResponse(content_type="text/csv")
             response["Content-Disposition"] = 'attachment; filename="payments_report.csv"'
             writer = csv.writer(response)
-            writer.writerow(["ID", "Customer", "Trip ID", "Amount", "Status", "Method", "Created At"])
+            writer.writerow(["ID", "Customer", "Trip ID", "Amount", "Status", "Method", "Cash Settled", "Created At"])
             for p in qs:
+                settled_str = "Yes" if p.cash_settled else ("No" if p.payment_method == "CASH" else "N/A")
                 writer.writerow([
                     p.id,
                     p.customer.email,
@@ -730,6 +792,7 @@ class PaymentsReportView(BaseReportView):
                     p.amount,
                     p.status,
                     p.payment_method or "",
+                    settled_str,
                     p.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 ])
             return response
@@ -761,6 +824,8 @@ class PaymentsReportView(BaseReportView):
                 "amount": float(p.amount),
                 "status": p.status,
                 "payment_method": p.payment_method,
+                "cash_settled": p.cash_settled,
+                "needs_verification": p.needs_verification,
                 "created_at": p.created_at.isoformat(),
             }
             for p in page
@@ -1142,10 +1207,12 @@ class DocumentsExpiryReportView(BaseReportView):
                 "type": "DOCUMENT",
                 "id": d.id,
                 "target_type": "VEHICLE" if d.vehicle else "DRIVER",
+                "entity_type": "VEHICLE" if d.vehicle else "DRIVER",
                 "target": d.vehicle.registration_number if d.vehicle else (d.driver.user.full_name if d.driver and d.driver.user else "Driver"),
+                "owner_name": d.vehicle.registration_number if d.vehicle else (d.driver.user.full_name if d.driver and d.driver.user else "Driver"),
                 "doc_type": d.doc_type,
                 "doc_type_display": d.get_doc_type_display(),
-                "document_number": d.document_number,
+                "document_number": d.document_number or "Not recorded",
                 "expiry_date": d.expiry_date.isoformat(),
                 "days_left": d.days_left,
                 "expiry_status": st,
@@ -1163,10 +1230,12 @@ class DocumentsExpiryReportView(BaseReportView):
                     "type": "DRIVER_LICENSE",
                     "id": f"lic_{drv.id}",
                     "target_type": "DRIVER",
+                    "entity_type": "DRIVER",
                     "target": drv.user.full_name if drv.user else "Driver",
+                    "owner_name": drv.user.full_name if drv.user else "Driver",
                     "doc_type": Document.DocType.DRIVING_LICENSE,
                     "doc_type_display": "Driver License",
-                    "document_number": drv.license_number,
+                    "document_number": drv.license_number or "Not recorded",
                     "expiry_date": drv.license_expiry.isoformat(),
                     "days_left": days,
                     "expiry_status": st,

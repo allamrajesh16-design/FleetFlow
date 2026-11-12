@@ -82,9 +82,17 @@ export default function ErrorState({
         <div className="error-state-code text-danger">403</div>
         <h3 className="error-state-title">Access Restricted</h3>
         <p className="error-state-desc">You do not have permission to view this data</p>
-        <div className="error-state-actions">
+        <div className="error-state-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           <Button
             variant="primary"
+            size="sm"
+            onClick={handleLoginRedirect}
+            className="error-state-btn"
+          >
+            Go to Login
+          </Button>
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleDashboardRedirect}
             className="error-state-btn"
@@ -126,9 +134,17 @@ export default function ErrorState({
         <p className="error-state-desc">
           {rawMessage || 'The requested resource or dataset could not be found.'}
         </p>
-        <div className="error-state-actions">
+        <div className="error-state-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           <Button
             variant="primary"
+            size="sm"
+            onClick={handleLoginRedirect}
+            className="error-state-btn"
+          >
+            Go to Login
+          </Button>
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleDashboardRedirect}
             className="error-state-btn"

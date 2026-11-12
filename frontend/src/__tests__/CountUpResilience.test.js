@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import CountUp, { formatValue } from '../components/common/CountUp';
+import CountUp from '../components/common/CountUp';
 import StatCard from '../components/common/StatCard';
 import LandingPage from '../pages/public/LandingPage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';

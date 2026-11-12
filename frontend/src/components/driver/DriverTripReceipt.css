@@ -1,0 +1,350 @@
+/* DriverTripReceipt.css */
+
+.driver-receipt-wrapper {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  animation: receiptFadeIn 0.3s ease;
+}
+
+@keyframes receiptFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.driver-receipt-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Header Banner */
+.driver-receipt-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid #2563eb;
+}
+
+.driver-receipt-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.driver-receipt-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: #2563eb;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.driver-receipt-brand-text h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+}
+
+.driver-receipt-tagline {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.driver-receipt-meta {
+  text-align: right;
+}
+
+.driver-receipt-title-badge {
+  display: inline-block;
+  background: rgba(37, 99, 235, 0.25);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.driver-receipt-num {
+  margin-top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+/* Receipt Body */
+.driver-receipt-body {
+  padding: 24px 28px;
+}
+
+/* Status Ribbon */
+.driver-receipt-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.driver-receipt-status-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #047857;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.driver-receipt-status-badge {
+  background: #059669;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Sections */
+.driver-receipt-section {
+  margin-bottom: 22px;
+}
+
+.driver-receipt-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.driver-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+}
+
+@media (max-width: 600px) {
+  .driver-receipt-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.driver-receipt-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.driver-receipt-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.driver-receipt-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.driver-receipt-val.highlight {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.driver-receipt-val.badge-val {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Route Display */
+.driver-receipt-route-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.driver-receipt-route-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.driver-receipt-route-row:last-child {
+  margin-bottom: 0;
+}
+
+.driver-receipt-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.driver-receipt-dot.pickup {
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+
+.driver-receipt-dot.drop {
+  background: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.driver-receipt-place-text {
+  flex: 1;
+}
+
+.driver-receipt-place-title {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.driver-receipt-place-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 1px;
+}
+
+/* Fare Summary Box */
+.driver-receipt-fare-table {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.driver-receipt-fare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.driver-receipt-fare-row.total {
+  border-top: 2px dashed #cbd5e1;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.driver-receipt-total-fare {
+  font-size: 22px;
+  font-weight: 900;
+  color: #15803d;
+}
+
+/* Footer Note */
+.driver-receipt-footer-note {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+}
+
+/* Action Buttons Bar */
+.driver-receipt-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.driver-receipt-actions button {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* PRINT MEDIA STYLES */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .driver-receipt-printable,
+  .driver-receipt-printable * {
+    visibility: visible;
+  }
+
+  .driver-receipt-printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .driver-receipt-card {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .driver-receipt-actions,
+  .driver-page-header,
+  .ui-sidebar,
+  .ui-navbar {
+    display: none !important;
+  }
+
+  .driver-receipt-header {
+    background: #1e293b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+

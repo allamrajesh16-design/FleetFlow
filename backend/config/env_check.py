@@ -65,3 +65,4 @@ def validate_environment():
             "=" * 80 + "\n"
         )
         raise ImproperlyConfigured(msg)
+

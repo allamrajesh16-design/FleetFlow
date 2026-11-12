@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import Loader from './Loader';
-import { DownloadIcon } from './Icons';
+import { DownloadIcon, RefreshIcon } from './Icons';
 import { fetchPrivateFileBlobUrl, downloadPrivateFile } from '../../utils/fileDownloader';
 import { useToast } from '../../context/ToastContext';
 import './ReceiptViewer.css';
@@ -24,57 +24,70 @@ export default function ReceiptViewer({
 }) {
   const { error: toastError } = useToast();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errorInfo, setErrorInfo] = useState(null);
   const [fileData, setFileData] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [displayError, setDisplayError] = useState(false);
+  const [retryCounter, setRetryCounter] = useState(0);
+  const fileDataRef = useRef(null);
+  fileDataRef.current = fileData;
+
+  const loadPreview = useCallback(async (activeRef) => {
+    setLoading(true);
+    setErrorInfo(null);
+    setDisplayError(false);
+    setFileData(null);
+
+    try {
+      const res = await fetchPrivateFileBlobUrl(downloadUrl, toastError);
+      if (!activeRef.current) {
+        if (res?.revoke) res.revoke();
+        return;
+      }
+      if (res && !res.error) {
+        setFileData(res);
+        if (!res.isPdf && !res.isImage) {
+          setDisplayError(true);
+        }
+      } else {
+        setErrorInfo(res || { error: true, status: 500, errorMessage: 'Server problem. Please try again' });
+      }
+    } catch (err) {
+      if (activeRef.current) {
+        setErrorInfo({ error: true, status: 500, errorMessage: 'Server problem. Please try again' });
+      }
+    } finally {
+      if (activeRef.current) setLoading(false);
+    }
+  }, [downloadUrl, toastError]);
 
   useEffect(() => {
-    let active = true;
-    let cleanupFn = null;
+    const activeRef = { current: true };
 
     if (isOpen && downloadUrl) {
-      setLoading(true);
-      setError(null);
-      setDisplayError(false);
-      setFileData(null);
-
-      fetchPrivateFileBlobUrl(downloadUrl, toastError)
-        .then((res) => {
-          if (!active) {
-            if (res?.revoke) res.revoke();
-            return;
-          }
-          if (res) {
-            setFileData(res);
-            cleanupFn = res.revoke;
-            if (!res.isPdf && !res.isImage) {
-              setDisplayError(true);
-            }
-          } else {
-            setError(true);
-          }
-        })
-        .catch(() => {
-          if (active) setError(true);
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
+      loadPreview(activeRef);
     }
 
     return () => {
-      active = false;
-      if (cleanupFn) cleanupFn();
+      activeRef.current = false;
+      if (fileDataRef.current?.revoke) {
+        fileDataRef.current.revoke();
+      }
     };
-  }, [isOpen, downloadUrl, toastError]);
+  }, [isOpen, downloadUrl, retryCounter, loadPreview]);
 
   const handleClose = () => {
     if (fileData?.revoke) {
       fileData.revoke();
     }
     setFileData(null);
+    setErrorInfo(null);
+    setDisplayError(false);
     if (onClose) onClose();
+  };
+
+  const handleRetry = () => {
+    setRetryCounter((c) => c + 1);
   };
 
   const handleDownload = async () => {
@@ -86,7 +99,7 @@ export default function ReceiptViewer({
     }
   };
 
-  const showUnavailable = (error || displayError || (!loading && fileData && !fileData.isPdf && !fileData.isImage));
+  const isUnsupported = !loading && !errorInfo && (displayError || (fileData && !fileData.isPdf && !fileData.isImage));
 
   return (
     <Modal
@@ -121,7 +134,39 @@ export default function ReceiptViewer({
           </div>
         )}
 
-        {showUnavailable && !loading && (
+        {/* Specific error states: 401, 403, 404, 5xx */}
+        {!loading && errorInfo && (
+          <div className="receipt-viewer-unsupported">
+            {errorInfo.status === 401 ? (
+              <>
+                <p className="receipt-viewer-unsupported-msg">Please login again.</p>
+                <Button variant="primary" onClick={() => { window.location.href = '/login'; }}>
+                  Go to Login
+                </Button>
+              </>
+            ) : errorInfo.status === 403 ? (
+              <p className="receipt-viewer-unsupported-msg">You are not allowed to open this file</p>
+            ) : errorInfo.status === 404 ? (
+              <p className="receipt-viewer-unsupported-msg">
+                The file is missing on the server. Please contact your Fleet Manager
+              </p>
+            ) : (
+              <>
+                <p className="receipt-viewer-unsupported-msg">Server problem. Please try again</p>
+                <Button
+                  variant="primary"
+                  onClick={handleRetry}
+                  leftIcon={<RefreshIcon size={16} />}
+                >
+                  Retry
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Unsupported format */}
+        {isUnsupported && (
           <div className="receipt-viewer-unsupported">
             <p className="receipt-viewer-unsupported-msg">Preview is not available. Please download the file.</p>
             <Button
@@ -135,34 +180,14 @@ export default function ReceiptViewer({
           </div>
         )}
 
-        {fileData && !loading && !showUnavailable && (
+        {fileData && !loading && !errorInfo && !isUnsupported && (
           <div className="receipt-viewer-body">
             {fileData.isPdf ? (
-              <object
-                data={fileData.blobUrl}
-                type="application/pdf"
+              <iframe
+                src={fileData.blobUrl}
+                title={title}
                 className="receipt-viewer-iframe"
-                onError={() => setDisplayError(true)}
-              >
-                <iframe
-                  src={fileData.blobUrl}
-                  title={title}
-                  className="receipt-viewer-iframe"
-                  onError={() => setDisplayError(true)}
-                >
-                  <div className="receipt-viewer-unsupported">
-                    <p className="receipt-viewer-unsupported-msg">Preview is not available. Please download the file.</p>
-                    <Button
-                      variant="primary"
-                      onClick={handleDownload}
-                      loading={downloading}
-                      leftIcon={<DownloadIcon size={16} />}
-                    >
-                      Download File
-                    </Button>
-                  </div>
-                </iframe>
-              </object>
+              />
             ) : (
               <div className="receipt-viewer-image-wrapper">
                 <img

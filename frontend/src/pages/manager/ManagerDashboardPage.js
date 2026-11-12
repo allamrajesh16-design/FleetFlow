@@ -8,7 +8,6 @@ import Loader from '../../components/common/Loader';
 import ErrorState from '../../components/common/ErrorState';
 import ExpiryBadge from '../../components/common/ExpiryBadge';
 import { VehiclePlate, StatusDot } from '../../components/common/SignatureDesign';
-import ManagerQuickAssignCard from '../../components/manager/ManagerQuickAssignCard';
 import AssignedTripsTable from '../../components/manager/AssignedTripsTable';
 import {
   VehicleIcon,
@@ -29,12 +28,7 @@ export default function ManagerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [errorStatus, setErrorStatus] = useState(null);
-  const [tripRefreshKey, setTripRefreshKey] = useState(0);
-
-  const handleTripAssigned = () => {
-    setTripRefreshKey((prev) => prev + 1);
-    fetchDashboard();
-  };
+  const [tripRefreshKey] = useState(0);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -162,9 +156,6 @@ export default function ManagerDashboardPage() {
           description="Immediate compliance attention"
         />
       </div>
-
-      {/* Assign Trip Form & Driver Dispatch (Manager Dashboard) */}
-      <ManagerQuickAssignCard onAssigned={handleTripAssigned} />
 
       {/* Assigned Trips & Driver Roster Table */}
       <AssignedTripsTable

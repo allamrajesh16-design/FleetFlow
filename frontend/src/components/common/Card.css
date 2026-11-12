@@ -28,6 +28,18 @@
   padding: var(--space-6, 24px);
 }
 
+@media (max-width: 768px) {
+  .card-p-normal {
+    padding: var(--space-4, 16px);
+  }
+}
+
+@media (max-width: 360px) {
+  .card-p-normal {
+    padding: 12px;
+  }
+}
+
 .card-accent-top {
   border-top: 3px solid var(--accent, var(--primary));
 }

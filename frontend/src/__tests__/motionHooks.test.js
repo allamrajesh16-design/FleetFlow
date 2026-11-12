@@ -110,12 +110,10 @@ describe('Motion Hooks', () => {
     });
 
     test('creates intersection observer and handles observe when motion is enabled', () => {
-      let observerCallback = null;
       const mockObserve = jest.fn();
       const mockDisconnect = jest.fn();
 
-      window.IntersectionObserver = jest.fn().mockImplementation((cb) => {
-        observerCallback = cb;
+      window.IntersectionObserver = jest.fn().mockImplementation(() => {
         return {
           observe: mockObserve,
           unobserve: jest.fn(),

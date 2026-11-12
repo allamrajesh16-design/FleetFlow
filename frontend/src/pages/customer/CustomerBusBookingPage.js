@@ -9,6 +9,9 @@ import ErrorState from '../../components/common/ErrorState';
 import Toast from '../../components/common/Toast';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
+import SmartImage from '../../components/common/SmartImage';
+import { images } from '../../config/images';
+import { BusIcon } from '../../components/common/Icons';
 import { NumberInput } from '../../components/forms';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
 import './CustomerPages.css';
@@ -153,116 +156,146 @@ export default function CustomerBusBookingPage() {
         </div>
       ) : error ? (
         <ErrorState message={error} onRetry={loadSchedules} />
-      ) : schedules.length === 0 ? (
-        <EmptyState
-          title="No Bus Schedules Available"
-          description="There are currently no scheduled bus trips open for booking."
-          actionText="Book Private Vehicle"
-          onAction={() => navigate('/customer/book')}
-        />
-      ) : (
-        <div className="bus-schedules-grid">
-          {schedules.map((schedule) => {
-            const deadlineInfo = getDeadlineInfo(schedule.booking_deadline);
-            const isClosed =
-              deadlineInfo.closed ||
-              schedule.available_seats <= 0 ||
-              schedule.status === 'CANCELLED' ||
-              schedule.status === 'COMPLETED';
+      ) : (() => {
+        const availableSchedules = schedules.filter((schedule) => {
+          if (schedule.status === 'EXPIRED' || schedule.is_expired) return false;
+          if (schedule.departure_datetime && new Date(schedule.departure_datetime) <= currentTime) return false;
+          return true;
+        });
 
-            const minPass = schedule.min_passengers || 1;
-            const currentPass = schedule.current_passengers || schedule.booked_seats || 0;
-            const progressPct = Math.min(100, Math.round((currentPass / minPass) * 100));
-            const minReached = currentPass >= minPass;
+        if (availableSchedules.length === 0) {
+          return (
+            <EmptyState
+              title="No Bus Schedules Available"
+              description="There are currently no active scheduled bus trips open for booking."
+              actionText="Book Private Vehicle"
+              onAction={() => navigate('/customer/book')}
+            />
+          );
+        }
 
-            return (
-              <div key={schedule.id} className="bus-schedule-card">
-                <div className="bus-card-top">
-                  <div className="bus-route-badge">
-                    <span className="bus-icon">🚌</span>
-                    <strong>{schedule.source}</strong>
-                    <span className="bus-arrow">➔</span>
-                    <strong>{schedule.destination}</strong>
-                  </div>
-                  <StatusBadge status={schedule.status} />
-                </div>
+        return (
+          <div className="bus-schedules-grid">
+            {availableSchedules.map((schedule) => {
+              const deadlineInfo = getDeadlineInfo(schedule.booking_deadline);
+              const isClosed =
+                deadlineInfo.closed ||
+                schedule.available_seats <= 0 ||
+                schedule.status === 'CANCELLED' ||
+                schedule.status === 'COMPLETED';
 
-                <div className="bus-card-departure">
-                  <span className="departure-label">Departure</span>
-                  <span className="departure-val">
-                    {formatDateTime(schedule.departure_datetime)}
-                  </span>
-                </div>
+              const minPass = schedule.min_passengers || 1;
+              const currentPass = schedule.current_passengers || schedule.booked_seats || 0;
+              const progressPct = Math.min(100, Math.round((currentPass / minPass) * 100));
+              const minReached = currentPass >= minPass;
 
-                {schedule.vehicle_registration && (
-                  <div className="bus-vehicle-reg">
-                    <span>Vehicle:</span>
-                    <strong>{schedule.vehicle_registration}</strong>
-                  </div>
-                )}
-
-                {/* Progress Bar for Minimum Passengers */}
-                <div className="bus-progress-section">
-                  <div className="bus-progress-header">
-                    <span>
-                      Passenger Target:{' '}
-                      <strong>
-                        {currentPass} / {minPass} min
-                      </strong>
-                    </span>
-                    <span className={`target-status ${minReached ? 'reached' : 'pending'}`}>
-                      {minReached ? '✓ Target Reached' : 'Requires Minimum'}
-                    </span>
-                  </div>
-                  <div className="bus-progress-bar-bg">
-                    <div
-                      className={`bus-progress-fill ${minReached ? 'filled-green' : 'filled-blue'}`}
-                      style={{ width: `${progressPct}%` }}
+              return (
+                <div key={schedule.id} className="bus-schedule-card">
+                  {/* Bus Image Header */}
+                  <div className="bus-card-image-wrap">
+                    <SmartImage
+                      src={images.busBooking.src}
+                      fallback={images.busBooking.fallback}
+                      fallbacks={images.busBooking.fallbacks}
+                      fallbackIcon={images.busBooking.fallbackIcon}
+                      alt={`${schedule.source} to ${schedule.destination} Express Bus`}
+                      aspectRatio="16 / 9"
+                      className="bus-card-image"
                     />
+                    <span className="vehicle-category-pill">
+                      <BusIcon size={14} /> Express Intercity
+                    </span>
+                  </div>
+
+                  <div className="bus-card-body">
+                    <div className="bus-card-top">
+                      <div className="bus-route-badge">
+                        <span className="bus-icon">🚌</span>
+                        <strong>{schedule.source}</strong>
+                        <span className="bus-arrow">➔</span>
+                        <strong>{schedule.destination}</strong>
+                      </div>
+                      <StatusBadge status={schedule.status} />
+                    </div>
+
+                    <div className="bus-card-departure">
+                      <span className="departure-label">Departure</span>
+                      <span className="departure-val">
+                        {formatDateTime(schedule.departure_datetime)}
+                      </span>
+                    </div>
+
+                    {schedule.vehicle_registration && (
+                      <div className="bus-vehicle-reg">
+                        <span>Vehicle:</span>
+                        <strong>{schedule.vehicle_registration}</strong>
+                      </div>
+                    )}
+
+                    {/* Progress Bar for Minimum Passengers */}
+                    <div className="bus-progress-section">
+                      <div className="bus-progress-header">
+                        <span>
+                          Passenger Target:{' '}
+                          <strong>
+                            {currentPass} / {minPass} min
+                          </strong>
+                        </span>
+                        <span className={`target-status ${minReached ? 'reached' : 'pending'}`}>
+                          {minReached ? '✓ Target Reached' : 'Requires Minimum'}
+                        </span>
+                      </div>
+                      <div className="bus-progress-bar-bg">
+                        <div
+                          className={`bus-progress-fill ${minReached ? 'filled-green' : 'filled-blue'}`}
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="bus-stats-grid">
+                      <div className="bus-stat-box">
+                        <span className="bus-stat-num">{schedule.available_seats}</span>
+                        <span className="bus-stat-lbl">Available Seats</span>
+                      </div>
+                      <div className="bus-stat-box">
+                        <span className="bus-stat-num">{schedule.total_seats}</span>
+                        <span className="bus-stat-lbl">Total Capacity</span>
+                      </div>
+                      <div className="bus-stat-box">
+                        <span className="bus-stat-num">{formatCurrency(schedule.fare_per_seat)}</span>
+                        <span className="bus-stat-lbl">Per Seat</span>
+                      </div>
+                    </div>
+
+                    {/* Countdown & Deadline Warning */}
+                    <div className="bus-deadline-notice">
+                      <div className="deadline-time">
+                        ⏱ {deadlineInfo.text}
+                      </div>
+                      <div className="deadline-rule">
+                        * Booking closes strictly 10 hours before departure.
+                      </div>
+                    </div>
+
+                    {/* Action button */}
+                    <Button
+                      type="button"
+                      variant={isClosed ? 'secondary' : 'primary'}
+                      fullWidth
+                      disabled={isClosed}
+                      onClick={() => handleOpenBooking(schedule)}
+                    >
+                      {isClosed ? 'Booking Closed' : 'Book Bus Seat'}
+                    </Button>
                   </div>
                 </div>
-
-                {/* Stats Grid */}
-                <div className="bus-stats-grid">
-                  <div className="bus-stat-box">
-                    <span className="bus-stat-num">{schedule.available_seats}</span>
-                    <span className="bus-stat-lbl">Available Seats</span>
-                  </div>
-                  <div className="bus-stat-box">
-                    <span className="bus-stat-num">{schedule.total_seats}</span>
-                    <span className="bus-stat-lbl">Total Capacity</span>
-                  </div>
-                  <div className="bus-stat-box">
-                    <span className="bus-stat-num">{formatCurrency(schedule.fare_per_seat)}</span>
-                    <span className="bus-stat-lbl">Per Seat</span>
-                  </div>
-                </div>
-
-                {/* Countdown & Deadline Warning */}
-                <div className="bus-deadline-notice">
-                  <div className="deadline-time">
-                    ⏱ {deadlineInfo.text}
-                  </div>
-                  <div className="deadline-rule">
-                    * Booking closes strictly 10 hours before departure.
-                  </div>
-                </div>
-
-                {/* Action button */}
-                <Button
-                  type="button"
-                  variant={isClosed ? 'secondary' : 'primary'}
-                  fullWidth
-                  disabled={isClosed}
-                  onClick={() => handleOpenBooking(schedule)}
-                >
-                  {isClosed ? 'Booking Closed' : 'Book Bus Seat'}
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Book Seat Modal */}
       {selectedSchedule && (

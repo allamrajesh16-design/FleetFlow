@@ -171,44 +171,42 @@
 }
 
 /* ==========================================================================
-   Responsive: on screens below 768px, show icon WITH its text label
+   Responsive: Mobile (<= 768px) Touch Targets (>= 44px)
+   Maintain clean icon buttons without unsolicited label expansions
    ========================================================================== */
 @media (max-width: 768px) {
   .icon-btn {
-    width: auto !important;
     min-width: 44px;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 12px;
-    border-radius: 8px !important;
+    min-height: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
-  .icon-btn-sm,
-  .icon-btn-small {
+  /* Round and square icon buttons stay 44px x 44px square touch targets */
+  .icon-btn-round,
+  .icon-btn-square {
+    width: 44px;
     min-width: 44px;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 10px;
-    font-size: 13px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
   }
 
-  .icon-btn-md {
-    min-width: 44px;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 14px;
-    font-size: 13px;
-  }
-
-  .icon-btn-lg {
-    min-width: 44px;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 16px;
-    font-size: 14px;
-  }
-
+  /* Hide textual label by default on icon buttons to prevent layout destruction */
   .icon-btn-label {
+    display: none;
+  }
+
+  /* Only show label if explicitly flagged */
+  .icon-btn.icon-btn-with-label {
+    width: auto;
+    padding: 0 12px;
+  }
+
+  .icon-btn.icon-btn-with-label .icon-btn-label {
     display: inline-block;
     font-weight: 600;
   }

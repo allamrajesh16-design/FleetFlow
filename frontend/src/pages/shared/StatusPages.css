@@ -23,7 +23,6 @@
   display: flex;
   justify-content: center;
   margin-bottom: var(--space-6);
-  animation: ffShake 350ms var(--ease-in-out);
 }
 
 .status-code {
@@ -33,7 +32,6 @@
   color: var(--color-primary);
   margin-bottom: var(--space-2);
   display: inline-block;
-  animation: ffFadeRiseLg var(--dur-slow) var(--ease-out), ffFloat 4s ease-in-out infinite var(--dur-slow);
 }
 
 .status-code.text-danger {

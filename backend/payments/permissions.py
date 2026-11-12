@@ -26,6 +26,22 @@ class PaymentPermission(BasePermission):
         if not (request.user and request.user.is_authenticated):
             return False
 
+        if getattr(view, "action", None) == "collect":
+            # Only assigned driver can collect
+            return bool(
+                request.user.role == User.Role.DRIVER
+                and obj.trip
+                and obj.trip.driver
+                and obj.trip.driver.user_id == request.user.id
+            )
+
+        if getattr(view, "action", None) == "settle_cash":
+            # Only admin and fleet manager can settle
+            return bool(
+                request.user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER]
+                or request.user.is_superuser
+            )
+
         if request.user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER] or request.user.is_superuser:
             return True
 
@@ -33,7 +49,7 @@ class PaymentPermission(BasePermission):
             return obj.customer_id == request.user.id
 
         if request.user.role == User.Role.DRIVER:
-            return obj.trip.driver.user_id == request.user.id
+            return bool(obj.trip and obj.trip.driver and obj.trip.driver.user_id == request.user.id)
 
         return False
 

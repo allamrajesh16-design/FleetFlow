@@ -26,28 +26,21 @@
 }
 
 .auth-side-smart-image img {
-  animation: ffKenBurnsOnce 20s var(--ease-out) 1 forwards;
-  will-change: transform;
+  transform: none !important;
+  will-change: auto;
 }
 
-/* Staggered slide in for panel items */
-.motion-auth-logo {
-  animation: ffFadeSlideRight var(--dur-slow) var(--ease-out) both;
-}
-
-.motion-auth-accent {
-  animation: ffFadeSlideRight var(--dur-slow) var(--ease-out) 80ms both;
-}
-
-.motion-auth-text {
-  animation: ffFadeSlideRight var(--dur-slow) var(--ease-out) 160ms both;
-}
-
+/* Panel items render cleanly without delayed sliding */
+.motion-auth-logo,
+.motion-auth-accent,
+.motion-auth-text,
 .motion-auth-point {
-  animation: ffFadeSlideRight var(--dur-slow) var(--ease-out) both;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
-/* Light gradient overlay: dark only at top and bottom, almost transparent in middle */
+/* Gradient overlay: strong enough for >=4.5:1 contrast against pure white photo pixels */
 .auth-side-gradient-overlay {
   position: absolute;
   inset: 0;
@@ -55,10 +48,10 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(15, 23, 42, 0.45) 0%,
-    transparent 30%,
-    rgba(15, 23, 42, 0.4) 65%,
-    rgba(15, 23, 42, 0.85) 100%
+    rgba(15, 23, 42, 0.70) 0%,
+    rgba(15, 23, 42, 0.40) 25%,
+    rgba(15, 23, 42, 0.75) 60%,
+    rgba(15, 23, 42, 0.92) 100%
   );
   pointer-events: none;
 }
@@ -85,7 +78,7 @@
   justify-content: space-between;
   padding: clamp(28px, 4.5vh, 44px) clamp(24px, 3vw, 40px);
   box-sizing: border-box;
-  color: var(--surface);
+  color: var(--on-photo-text);
 }
 
 .auth-side-top {
@@ -105,7 +98,7 @@
   width: 44px;
   height: 4px;
   border-radius: 2px;
-  background: var(--primary);
+  background: var(--on-photo-accent);
 }
 
 .auth-side-hero-text {
@@ -117,7 +110,7 @@
 .auth-side-headline {
   font-size: 2.125rem;
   font-weight: 700;
-  color: var(--surface);
+  color: var(--on-photo-text);
   margin: 0;
   line-height: 1.2;
   letter-spacing: -0.025em;
@@ -126,7 +119,7 @@
 
 .auth-side-sentence {
   font-size: 1.125rem;
-  color: var(--surface);
+  color: var(--on-photo-muted);
   margin: 0;
   line-height: 1.5;
   font-weight: 500;
@@ -149,7 +142,7 @@
   gap: 12px;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--surface);
+  color: var(--on-photo-text);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
 
@@ -161,8 +154,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--primary);
-  color: var(--surface);
+  background: var(--on-photo-accent);
+  color: var(--navy-900);
   flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }

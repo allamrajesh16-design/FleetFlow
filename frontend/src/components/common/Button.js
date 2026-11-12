@@ -11,26 +11,29 @@ import './Button.css';
  * - Smooth transition from label to spinner
  * - Success checkmark state
  */
-export default function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
-  type = 'button',
-  loading = false,
-  success = false,
-  disabled = false,
-  icon = null,
-  leftIcon = null,
-  iconLeft = null,
-  rightIcon = null,
-  iconRight = null,
-  fullWidth = false,
-  className = '',
-  onClick,
-  as = 'button',
-  href,
-  ...props
-}) {
+const Button = React.forwardRef(function Button(
+  {
+    children,
+    variant = 'primary',
+    size = 'md',
+    type = 'button',
+    loading = false,
+    success = false,
+    disabled = false,
+    icon = null,
+    leftIcon = null,
+    iconLeft = null,
+    rightIcon = null,
+    iconRight = null,
+    fullWidth = false,
+    className = '',
+    onClick,
+    as = 'button',
+    href,
+    ...props
+  },
+  ref
+) {
   const [ripples, setRipples] = useState([]);
 
   // Normalize size names
@@ -122,6 +125,7 @@ export default function Button({
   if (as === 'a' || href) {
     return (
       <a
+        ref={ref}
         href={href}
         className={btnClasses}
         onClick={disabled || loading ? (e) => e.preventDefault() : handleClick}
@@ -135,6 +139,7 @@ export default function Button({
 
   return (
     <button
+      ref={ref}
       type={type}
       disabled={disabled || loading}
       onClick={handleClick}
@@ -144,4 +149,6 @@ export default function Button({
       {content}
     </button>
   );
-}
+});
+
+export default Button;

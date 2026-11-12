@@ -63,3 +63,28 @@ FleetFlow enforces strict role-based access control (RBAC) across both frontend 
 ### Q: What happens when a bus schedule is cancelled due to low passengers?
 **A:** Customers receive automated notifications and can choose from three options: transfer to an alternative bus schedule, cancel reservation, or receive an automatic full refund.
 
+---
+
+## 5. Email Verification: What Can and Cannot Be Checked
+
+When registering an account on FleetFlow, the platform performs real-time checks on the email address:
+
+### What CAN be checked:
+- **Syntax and Format**: Standard ASCII characters, single `@`, valid domain labels, total length $\le$ 254, username $\le$ 64.
+- **Provider Rules**: Gmail-specific (6–30 characters, no leading/trailing or double dots) and Yahoo-specific rules (4–32 characters, starts with letter).
+- **Dummy Address Rejection**: Blocks dummy addresses with 4+ identical characters in a row, $\le$ 2 unique characters on length $\ge$ 6, common keyboard runs (`qwerty`, `123456`, `asdfgh`), Shannon entropy < 1.6 on length $\ge$ 8, and dummy dictionary words (`test`, `dummy`, `demo`, `user`, etc.).
+- **Domain Verification**: Blocks disposable email providers (250+ domains) and reserved/testing domains (`example.com`, `test.com`, `.local`, `.test`).
+- **Domain Typos**: Suggests the correct provider when edit distance $\le$ 2 from major providers (e.g. `gmial.com` $\to$ `gmail.com`).
+- **Mail Server DNS**: Confirms domain has active MX or A records (network timeouts do not block users).
+
+### What CANNOT be checked programmatically:
+- **Mailbox Existence**: A server cannot verify whether an individual mailbox exists at a provider like Google or Yahoo without actually sending mail, because mail servers disable SMTP `VRFY` and reject verification probes to prevent spam.
+- **Spam Filtering**: Server checks cannot predict if a mailbox provider will place an email in the Inbox or Spam folder.
+
+### The OTP is the Final Proof:
+Because a program cannot confirm a mailbox exists without sending mail, the **6-digit email OTP is the final, definitive proof** of ownership:
+- Accounts remain inactive and unusable until the OTP is verified.
+- Unverified registrations older than 24 hours are automatically purged.
+- Re-registering with an unverified email address safely replaces the pending account, preventing typo lockouts.
+
+

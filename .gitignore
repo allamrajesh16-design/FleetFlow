@@ -50,6 +50,7 @@ backups/
 docs/scope/before/
 docs/scope/after/
 docs/scope/diff/
+docs/scope*/
 
 # Operating System Files
 .DS_Store

@@ -26,7 +26,9 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='auth_register'),
     path('check-email/', CheckEmailView.as_view(), name='auth_check_email'),
     path('verify-otp/', VerifyOTPView.as_view(), name='auth_verify_otp'),
+    path('verify-email-otp/', VerifyOTPView.as_view(), name='auth_verify_email_otp'),
     path('resend-otp/', ResendOTPView.as_view(), name='auth_resend_otp'),
+    path('resend-email-otp/', ResendOTPView.as_view(), name='auth_resend_email_otp'),
 
     # Approvals workflow
     path('approvals/', ApprovalsListView.as_view(), name='auth_approvals_list'),

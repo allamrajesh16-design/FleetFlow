@@ -14,3 +14,4 @@ Briefly describe the purpose of this change.
 - [ ] Scope guard verified (no unintended UI modifications).
 - [ ] Accessibility standards maintained (WCAG 2.1 AA).
 - [ ] Documentation updated (`README.md`, `docs/`).
+

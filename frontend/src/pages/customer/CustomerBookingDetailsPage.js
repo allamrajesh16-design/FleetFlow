@@ -13,7 +13,7 @@ import Toast from '../../components/common/Toast';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import { Textarea } from '../../components/forms';
-import { formatDateTime, formatCurrency } from '../../utils/formatters';
+import { formatDateTime, formatCurrency, formatPayableAmount } from '../../utils/formatters';
 import './CustomerPages.css';
 
 export default function CustomerBookingDetailsPage() {
@@ -406,12 +406,12 @@ export default function CustomerBookingDetailsPage() {
             {booking.final_fare && (
               <div className="fare-row final-fare">
                 <span>Final Fare</span>
-                <strong>{formatCurrency(booking.final_fare)}</strong>
+                <strong>{formatPayableAmount(booking.final_fare, { paymentStatus: booking.payment_status })}</strong>
               </div>
             )}
 
             <div className="fare-note">
-              * Final fare is calculated after the trip from odometer readings.
+              * Final fare is calculated upon trip completion.
             </div>
 
             <div className="payment-status-row">

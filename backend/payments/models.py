@@ -27,6 +27,7 @@ class Payment(models.Model):
         UPI = "UPI", "UPI"
         CARD = "CARD", "Card"
         WALLET = "WALLET", "Wallet"
+        CASH = "CASH", "Cash"
 
     booking = models.ForeignKey(
         Booking,
@@ -43,6 +44,13 @@ class Payment(models.Model):
         on_delete=models.CASCADE,
         related_name="payments",
     )
+    collected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="collected_payments",
+    )
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -57,6 +65,23 @@ class Payment(models.Model):
         choices=PaymentMethod.choices,
         null=True,
         blank=True,
+    )
+    needs_verification = models.BooleanField(
+        default=False,
+    )
+    cash_settled = models.BooleanField(
+        default=False,
+    )
+    cash_settled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    cash_settled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="settled_cash_payments",
     )
     qr_token = models.CharField(
         max_length=128,

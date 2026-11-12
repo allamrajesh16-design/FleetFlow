@@ -87,11 +87,21 @@ export async function deleteVehicleApi(id) {
   return res.data;
 }
 
+export async function getVehicleApi(id) {
+  const res = await apiClient.get(`/vehicles/${id}/`);
+  return res.data;
+}
+
 // ==========================================
 // DRIVERS
 // ==========================================
 export async function listDriversApi(params) {
   const res = await apiClient.get('/drivers/', { params });
+  return res.data;
+}
+
+export async function getDriverApi(id) {
+  const res = await apiClient.get(`/drivers/${id}/`);
   return res.data;
 }
 
@@ -189,8 +199,18 @@ export async function getAssignableResourcesApi(params) {
   return res.data;
 }
 
-export async function cancelTripApi(id) {
-  const res = await apiClient.post(`/trips/${id}/cancel/`);
+export async function getDispatchSummaryApi(params) {
+  const res = await apiClient.get('/trips/dispatch-summary/', { params });
+  return res.data;
+}
+
+export async function reassignTripApi(id, payload) {
+  const res = await apiClient.post(`/trips/${id}/reassign/`, payload);
+  return res.data;
+}
+
+export async function cancelTripApi(id, reason = '') {
+  const res = await apiClient.post(`/trips/${id}/cancel/`, { reason });
   return res.data;
 }
 
@@ -242,6 +262,11 @@ export async function rejectPaymentProofApi(id, reason) {
 
 export async function refundPaymentApi(id) {
   const res = await apiClient.post(`/payments/${id}/refund/`);
+  return res.data;
+}
+
+export async function settleCashPaymentApi(id) {
+  const res = await apiClient.post(`/payments/${id}/settle-cash/`);
   return res.data;
 }
 

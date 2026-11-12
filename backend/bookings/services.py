@@ -132,8 +132,88 @@ def check_bus_schedules():
                         item_id=schedule.id,
                     )
 
+        # Also sync any past schedules/trips whose departure datetime has already passed
+        expired_stats = sync_expired_bus_schedules()
+
         return {
             "processed": len(schedules),
             "confirmed": confirmed_count,
             "cancelled": cancelled_count,
+            "expired_schedules": expired_stats["expired_schedules"],
+            "expired_trips": expired_stats["expired_trips"],
         }
+
+
+def sync_expired_bus_schedules():
+    """
+    Checks all bus schedules and associated trips where departure/scheduled date has passed.
+    - If departure_datetime <= now:
+        - If status is OPEN:
+            Mark schedule as EXPIRED.
+        - If status is CONFIRMED:
+            Check associated trips:
+            - If any trip is IN_PROGRESS: leave as is (currently on the road).
+            - If any trip is COMPLETED: mark schedule as COMPLETED.
+            - If trip was SCHEDULED and departure has passed:
+                Mark trip as EXPIRED.
+                Mark schedule as EXPIRED.
+            - If no trip was ever created and departure has passed:
+                Mark schedule as EXPIRED.
+    - All previous booking records, payment records, and customer histories are preserved.
+    - Returns summary dict: {"expired_schedules": int, "expired_trips": int}.
+    """
+    now = timezone.now()
+    from trips.models import Trip
+
+    with transaction.atomic():
+        expired_schedules_count = 0
+        expired_trips_count = 0
+
+        # 1. Any OPEN schedule whose departure_datetime <= now is EXPIRED
+        expired_open_schedules = list(
+            BusSchedule.objects.select_for_update().filter(
+                status=BusSchedule.Status.OPEN,
+                departure_datetime__lte=now,
+            )
+        )
+        for s in expired_open_schedules:
+            s.status = BusSchedule.Status.EXPIRED
+            s.save(update_fields=["status"])
+            expired_schedules_count += 1
+
+        # 2. CONFIRMED schedules where departure_datetime <= now
+        confirmed_past_schedules = list(
+            BusSchedule.objects.select_for_update().filter(
+                status=BusSchedule.Status.CONFIRMED,
+                departure_datetime__lte=now,
+            )
+        )
+        for s in confirmed_past_schedules:
+            trips = list(s.trips.select_for_update().all())
+            if not trips:
+                s.status = BusSchedule.Status.EXPIRED
+                s.save(update_fields=["status"])
+                expired_schedules_count += 1
+            else:
+                has_in_progress = any(t.status == Trip.Status.IN_PROGRESS for t in trips)
+                has_completed = any(t.status == Trip.Status.COMPLETED for t in trips)
+                if has_in_progress:
+                    continue
+                elif has_completed:
+                    s.status = BusSchedule.Status.COMPLETED
+                    s.save(update_fields=["status"])
+                else:
+                    for t in trips:
+                        if t.status == Trip.Status.SCHEDULED:
+                            t.status = Trip.Status.EXPIRED
+                            t.save(update_fields=["status"])
+                            expired_trips_count += 1
+                    s.status = BusSchedule.Status.EXPIRED
+                    s.save(update_fields=["status"])
+                    expired_schedules_count += 1
+
+        return {
+            "expired_schedules": expired_schedules_count,
+            "expired_trips": expired_trips_count,
+        }
+

@@ -5,6 +5,8 @@ from .models import Vehicle
 class VehicleSerializer(serializers.ModelSerializer):
     """Serializer for Vehicle model with seating and bus validation."""
 
+    operational_status = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Vehicle
         fields = [
@@ -17,13 +19,65 @@ class VehicleSerializer(serializers.ModelSerializer):
             "min_passengers",
             "rate_per_km",
             "status",
+            "operational_status",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id", "operational_status", "created_at", "updated_at"]
+
+    def get_operational_status(self, obj) -> str:
+        """
+        Operational status definitions:
+        - MAINTENANCE: Under active/scheduled maintenance or status is MAINTENANCE
+        - INACTIVE: Status is INACTIVE
+        - ON_TRIP: Status is ON_TRIP or has an active IN_PROGRESS trip
+        - ASSIGNED_TODAY: Scheduled assignment today, not yet started
+        - AVAILABLE: Eligible for assignment
+        """
+        if obj.status == Vehicle.Status.MAINTENANCE:
+            return "MAINTENANCE"
+        if obj.status == Vehicle.Status.INACTIVE:
+            return "INACTIVE"
+
+        from django.utils import timezone
+        from trips.models import Trip
+
+        # Check if currently associated with an active trip
+        if obj.status == Vehicle.Status.ON_TRIP or Trip.objects.filter(vehicle=obj, status=Trip.Status.IN_PROGRESS).exists():
+            return "ON_TRIP"
+
+        # Check if scheduled for today (assigned today)
+        today = timezone.localdate()
+        today_start = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time()))
+        today_end = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.max.time()))
+
+        has_assigned_today = Trip.objects.filter(
+            vehicle=obj,
+            status=Trip.Status.SCHEDULED,
+            scheduled_datetime__range=(today_start, today_end),
+        ).exists()
+        if has_assigned_today:
+            return "ASSIGNED_TODAY"
+
+        return "AVAILABLE"
 
     def validate(self, attrs):
         # Support partial updates by falling back to instance values
+        target_status = attrs.get("status")
+        if target_status == Vehicle.Status.ACTIVE and self.instance:
+            from trips.models import Trip
+            if Trip.objects.filter(vehicle=self.instance, status=Trip.Status.IN_PROGRESS).exists():
+                raise serializers.ValidationError({
+                    "status": "Vehicle has an active trip in progress and cannot be marked Available."
+                })
+            from vehicles.models import Maintenance
+            if Maintenance.objects.filter(
+                vehicle=self.instance,
+                status=Maintenance.Status.IN_PROGRESS,
+            ).exists():
+                raise serializers.ValidationError({
+                    "status": "Vehicle is currently undergoing maintenance and cannot be marked Available."
+                })
         vehicle_type = attrs.get(
             "vehicle_type",
             getattr(self.instance, "vehicle_type", None)

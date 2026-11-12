@@ -109,3 +109,51 @@ Base URL: `http://127.0.0.1:8000/api`
 | `GET` | `/reports/trips/` | Admin Only | Trips CSV / JSON report export |
 | `GET` | `/reports/payments/` | Admin Only | Financial & payment CSV / JSON report export |
 | `GET` | `/reports/utilization/` | Admin Only | Fleet utilization report export |
+
+---
+
+## 8. Fuel Management (`/api/fuel/`)
+
+| Method | Endpoint | Allowed Roles | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/fuel/` | Driver (own), Fleet Manager, Admin | List vehicle fueling logs |
+| `POST` | `/fuel/` | Driver, Fleet Manager, Admin | Log fueling entry with liters, cost, receipt |
+| `GET` | `/fuel/{id}/` | Driver (own), Fleet Manager, Admin | Retrieve specific fuel log details |
+| `POST` | `/fuel/{id}/approve/` | Fleet Manager, Admin | Approve driver-submitted fuel log |
+| `POST` | `/fuel/{id}/reject/` | Fleet Manager, Admin | Reject fuel log with mandatory reason |
+| `GET` | `/fuel/summary/` | Fleet Manager, Admin | Monthly fleet fuel expenditure & efficiency |
+
+---
+
+## 9. Operational Expenses (`/api/expenses/`)
+
+| Method | Endpoint | Allowed Roles | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/expenses/` | Driver (own), Fleet Manager, Admin | List categorized fleet expenses |
+| `POST` | `/expenses/` | Driver, Fleet Manager, Admin | Submit expense (toll, parking, repair) |
+| `GET` | `/expenses/{id}/` | Driver (own), Fleet Manager, Admin | Retrieve expense details & receipt |
+| `POST` | `/expenses/{id}/approve/` | Fleet Manager, Admin | Approve driver-submitted expense claim |
+| `POST` | `/expenses/{id}/reject/` | Fleet Manager, Admin | Reject expense claim with reason |
+| `GET` | `/expenses/summary/` | Fleet Manager, Admin | Aggregated monthly expense totals |
+
+---
+
+## 10. Compliance Documents (`/api/documents/`)
+
+| Method | Endpoint | Allowed Roles | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/documents/` | Driver (own), Fleet Manager, Admin | List compliance records (RC, PUC, Insurance) |
+| `POST` | `/documents/` | Driver, Fleet Manager, Admin | Upload compliance document with expiry date |
+| `GET` | `/documents/{id}/` | Driver (own), Fleet Manager, Admin | Retrieve document details & verification |
+| `GET` | `/documents/{id}/download/`| Driver (own), Fleet Manager, Admin | Download secure private document file |
+| `POST` | `/documents/{id}/approve/` | Fleet Manager, Admin | Mark compliance document as verified |
+| `POST` | `/documents/{id}/reject/` | Fleet Manager, Admin | Reject document with feedback notes |
+| `GET` | `/documents/expiring/` | Fleet Manager, Admin | List documents expiring within 30 days |
+
+---
+
+## 11. System Health & Observability (`/api/health/`)
+
+| Method | Endpoint | Allowed Roles | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/health/` | Public (Unauthenticated) | Liveness probe returning status, DB connectivity, version |

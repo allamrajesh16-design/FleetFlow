@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useId } from 'react';
 import IconButton from '../common/IconButton';
 import { CloseIcon } from '../common/Icons';
 import './forms.css';
@@ -33,7 +33,8 @@ const SearchInput = forwardRef(function SearchInput(
     }
   }, [controlledValue, isControlled]);
 
-  const searchId = id || name || 'search-input';
+  const autoId = useId();
+  const searchId = id || name || `search-input-${autoId}`;
 
   const triggerSearch = (term) => {
     if (debounceTimerRef.current) {

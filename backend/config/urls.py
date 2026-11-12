@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/notifications/', include('notifications.urls')),
     path('api/', include('bookings.urls')),
     path('api/trips/', include('trips.urls')),
+    path('api/', include('trips.manager_urls')),
     path('api/payments/', include('payments.urls')),
 
     # Dashboards & Reports

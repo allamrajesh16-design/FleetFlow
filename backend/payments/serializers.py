@@ -40,6 +40,12 @@ class PaymentSerializer(serializers.ModelSerializer):
     driver_name = serializers.CharField(
         source="trip.driver.user.full_name", read_only=True, default=None, allow_null=True
     )
+    collected_by_name = serializers.CharField(
+        source="collected_by.full_name", read_only=True, default=None, allow_null=True
+    )
+    cash_settled_by_name = serializers.CharField(
+        source="cash_settled_by.full_name", read_only=True, default=None, allow_null=True
+    )
     receipt_number = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -55,9 +61,16 @@ class PaymentSerializer(serializers.ModelSerializer):
             "trip_destination",
             "vehicle_registration",
             "driver_name",
+            "collected_by",
+            "collected_by_name",
             "amount",
             "status",
             "payment_method",
+            "needs_verification",
+            "cash_settled",
+            "cash_settled_at",
+            "cash_settled_by",
+            "cash_settled_by_name",
             "qr_token",
             "qr_expires_at",
             "qr_used",
@@ -82,8 +95,15 @@ class PaymentSerializer(serializers.ModelSerializer):
             "trip_destination",
             "vehicle_registration",
             "driver_name",
+            "collected_by",
+            "collected_by_name",
             "amount",
             "status",
+            "needs_verification",
+            "cash_settled",
+            "cash_settled_at",
+            "cash_settled_by",
+            "cash_settled_by_name",
             "qr_token",
             "qr_expires_at",
             "qr_used",
@@ -154,6 +174,10 @@ class PaymentSummarySerializer(serializers.Serializer):
     pending_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
     failed_count = serializers.IntegerField()
     refunded_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    cash_collected = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    online_collected = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    cash_waiting_settlement = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    cash_by_driver = serializers.ListField(child=serializers.DictField(), required=False)
 
 
 class PaymentQRSettingSerializer(serializers.ModelSerializer):
@@ -247,4 +271,28 @@ class RejectProofSerializer(serializers.Serializer):
     """Payload for rejecting submitted payment proof."""
 
     reason = serializers.CharField(required=True, allow_blank=False)
+
+
+class PaymentCollectSerializer(serializers.Serializer):
+    """Payload for driver collecting payment (CASH or ONLINE)."""
+
+    method = serializers.ChoiceField(choices=["CASH", "ONLINE"], required=True)
+    transaction_reference = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        min_length=6,
+        max_length=30,
+    )
+
+    def validate_transaction_reference(self, value):
+        if value:
+            import re
+            cleaned = value.strip()
+            if not re.match(r"^[A-Za-z0-9]+$", cleaned):
+                raise serializers.ValidationError("Transaction reference must contain only letters and digits.")
+            if Payment.objects.filter(transaction_reference=cleaned).exists():
+                raise serializers.ValidationError("This transaction reference has already been used.")
+            return cleaned
+        return value
 

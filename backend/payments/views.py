@@ -33,6 +33,7 @@ from .models import Payment, Receipt, PaymentQRSetting
 from .pdf import generate_receipt_pdf
 from .permissions import IsAdminUserOnly, PaymentPermission
 from .serializers import (
+    PaymentCollectSerializer,
     PaymentPayInfoSerializer,
     PaymentPaySerializer,
     PaymentQRGenerateResponseSerializer,
@@ -194,6 +195,9 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return Payment.objects.none()
+
+        if getattr(self, "action", None) in ["collect", "settle_cash"]:
+            return Payment.objects.all().select_related("customer", "trip", "trip__vehicle", "trip__driver", "booking")
 
         if user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER] or user.is_superuser:
             return Payment.objects.all().select_related("customer", "trip", "trip__vehicle", "trip__driver", "booking")
@@ -803,13 +807,180 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
             total=models.Sum("amount")
         )["total"] or Decimal("0.00")
 
+        cash_collected = all_payments.filter(
+            status=Payment.Status.PAID, payment_method=Payment.PaymentMethod.CASH
+        ).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
+
+        online_collected = all_payments.filter(status=Payment.Status.PAID).exclude(
+            payment_method=Payment.PaymentMethod.CASH
+        ).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
+
+        cash_waiting_settlement = all_payments.filter(
+            status=Payment.Status.PAID, payment_method=Payment.PaymentMethod.CASH, cash_settled=False
+        ).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
+
+        unsettled_cash_by_driver = list(
+            all_payments.filter(
+                status=Payment.Status.PAID,
+                payment_method=Payment.PaymentMethod.CASH,
+                cash_settled=False,
+            )
+            .values("collected_by__id", "collected_by__full_name")
+            .annotate(total_cash=models.Sum("amount"), count=models.Count("id"))
+            .order_by("-total_cash")
+        )
+
         data = {
             "total_collected": total_collected,
             "pending_amount": pending_amount,
             "failed_count": failed_count,
             "refunded_amount": refunded_amount,
+            "cash_collected": cash_collected,
+            "online_collected": online_collected,
+            "cash_waiting_settlement": cash_waiting_settlement,
+            "cash_by_driver": [
+                {
+                    "driver_id": r["collected_by__id"],
+                    "driver_name": r["collected_by__full_name"] or "Unknown Driver",
+                    "total_cash": str(r["total_cash"]),
+                    "count": r["count"],
+                }
+                for r in unsettled_cash_by_driver
+            ],
         }
         return Response(data)
+
+    @extend_schema(
+        tags=["Payments"],
+        summary="Collect Payment",
+        description="Assigned driver collects CASH or ONLINE payment for completed trip.",
+        request=PaymentCollectSerializer,
+        responses={200: PaymentSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="collect")
+    def collect(self, request, pk=None):
+        payment = self.get_object()
+
+        # Only assigned driver can collect
+        if not (payment.trip and payment.trip.driver and payment.trip.driver.user_id == request.user.id):
+            return Response(
+                {"detail": "Only the assigned driver can collect payment for this trip."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Idempotent: a second call returns 400 "Already paid"
+        if payment.status == Payment.Status.PAID:
+            return Response(
+                {"detail": "Already paid"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if payment.status not in [Payment.Status.UNPAID, Payment.Status.PAYMENT_INITIATED]:
+            return Response(
+                {"detail": f"Payment cannot be collected in status {payment.status}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = PaymentCollectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        method = serializer.validated_data["method"]
+        tx_ref = serializer.validated_data.get("transaction_reference") or None
+
+        with transaction.atomic():
+            payment.status = Payment.Status.PAID
+            payment.paid_at = timezone.now()
+            payment.collected_by = request.user
+
+            if method == "CASH":
+                payment.payment_method = Payment.PaymentMethod.CASH
+                payment.needs_verification = False
+                payment.cash_settled = False
+                method_label = "cash"
+            else:  # ONLINE
+                payment.payment_method = Payment.PaymentMethod.UPI
+                payment.transaction_reference = tx_ref
+                payment.needs_verification = bool(not tx_ref)
+                method_label = "online transfer"
+
+            payment.save(
+                update_fields=[
+                    "status",
+                    "paid_at",
+                    "collected_by",
+                    "payment_method",
+                    "transaction_reference",
+                    "needs_verification",
+                    "cash_settled",
+                    "updated_at",
+                ]
+            )
+
+            receipt = create_payment_receipt(payment)
+            receipt_no = receipt.receipt_number if receipt else "N/A"
+
+            # Notify customer
+            msg = f"Payment received Rs. {payment.amount} by {method_label}, receipt {receipt_no}."
+            notify(
+                user=payment.customer,
+                title="Payment Received",
+                message=msg,
+                type=Notification.NotificationType.PAYMENT,
+                item_type="payment",
+                item_id=payment.id,
+            )
+
+            # If ONLINE without reference, notify Fleet Managers and Admins
+            if method == "ONLINE" and not tx_ref:
+                managers = User.objects.filter(
+                    role__in=[User.Role.ADMIN, User.Role.FLEET_MANAGER],
+                    is_active=True,
+                )
+                for m in managers:
+                    notify(
+                        user=m,
+                        title="Payment Needs Verification",
+                        message=f"Payment #{payment.id} for Trip #{payment.trip_id} received via online transfer without reference number. Needs manual verification.",
+                        type=Notification.NotificationType.PAYMENT,
+                        item_type="payment",
+                        item_id=payment.id,
+                    )
+
+        return Response(PaymentSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["Payments"],
+        summary="Settle Cash Payment",
+        description="Admin or Fleet Manager marks cash payment as settled with driver.",
+        responses={200: PaymentSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="settle-cash")
+    def settle_cash(self, request, pk=None):
+        if not (request.user.role in [User.Role.ADMIN, User.Role.FLEET_MANAGER] or request.user.is_superuser):
+            return Response(
+                {"detail": "Only Admin and Fleet Manager can settle cash payments."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        payment = self.get_object()
+
+        if payment.payment_method != Payment.PaymentMethod.CASH or payment.status != Payment.Status.PAID:
+            return Response(
+                {"detail": "Only paid cash payments can be settled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if payment.cash_settled:
+            return Response(
+                {"detail": "Payment is already marked as cash settled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payment.cash_settled = True
+        payment.cash_settled_at = timezone.now()
+        payment.cash_settled_by = request.user
+        payment.save(update_fields=["cash_settled", "cash_settled_at", "cash_settled_by", "updated_at"])
+
+        return Response(PaymentSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK)
 
 
 class PaymentQRSettingView(APIView):

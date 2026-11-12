@@ -132,7 +132,7 @@ def run_e2e_smoke_tests():
         vehicle=vehicle,
         source="City Central Depot",
         destination="Airport Terminal 2",
-        scheduled_datetime=future_time,
+        scheduled_datetime=timezone.now(),
         status=Trip.Status.SCHEDULED
     )
 

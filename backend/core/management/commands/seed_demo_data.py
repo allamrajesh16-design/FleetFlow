@@ -249,16 +249,17 @@ class Command(BaseCommand):
             vehicles[reg_no] = v
 
         # -------------------------------------------------------------------------
-        # 3. Kakinada-based Routes & 2 Bus Schedules in the Future
+        # 3. Kakinada-based Routes & Bus Schedules
         # -------------------------------------------------------------------------
         now = timezone.now()
         schedule1_time = now + timedelta(days=2, hours=3)
         schedule2_time = now + timedelta(days=3, hours=5)
+        schedule_conf_time = now + timedelta(days=1, hours=4)
 
         bus1 = vehicles["AP 05 JK 5005"]
         bus2 = vehicles["AP 05 LM 6006"]
 
-        sched1, _ = BusSchedule.objects.get_or_create(
+        sched1, _ = BusSchedule.objects.update_or_create(
             vehicle=bus1,
             source="Kakinada",
             destination="Rajahmundry",
@@ -270,7 +271,7 @@ class Command(BaseCommand):
             },
         )
 
-        sched2, _ = BusSchedule.objects.get_or_create(
+        sched2, _ = BusSchedule.objects.update_or_create(
             vehicle=bus2,
             source="Vizag",
             destination="Kakinada",
@@ -278,6 +279,19 @@ class Command(BaseCommand):
                 "departure_datetime": schedule2_time,
                 "fare_per_seat": Decimal("350.00"),
                 "status": BusSchedule.Status.OPEN,
+                "created_by": fm_user,
+            },
+        )
+
+        # 3.3 Confirmed Bus Schedule waiting for assignment
+        sched_confirmed, _ = BusSchedule.objects.update_or_create(
+            vehicle=bus1,
+            source="Kakinada",
+            destination="Samalkot",
+            defaults={
+                "departure_datetime": schedule_conf_time,
+                "fare_per_seat": Decimal("100.00"),
+                "status": BusSchedule.Status.CONFIRMED,
                 "created_by": fm_user,
             },
         )
@@ -420,6 +434,35 @@ class Command(BaseCommand):
             },
         )
 
+        # 5.3 One Trip In-Progress (Driver 1 on Bike 1)
+        bike1 = vehicles["AP 05 EF 3003"]
+        b_in_prog, _ = Booking.objects.get_or_create(
+            customer=customers[0],
+            booking_type=Booking.BookingType.VEHICLE,
+            vehicle_type=Booking.VehicleType.BIKE,
+            pickup_location="Kakinada",
+            drop_location="Peddapuram",
+            defaults={
+                "travel_datetime": now - timedelta(hours=1),
+                "status": Booking.Status.APPROVED,
+            },
+        )
+        trip_in_prog, _ = Trip.objects.get_or_create(
+            booking=b_in_prog,
+            vehicle=bike1,
+            driver=drivers[0],
+            defaults={
+                "source": "Kakinada",
+                "destination": "Peddapuram",
+                "scheduled_datetime": now - timedelta(hours=1),
+                "status": Trip.Status.IN_PROGRESS,
+                "start_odometer": 5400,
+                "started_at": now - timedelta(hours=1),
+                "total_fare": Decimal("320.00"),
+                "assigned_by": fm_user,
+            },
+        )
+
         # -------------------------------------------------------------------------
         # 6. One Scheduled Maintenance
         # -------------------------------------------------------------------------
@@ -436,18 +479,17 @@ class Command(BaseCommand):
         )
 
         # -------------------------------------------------------------------------
-        # 7. Fuel Logs (for each vehicle, with full tanks to compute mileage)
-        # -------------------------------------------------------------------------
         # 7. Fuel Logs
         # -------------------------------------------------------------------------
         today_date = date.today()
+        driver_user1 = User.objects.filter(role=User.Role.DRIVER).first()
 
         base_odometer = 10000
         for idx, (reg, veh) in enumerate(vehicles.items()):
             fuel_type = FuelLog.FuelType.PETROL if veh.vehicle_type == Vehicle.VehicleType.BIKE else FuelLog.FuelType.DIESEL
             assigned_driver = drivers[idx % len(drivers)] if drivers else None
 
-            # Log 1: 5 days ago, full tank
+            # Log 1: 5 days ago, full tank (APPROVED)
             f1, _ = FuelLog.objects.get_or_create(
                 vehicle=veh,
                 date=today_date - timedelta(days=5),
@@ -460,12 +502,15 @@ class Command(BaseCommand):
                     "is_full_tank": True,
                     "station_name": "IndianOil Auto Hub",
                     "created_by": admin_user,
+                    "review_status": FuelLog.ReviewStatus.APPROVED,
+                    "reviewed_by": fm_user,
+                    "reviewed_at": timezone.now() - timedelta(days=5),
                 },
             )
             f1_png = generate_receipt_png("Fuel Fill", f"IndianOil Auto Hub - {reg}", f"{f1.total_cost} INR")
             f1.receipt_image.save(f"fuel_receipt_{f1.id}.png", ContentFile(f1_png), save=True)
 
-            # Log 2: 2 days ago, full tank (so mileage_kmpl computes)
+            # Log 2: 2 days ago, full tank (APPROVED, so mileage_kmpl computes)
             f2, _ = FuelLog.objects.get_or_create(
                 vehicle=veh,
                 date=today_date - timedelta(days=2),
@@ -478,10 +523,57 @@ class Command(BaseCommand):
                     "is_full_tank": True,
                     "station_name": "HPCL FastFill",
                     "created_by": admin_user,
+                    "review_status": FuelLog.ReviewStatus.APPROVED,
+                    "reviewed_by": fm_user,
+                    "reviewed_at": timezone.now() - timedelta(days=2),
                 },
             )
             f2_png = generate_receipt_png("Fuel Fill", f"HPCL FastFill - {reg}", f"{f2.total_cost} INR")
             f2.receipt_image.save(f"fuel_receipt_{f2.id}.png", ContentFile(f2_png), save=True)
+
+        # Driver-entered fuel logs with mixed statuses (PENDING, REJECTED, APPROVED)
+        if driver_user1 and len(drivers) > 0:
+            d_veh = list(vehicles.values())[0]
+            # Pending driver fuel log
+            f_pending, _ = FuelLog.objects.get_or_create(
+                vehicle=d_veh,
+                date=today_date - timedelta(days=1),
+                odometer_km=base_odometer + 1200,
+                defaults={
+                    "fuel_type": FuelLog.FuelType.DIESEL,
+                    "driver": drivers[0],
+                    "quantity": Decimal("25.00"),
+                    "price_per_unit": Decimal("98.00"),
+                    "is_full_tank": False,
+                    "station_name": "Bharat Petroleum Station",
+                    "created_by": driver_user1,
+                    "review_status": FuelLog.ReviewStatus.PENDING,
+                },
+            )
+            fp_png = generate_receipt_png("Fuel Fill Pending", "BPCL Highway Pump", "2450.00 INR")
+            f_pending.receipt_image.save(f"fuel_pending_{f_pending.id}.png", ContentFile(fp_png), save=True)
+
+            # Rejected driver fuel log
+            f_rejected, _ = FuelLog.objects.get_or_create(
+                vehicle=d_veh,
+                date=today_date - timedelta(days=3),
+                odometer_km=base_odometer + 800,
+                defaults={
+                    "fuel_type": FuelLog.FuelType.DIESEL,
+                    "driver": drivers[0],
+                    "quantity": Decimal("15.00"),
+                    "price_per_unit": Decimal("97.50"),
+                    "is_full_tank": False,
+                    "station_name": "City Auto Care Fuel",
+                    "created_by": driver_user1,
+                    "review_status": FuelLog.ReviewStatus.REJECTED,
+                    "reviewed_by": fm_user,
+                    "reviewed_at": timezone.now() - timedelta(days=2),
+                    "rejection_reason": "Receipt blurry and illegible. Please submit clear receipt.",
+                },
+            )
+            fr_png = generate_receipt_png("Fuel Fill Rejected", "City Auto Care", "1462.50 INR")
+            f_rejected.receipt_image.save(f"fuel_rejected_{f_rejected.id}.png", ContentFile(fr_png), save=True)
 
         # -------------------------------------------------------------------------
         # 8. Expenses in all statuses (PENDING, APPROVED, REJECTED)
@@ -608,10 +700,20 @@ class Command(BaseCommand):
         all_drivers = Driver.objects.select_related("user").all()
         for idx, drv in enumerate(all_drivers):
             if idx == 0:
-                # Driver 0: Medical certificate expiring in 10 days
+                # Driver 0 (Suresh): Medical certificate expiring in 10 days, PENDING review
                 exp_date = today_date + timedelta(days=10)
+                med_review = Document.ReviewStatus.PENDING
+                med_reviewer = None
+                id_review = Document.ReviewStatus.REJECTED
+                id_reviewer = fm_user
+                id_reason = "Photo ID is unclear. Please provide clear colored copy."
             else:
                 exp_date = today_date + timedelta(days=365)
+                med_review = Document.ReviewStatus.APPROVED
+                med_reviewer = fm_user
+                id_review = Document.ReviewStatus.APPROVED
+                id_reviewer = fm_user
+                id_reason = ""
 
             med_number = f"MED-{drv.id}-2026"
             med_doc, _ = Document.objects.get_or_create(
@@ -622,14 +724,16 @@ class Command(BaseCommand):
                     "expiry_date": exp_date,
                     "issue_date": exp_date - timedelta(days=365),
                     "notes": f"Driver medical fitness certificate for {drv.user.full_name}",
-                    "uploaded_by": admin_user,
+                    "uploaded_by": drv.user,
+                    "review_status": med_review,
+                    "reviewed_by": med_reviewer,
                 },
             )
             # Save real valid PDF
             med_pdf = generate_pdf_document("Medical Fitness Certificate", med_number, exp_date)
             med_doc.file.save(f"med_{drv.id}.pdf", ContentFile(med_pdf), save=True)
 
-            # Driving License (valid PNG image)
+            # Driving License (valid PNG image, APPROVED)
             dl_doc, _ = Document.objects.get_or_create(
                 driver=drv,
                 doc_type=Document.DocType.DRIVING_LICENSE,
@@ -638,7 +742,10 @@ class Command(BaseCommand):
                     "expiry_date": drv.license_expiry or (today_date + timedelta(days=700)),
                     "issue_date": today_date - timedelta(days=365),
                     "notes": f"Commercial Driving License for {drv.user.full_name}",
-                    "uploaded_by": admin_user,
+                    "uploaded_by": drv.user,
+                    "review_status": Document.ReviewStatus.APPROVED,
+                    "reviewed_by": fm_user,
+                    "reviewed_at": timezone.now() - timedelta(days=10),
                 },
             )
             dl_png = generate_receipt_png("Commercial Driving License", f"Driver: {drv.user.full_name} | Lic: {drv.license_number}", "VERIFIED")
@@ -654,7 +761,10 @@ class Command(BaseCommand):
                     "expiry_date": today_date + timedelta(days=1000),
                     "issue_date": today_date - timedelta(days=500),
                     "notes": f"Government Identification Document for {drv.user.full_name}",
-                    "uploaded_by": admin_user,
+                    "uploaded_by": drv.user,
+                    "review_status": id_review,
+                    "reviewed_by": id_reviewer,
+                    "rejection_reason": id_reason,
                 },
             )
             id_pdf = generate_pdf_document("Government Identity Card (ID Proof)", id_number, today_date + timedelta(days=1000))

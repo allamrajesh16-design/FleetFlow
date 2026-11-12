@@ -8,7 +8,7 @@ import ViewSwitch from '../../components/common/ViewSwitch';
 import { SkeletonCard } from '../../components/common/Skeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
-import { formatCurrency, formatDateTime } from '../../utils/formatters';
+import { formatDateTime, formatPayableAmount } from '../../utils/formatters';
 import './CustomerPages.css';
 
 export default function CustomerPaymentHistoryPage() {
@@ -156,7 +156,7 @@ export default function CustomerPaymentHistoryPage() {
                       <td className="datatable-td">{formatDateTime(p.created_at)}</td>
                       <td className="datatable-td">{p.vehicle_registration || '—'}</td>
                       <td className="datatable-td align-right" style={{ fontWeight: 700 }}>
-                        {formatCurrency(p.amount)}
+                        {formatPayableAmount(p.amount, { paymentStatus: p.status })}
                       </td>
                       <td className="datatable-td">
                         <StatusBadge status={p.status} />
@@ -226,7 +226,7 @@ export default function CustomerPaymentHistoryPage() {
                 </div>
 
                 <div className="record-side-col">
-                  <div className="record-amount">{formatCurrency(p.amount)}</div>
+                  <div className="record-amount">{formatPayableAmount(p.amount, { paymentStatus: p.status })}</div>
 
                   <div className="record-action">
                     {isPaid ? (

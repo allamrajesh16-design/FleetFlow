@@ -10,11 +10,12 @@
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
   width: 100%;
-  table-layout: fixed;
+  min-width: 640px;
   border-collapse: collapse;
   text-align: left;
 }

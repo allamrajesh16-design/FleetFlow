@@ -1,0 +1,257 @@
+/* Manager Assignment Details Page Styles */
+.assignment-details-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.assignment-details-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.assignment-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #64748b);
+}
+
+.assignment-breadcrumbs a,
+.assignment-breadcrumbs .crumb-link {
+  color: var(--color-primary, #2563eb);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.assignment-breadcrumbs a:hover,
+.assignment-breadcrumbs .crumb-link:hover {
+  text-decoration: underline;
+}
+
+.assignment-breadcrumbs .crumb-sep {
+  color: var(--color-border, #cbd5e1);
+}
+
+.assignment-breadcrumbs .crumb-active {
+  color: var(--color-text-primary, #0f172a);
+  font-weight: 600;
+}
+
+.assignment-details-header-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.assignment-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.assignment-header-title-box h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary, #0f172a);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
+}
+
+.assignment-header-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary, #64748b);
+}
+
+.assignment-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 2-Column Grid of Detail Cards */
+.assignment-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.assignment-card-full-width {
+  grid-column: 1 / -1;
+}
+
+.assignment-section-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.assignment-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border, #f1f5f9);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.assignment-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assignment-items-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.assignment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.assignment-item.full-col {
+  grid-column: 1 / -1;
+}
+
+.assignment-item-k {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #64748b);
+  letter-spacing: 0.02em;
+}
+
+.assignment-item-v {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-primary, #0f172a);
+  word-break: break-word;
+}
+
+.assignment-item-v.highlight-primary {
+  color: var(--color-primary, #2563eb);
+}
+
+.assignment-item-v.highlight-success {
+  color: var(--color-success, #16a34a);
+  font-size: 16px;
+}
+
+/* Vehicle preview inside vehicle card */
+.assignment-vehicle-preview {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--color-surface-hover, #f8fafc);
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.assignment-vehicle-thumb {
+  width: 90px;
+  height: 65px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.assignment-driver-preview {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--color-surface-hover, #f8fafc);
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.assignment-driver-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.assignment-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .assignment-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-items-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .assignment-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .assignment-vehicle-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .assignment-vehicle-thumb {
+    width: 100%;
+    height: 140px;
+  }
+
+  .assignment-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assignment-actions-bar button {
+    width: 100%;
+  }
+}
+

@@ -8,6 +8,7 @@ import {
   rejectPaymentProofApi,
   refundPaymentApi,
   downloadReceiptPdfApi,
+  settleCashPaymentApi,
 } from '../../api/adminManager';
 import { useToast } from '../../context/ToastContext';
 import DataTable from '../../components/common/DataTable';
@@ -21,7 +22,6 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import StatCard from '../../components/common/StatCard';
 import {
   DownloadIcon,
-  CheckCircleIcon,
   PaymentIcon,
   AlertCircleIcon,
 } from '../../components/common/Icons';
@@ -55,13 +55,14 @@ export default function AdminPaymentsPage({ canRefund = true }) {
     refresh,
   } = useApiList({
     endpoint: '/payments/',
-    initialFilters: { status: '' },
+    initialFilters: { status: '', payment_method: '', cash_to_settle: '' },
   });
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [confirmingPayment, setConfirmingPayment] = useState(null);
   const [rejectingPayment, setRejectingPayment] = useState(null);
   const [refundingPayment, setRefundingPayment] = useState(null);
+  const [settlingPayment, setSettlingPayment] = useState(null);
 
   useEffect(() => {
     if (!openId) return;
@@ -134,6 +135,19 @@ export default function AdminPaymentsPage({ canRefund = true }) {
     }
   };
 
+  const handleSettleCash = async () => {
+    if (!settlingPayment) return;
+    try {
+      await settleCashPaymentApi(settlingPayment.id);
+      toast.success(`Cash payment #${settlingPayment.id} marked as settled.`);
+      setSettlingPayment(null);
+      refresh();
+      fetchSummary();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || 'Failed to settle cash payment.');
+    }
+  };
+
   const handleDownloadPdf = async (p) => {
     try {
       toast.success('Generating receipt PDF...');
@@ -169,18 +183,57 @@ export default function AdminPaymentsPage({ canRefund = true }) {
       key: 'payment_method',
       label: 'Method',
       render: (p) => (
-        <span
-          style={{
-            padding: '2px 8px',
-            borderRadius: 'var(--radius-pill)',
-            fontSize: 'var(--font-size-xs)',
-            fontWeight: 'var(--font-weight-medium)',
-            background: 'var(--color-surface-hover)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          {p.payment_method || 'UPI / QR'}
-        </span>
+        <div>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: 'var(--radius-pill)',
+              fontSize: 'var(--font-size-xs)',
+              fontWeight: 'var(--font-weight-medium)',
+              background: p.payment_method === 'CASH' ? '#dcfce7' : 'var(--color-surface-hover)',
+              color: p.payment_method === 'CASH' ? '#15803d' : 'inherit',
+              border: `1px solid ${p.payment_method === 'CASH' ? '#86efac' : 'var(--color-border)'}`,
+            }}
+          >
+            {p.payment_method || 'UPI / QR'}
+          </span>
+          {p.needs_verification && (
+            <span
+              style={{
+                display: 'block',
+                marginTop: '4px',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 600,
+                backgroundColor: '#fef3c7',
+                color: '#b45309',
+                border: '1px solid #fde68a',
+                width: 'fit-content',
+              }}
+            >
+              Needs Verification
+            </span>
+          )}
+          {p.payment_method === 'CASH' && (
+            <span
+              style={{
+                display: 'block',
+                marginTop: '2px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: p.cash_settled ? '#16a34a' : '#d97706',
+              }}
+            >
+              {p.cash_settled ? '✓ Cash Settled' : 'Waiting Settlement'}
+            </span>
+          )}
+          {p.collected_by_name && (
+            <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-muted)' }}>
+              By: {p.collected_by_name}
+            </span>
+          )}
+        </div>
       ),
     },
     {
@@ -212,6 +265,17 @@ export default function AdminPaymentsPage({ canRefund = true }) {
               ariaLabel="Download PDF Receipt"
               onClick={() => handleDownloadPdf(p)}
             />
+          )}
+
+          {p.status === 'PAID' && p.payment_method === 'CASH' && !p.cash_settled && (
+            <Button
+              type="button"
+              size="small"
+              variant="success"
+              onClick={() => setSettlingPayment(p)}
+            >
+              Mark cash settled
+            </Button>
           )}
 
           {p.status === 'PAYMENT_INITIATED' && (
@@ -273,6 +337,24 @@ export default function AdminPaymentsPage({ canRefund = true }) {
           description="Gross settled revenue"
         />
         <StatCard
+          title="Cash Collected"
+          value={formatMoney(summary?.cash_collected || 0)}
+          icon={<PaymentIcon size={24} color="#16a34a" />}
+          description="Total received via Cash"
+        />
+        <StatCard
+          title="Online Collected"
+          value={formatMoney(summary?.online_collected || 0)}
+          icon={<PaymentIcon size={24} color="#2563eb" />}
+          description="Total received via UPI / Online"
+        />
+        <StatCard
+          title="Cash Waiting Settlement"
+          value={formatMoney(summary?.cash_waiting_settlement || 0)}
+          icon={<AlertCircleIcon size={24} color="#d97706" />}
+          description="Cash held by drivers to hand over"
+        />
+        <StatCard
           title="Pending Amount"
           value={formatMoney(summary?.pending_amount || 0)}
           icon={<AlertCircleIcon size={24} />}
@@ -284,13 +366,41 @@ export default function AdminPaymentsPage({ canRefund = true }) {
           icon={<AlertCircleIcon size={24} color="var(--status-red-text)" />}
           description="Incomplete or rejected transactions"
         />
-        <StatCard
-          title="Refunded"
-          value={formatMoney(summary?.refunded_amount || 0)}
-          icon={<CheckCircleIcon size={24} />}
-          description="Returned customer funds"
-        />
       </div>
+
+      {/* Cash to Settle Totals Per Driver */}
+      {summary?.cash_by_driver && summary.cash_by_driver.length > 0 && (
+        <div
+          style={{
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            alignItems: 'center',
+          }}
+        >
+          <strong style={{ color: '#92400e', fontSize: '14px' }}>Cash to Settle by Driver:</strong>
+          {summary.cash_by_driver.map((d) => (
+            <span
+              key={d.driver_id || d.driver_name}
+              style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #fcd34d',
+                padding: '4px 10px',
+                borderRadius: '16px',
+                fontSize: '13px',
+                color: '#78350f',
+              }}
+            >
+              <strong>{d.driver_name}</strong>: {formatMoney(d.total_cash)} ({d.count} {d.count === 1 ? 'trip' : 'trips'})
+            </span>
+          ))}
+        </div>
+      )}
 
       <DataTable
         columns={columns}
@@ -311,17 +421,38 @@ export default function AdminPaymentsPage({ canRefund = true }) {
         onPageChange={setPage}
         filters={[
           {
-            key: 'status',
-            label: 'All Status',
-            value: filters.status,
+            key: 'filter_view',
+            label: 'All Payments',
+            value: filters.cash_to_settle === 'true' ? 'cash_to_settle' : filters.status,
             options: [
-              { value: '', label: 'All Status' },
+              { value: '', label: 'All Payments' },
+              { value: 'cash_to_settle', label: 'Cash to Settle' },
               { value: 'PAID', label: 'Paid' },
               { value: 'PAYMENT_INITIATED', label: 'Payment Initiated' },
               { value: 'REFUNDED', label: 'Refunded' },
               { value: 'FAILED', label: 'Failed' },
             ],
-            onChange: (val) => setFilter('status', val),
+            onChange: (val) => {
+              if (val === 'cash_to_settle') {
+                setFilter('cash_to_settle', 'true');
+                setFilter('status', '');
+              } else {
+                setFilter('cash_to_settle', '');
+                setFilter('status', val);
+              }
+            },
+          },
+          {
+            key: 'payment_method',
+            label: 'All Methods',
+            value: filters.payment_method || '',
+            options: [
+              { value: '', label: 'All Methods' },
+              { value: 'CASH', label: 'Cash' },
+              { value: 'UPI', label: 'UPI' },
+              { value: 'CARD', label: 'Card' },
+            ],
+            onChange: (val) => setFilter('payment_method', val),
           },
         ]}
       />
@@ -461,6 +592,17 @@ export default function AdminPaymentsPage({ canRefund = true }) {
         message={`Are you sure you want to refund ${formatMoney(refundingPayment?.amount || 0)} to ${refundingPayment?.customer_name}? This will mark the payment as REFUNDED.`}
         confirmLabel="Execute Refund"
         variant="danger"
+      />
+
+      {/* Settle Cash Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(settlingPayment)}
+        onClose={() => setSettlingPayment(null)}
+        onConfirm={handleSettleCash}
+        title="Mark Cash Payment Settled"
+        message={`Confirm that the cash amount of ${formatMoney(settlingPayment?.amount || 0)} from Driver ${settlingPayment?.collected_by_name || 'Driver'} has been handed over and settled with the company?`}
+        confirmLabel="Mark Cash Settled"
+        variant="success"
       />
     </div>
   );

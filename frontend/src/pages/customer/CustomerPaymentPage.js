@@ -11,7 +11,7 @@ import { SkeletonCard } from '../../components/common/Skeleton';
 import ErrorState from '../../components/common/ErrorState';
 import Toast from '../../components/common/Toast';
 import Button from '../../components/common/Button';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatPayableAmount } from '../../utils/formatters';
 import { TextInput, FileInput } from '../../components/forms';
 import './CustomerPages.css';
 
@@ -266,7 +266,12 @@ export default function CustomerPaymentPage() {
           <div className="payment-trip-info">
             <div className="payment-amount-display">
               <span className="amount-label">Final Fare to Pay</span>
-              <span className="amount-hero">{formatCurrency(payInfo.amount)}</span>
+              <span className="amount-hero">
+                {formatPayableAmount(payInfo.amount, {
+                  paymentStatus: currentStatus,
+                  notDue: currentStatus === 'PAID' || currentStatus === 'NO_PAYMENT_DUE',
+                })}
+              </span>
             </div>
 
             <div className="trip-summary-pills">

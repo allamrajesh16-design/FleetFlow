@@ -61,6 +61,8 @@ class DriverDashboardSerializer(serializers.Serializer):
     current_trip = serializers.DictField(allow_null=True)
     own_fuel_logs_this_month = serializers.IntegerField(default=0)
     own_pending_expenses_count = serializers.IntegerField(default=0)
+    cash_to_hand_over = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    pending_payment_trip = serializers.DictField(allow_null=True, required=False)
 
 
 class ReportResponseSerializer(serializers.Serializer):

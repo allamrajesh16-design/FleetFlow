@@ -15,6 +15,8 @@ class BusSchedule(models.Model):
         OPEN = "OPEN", "Open"
         CONFIRMED = "CONFIRMED", "Confirmed"
         CANCELLED = "CANCELLED", "Cancelled"
+        EXPIRED = "EXPIRED", "Expired"
+        COMPLETED = "COMPLETED", "Completed"
 
     vehicle = models.ForeignKey(
         Vehicle,
@@ -87,7 +89,18 @@ class BusSchedule(models.Model):
         return (
             self.status == self.Status.OPEN
             and timezone.now() < self.booking_deadline
+            and self.departure_datetime > timezone.now()
             and self.available_seats > 0
+        )
+
+    @property
+    def is_expired(self) -> bool:
+        return (
+            self.status == self.Status.EXPIRED
+            or (
+                self.status in [self.Status.OPEN, self.Status.CONFIRMED]
+                and self.departure_datetime <= timezone.now()
+            )
         )
 
     def __str__(self):
@@ -123,6 +136,16 @@ class Booking(models.Model):
         CANCEL = "CANCEL", "Cancel"
         REFUND = "REFUND", "Refund"
 
+    class TripType(models.TextChoices):
+        ONE_WAY = "ONE_WAY", "One-way"
+        ROUND_TRIP = "ROUND_TRIP", "Round Trip"
+
+    class LuggageType(models.TextChoices):
+        NONE = "NONE", "None"
+        LIGHT = "LIGHT", "Light"
+        MEDIUM = "MEDIUM", "Medium"
+        HEAVY = "HEAVY", "Heavy"
+
     customer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -154,6 +177,20 @@ class Booking(models.Model):
     drop_location = models.CharField(max_length=255)
     travel_datetime = models.DateTimeField()
     passengers = models.PositiveIntegerField(default=1)
+    trip_type = models.CharField(
+        max_length=20,
+        choices=TripType.choices,
+        default=TripType.ONE_WAY,
+    )
+    return_datetime = models.DateTimeField(null=True, blank=True)
+    luggage_type = models.CharField(
+        max_length=20,
+        choices=LuggageType.choices,
+        default=LuggageType.NONE,
+    )
+    special_instructions = models.TextField(blank=True, default="")
+    pickup_details = models.JSONField(default=dict, blank=True)
+    drop_details = models.JSONField(default=dict, blank=True)
     estimated_distance_km = models.DecimalField(
         max_digits=8,
         decimal_places=2,

@@ -162,7 +162,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Django REST Framework configuration
+# Trip Execution Rules
+TRIP_START_RULE = os.getenv("TRIP_START_RULE", "same_day")
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -277,7 +279,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587').strip())
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').strip().lower() in ('true', '1', 't')
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').strip().lower() in ('true', '1', 't')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '').strip()
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').strip()
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').strip().replace(' ', '')
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '10').strip())
 
 default_from = os.getenv('DEFAULT_FROM_EMAIL', '').strip()

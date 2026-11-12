@@ -16,16 +16,12 @@ export async function getExpenseApi(id) {
 }
 
 export async function createExpenseApi(data) {
-  const isFormData = data instanceof FormData;
-  const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-  const res = await apiClient.post('/expenses/', data, config);
+  const res = await apiClient.post('/expenses/', data);
   return res.data;
 }
 
 export async function updateExpenseApi(id, data) {
-  const isFormData = data instanceof FormData;
-  const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-  const res = await apiClient.patch(`/expenses/${id}/`, data, config);
+  const res = await apiClient.patch(`/expenses/${id}/`, data);
   return res.data;
 }
 

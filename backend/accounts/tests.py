@@ -433,7 +433,7 @@ class RegistrationAndApprovalFlowTests(APITestCase):
         # Case 1: Valid MX -> allowed
         self.mock_dns_resolve.side_effect = None
         self.mock_dns_resolve.return_value = [MagicMock()]
-        self.assertEqual(validate_real_email("user@validmx.com"), "user@validmx.com")
+        self.assertEqual(validate_real_email("rajesh.kumar@validmx.com"), "rajesh.kumar@validmx.com")
 
         # Case 2: Only A record (No MX, but A record resolves) -> allowed
         def only_a_side_effect(qname, rdtype, **kwargs):
@@ -442,7 +442,7 @@ class RegistrationAndApprovalFlowTests(APITestCase):
             return [MagicMock()]
 
         self.mock_dns_resolve.side_effect = only_a_side_effect
-        self.assertEqual(validate_real_email("user@onlyarecord.com"), "user@onlyarecord.com")
+        self.assertEqual(validate_real_email("rajesh.kumar@onlyarecord.com"), "rajesh.kumar@onlyarecord.com")
 
         # Case 3: NXDOMAIN -> blocked
         self.mock_dns_resolve.side_effect = dns.resolver.NXDOMAIN()
@@ -462,7 +462,7 @@ class RegistrationAndApprovalFlowTests(APITestCase):
 
         # Case 4: Timeout or network error -> allowed (rely on OTP verification)
         self.mock_dns_resolve.side_effect = dns.resolver.LifetimeTimeout()
-        self.assertEqual(validate_real_email("user@timeoutdomain.com"), "user@timeoutdomain.com")
+        self.assertEqual(validate_real_email("rajesh.kumar@timeoutdomain.com"), "rajesh.kumar@timeoutdomain.com")
 
         # Case 5: Disposable / temporary email domain -> blocked
         self.mock_dns_resolve.side_effect = None
@@ -551,7 +551,7 @@ class LogoutAndBlacklistTests(APITestCase):
         mock_resolve.return_value = [MagicMock()]
 
         # Valid email
-        res_valid = self.client.post("/api/auth/check-email/", {"email": "validuser@example.com"})
+        res_valid = self.client.post("/api/auth/check-email/", {"email": "rajesh.kumar92@gmail.com"})
         self.assertEqual(res_valid.status_code, status.HTTP_200_OK)
         self.assertTrue(res_valid.data["valid"])
 
@@ -664,6 +664,295 @@ class ResendDecisionEmailTests(APITestCase):
         self.client.force_authenticate(user=self.customer)
         res = self.client.post(f"/api/auth/approvals/{self.approved_fm.id}/resend-decision-email/")
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+
+import smtplib
+from django.core.management import call_command
+from accounts.email_validation import EmailValidationError
+
+
+class EmailValidationAndPurgeTests(APITestCase):
+    def setUp(self):
+        mail.outbox = []
+        from django.core.cache import cache
+        cache.clear()
+        self.dns_patcher = patch("accounts.email_validation.check_domain_dns")
+        self.mock_check_domain_dns = self.dns_patcher.start()
+
+        def side_effect(domain):
+            if domain == "nodomainxyz123.com":
+                raise EmailValidationError(
+                    "This email domain does not exist or cannot receive emails. Please enter a correct, real email.",
+                    code="NO_MAIL_SERVER",
+                )
+            return True
+        self.mock_check_domain_dns.side_effect = side_effect
+
+    def tearDown(self):
+        self.dns_patcher.stop()
+
+    def test_email_validation_matrix_60_plus_cases(self):
+        rejected_matrix = [
+            ("abc@gmail.com", "GMAIL_TOO_SHORT"),
+            ("ab@gmail.com", "GMAIL_TOO_SHORT"),
+            ("fffffffffff@gmail.com", "DUMMY_PATTERN"),
+            ("aaaaaa@gmail.com", "DUMMY_PATTERN"),
+            ("abcdef@gmail.com", "DUMMY_PATTERN"),
+            ("123456@gmail.com", "DUMMY_PATTERN"),
+            ("qwerty@gmail.com", "DUMMY_PATTERN"),
+            ("test@gmail.com", "GMAIL_TOO_SHORT"),
+            ("test123@gmail.com", "DUMMY_PATTERN"),
+            ("demo@gmail.com", "GMAIL_TOO_SHORT"),
+            ("dummy.user@gmail.com", "DUMMY_PATTERN"),
+            ("asdfghjkl@gmail.com", "DUMMY_PATTERN"),
+            ("xyz@gmail.com", "GMAIL_TOO_SHORT"),
+            ("hello@gmail.com", "GMAIL_TOO_SHORT"),
+            ("user1@gmail.com", "GMAIL_TOO_SHORT"),
+            ("john..doe@gmail.com", "GMAIL_CHARS"),
+            (".john@gmail.com", "GMAIL_CHARS"),
+            ("john.@gmail.com", "GMAIL_CHARS"),
+            ("john doe@gmail.com", "FORMAT"),
+            ("name@gmial.com", "DOMAIN_TYPO"),
+            ("name@gamil.com", "DOMAIN_TYPO"),
+            ("name@hotmial.com", "DOMAIN_TYPO"),
+            ("name@mailinator.com", "DISPOSABLE"),
+            ("name@10minutemail.com", "DISPOSABLE"),
+            ("name@example.com", "RESERVED_DOMAIN"),
+            ("name@test.local", "RESERVED_DOMAIN"),
+            ("name@nodomainxyz123.com", "NO_MAIL_SERVER"),
+            ("a@b", "FORMAT"),
+            ("@gmail.com", "FORMAT"),
+            ("name@@gmail.com", "FORMAT"),
+            ("test\u0430@gmail.com", "FORMAT"),
+            # Additional rejected cases to exceed 60
+            ("abc@yahoo.com", "FORMAT"),
+            ("123user@yahoo.com", "FORMAT"),
+            ("john..smith@yahoo.com", "FORMAT"),
+            ("name@outlok.com", "DOMAIN_TYPO"),
+            ("name@yahooo.com", "DOMAIN_TYPO"),
+            ("name@gmai.com", "DOMAIN_TYPO"),
+            ("fake@company.com", "DUMMY_PATTERN"),
+            ("noname@company.com", "DUMMY_PATTERN"),
+            ("nobody@company.com", "DUMMY_PATTERN"),
+            ("null@company.com", "DUMMY_PATTERN"),
+            ("testing@company.com", "DUMMY_PATTERN"),
+            ("sample@company.com", "DUMMY_PATTERN"),
+            ("example@company.com", "DUMMY_PATTERN"),
+            ("temp@company.com", "DUMMY_PATTERN"),
+            ("temporary@company.com", "DUMMY_PATTERN"),
+            ("random@company.com", "DUMMY_PATTERN"),
+            ("check@company.com", "DUMMY_PATTERN"),
+            ("test.user@company.com", "DUMMY_PATTERN"),
+            ("012345@gmail.com", "DUMMY_PATTERN"),
+            ("zxcvbn@gmail.com", "DUMMY_PATTERN"),
+            ("654321@gmail.com", "DUMMY_PATTERN"),
+            ("poiuytrewq@gmail.com", "DUMMY_PATTERN"),
+            ("name@trashmail.com", "DISPOSABLE"),
+            ("name@tempmail.com", "DISPOSABLE"),
+            ("name@throwawaymail.com", "DISPOSABLE"),
+            ("name@localhost", "RESERVED_DOMAIN"),
+            ("name@invalid.test", "RESERVED_DOMAIN"),
+            ("a@gmail.com", "GMAIL_TOO_SHORT"),
+            ("toolongemailaddressover64charactersinlocalpart1234567890123456789012345@gmail.com", "FORMAT"),
+        ]
+
+        passing_matrix = [
+            "rajesh.kumar92@gmail.com",
+            "charanadbala16@gmail.com",
+            "rahul_sharma@yahoo.com",
+            "john.doe@company.in",
+            "wt.customer+1@gmail.com",
+            "priya.s2026@outlook.com",
+            "alexander.hamilton@gmail.com",
+            "vijay.kumar@yahoo.in",
+        ]
+
+        self.assertGreaterEqual(len(rejected_matrix) + len(passing_matrix), 60)
+
+        for email, expected_code in rejected_matrix:
+            with self.subTest(email=email, expected_code=expected_code):
+                with self.assertRaises(EmailValidationError) as ctx:
+                    validate_real_email(email)
+                self.assertEqual(ctx.exception.code, expected_code)
+
+        for email in passing_matrix:
+            with self.subTest(email=email):
+                norm = validate_real_email(email)
+                self.assertTrue(bool(norm))
+
+    def test_check_email_endpoint(self):
+        # 1. Valid email
+        res = self.client.post("/api/auth/check-email/", {"email": "rajesh.kumar92@gmail.com"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(res.data["valid"])
+        self.assertIn("Looks fine", res.data["message"])
+
+        # 2. Typo domain returns suggestion
+        res = self.client.post("/api/auth/check-email/", {"email": "name@gmial.com"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertFalse(res.data["valid"])
+        self.assertEqual(res.data["code"], "DOMAIN_TYPO")
+        self.assertEqual(res.data["suggestion"], "name@gmail.com")
+        self.assertIn("Did you mean", res.data["message"])
+
+        # 3. Verified user email
+        User.objects.create_user(
+            email="verified.user@fleetflow.com",
+            password="Password123!",
+            full_name="Verified User",
+            is_email_verified=True,
+        )
+        res = self.client.post("/api/auth/check-email/", {"email": "verified.user@fleetflow.com"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertFalse(res.data["valid"])
+        self.assertEqual(res.data["code"], "ALREADY_REGISTERED")
+
+        # 4. Unverified user email allowed
+        User.objects.create_user(
+            email="unverified.user@fleetflow.com",
+            password="Password123!",
+            full_name="Unverified User",
+            is_email_verified=False,
+        )
+        res = self.client.post("/api/auth/check-email/", {"email": "unverified.user@fleetflow.com"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(res.data["valid"])
+
+    def test_replace_unverified_account_on_re_registration(self):
+        # Initial registration of unverified account
+        user = User.objects.create_user(
+            email="reregister.test@fleetflow.com",
+            password="OldPassword123!",
+            full_name="Old Name",
+            is_email_verified=False,
+        )
+        self.assertEqual(user.full_name, "Old Name")
+
+        # Register again with same email
+        res = self.client.post("/api/auth/register/", {
+            "email": "reregister.test@fleetflow.com",
+            "password": "NewPassword123!",
+            "full_name": "New Name",
+            "role": "CUSTOMER",
+        })
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        user.refresh_from_db()
+        self.assertEqual(user.full_name, "New Name")
+        self.assertTrue(user.check_password("NewPassword123!"))
+        self.assertFalse(user.is_email_verified)
+
+        # But verified user cannot be replaced
+        user.is_email_verified = True
+        user.save()
+
+        res_verified = self.client.post("/api/auth/register/", {
+            "email": "reregister.test@fleetflow.com",
+            "password": "AnotherPassword123!",
+            "full_name": "Another Name",
+            "role": "CUSTOMER",
+        })
+        self.assertEqual(res_verified.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("already exists", str(res_verified.data))
+
+    def test_purge_unverified_management_command(self):
+        old_time = timezone.now() - timedelta(hours=30)
+        recent_time = timezone.now() - timedelta(hours=2)
+
+        # 1. Old unverified user (should be purged)
+        u_old_unverified = User.objects.create_user(
+            email="old.unverified@fleetflow.com",
+            password="Password123!",
+            full_name="Old Unverified",
+            is_email_verified=False,
+        )
+        User.objects.filter(id=u_old_unverified.id).update(created_at=old_time)
+
+        # 2. Recent unverified user (< 24h, must not be purged)
+        u_recent_unverified = User.objects.create_user(
+            email="recent.unverified@fleetflow.com",
+            password="Password123!",
+            full_name="Recent Unverified",
+            is_email_verified=False,
+        )
+        User.objects.filter(id=u_recent_unverified.id).update(created_at=recent_time)
+
+        # 3. Old verified user (must not be purged)
+        u_old_verified = User.objects.create_user(
+            email="old.verified@fleetflow.com",
+            password="Password123!",
+            full_name="Old Verified",
+            is_email_verified=True,
+        )
+        User.objects.filter(id=u_old_verified.id).update(created_at=old_time)
+
+        # 4. Old Admin user (even if unverified, must not be purged)
+        u_old_admin = User.objects.create_user(
+            email="old.admin@fleetflow.com",
+            password="Password123!",
+            full_name="Old Admin",
+            role=User.Role.ADMIN,
+            is_email_verified=False,
+        )
+        User.objects.filter(id=u_old_admin.id).update(created_at=old_time)
+
+        # Test dry-run
+        call_command("purge_unverified")
+        self.assertTrue(User.objects.filter(id=u_old_unverified.id).exists())
+
+        # Test apply
+        call_command("purge_unverified", apply=True)
+        self.assertFalse(User.objects.filter(id=u_old_unverified.id).exists())
+        self.assertTrue(User.objects.filter(id=u_recent_unverified.id).exists())
+        self.assertTrue(User.objects.filter(id=u_old_verified.id).exists())
+        self.assertTrue(User.objects.filter(id=u_old_admin.id).exists())
+
+    @patch("django.core.mail.EmailMultiAlternatives.send")
+    def test_refused_recipient_rollback(self, mock_send):
+        # Simulate immediate SMTP recipient refusal
+        mock_send.side_effect = smtplib.SMTPRecipientsRefused({
+            "unknown.person@fleetflow.com": (550, b"5.1.1 User unknown")
+        })
+
+        res = self.client.post("/api/auth/register/", {
+            "email": "unknown.person@fleetflow.com",
+            "password": "Password123!",
+            "full_name": "Unknown Person",
+            "role": "CUSTOMER",
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data.get("detail"), "We could not deliver to this email. Please check the spelling.")
+
+        # Assert user was rolled back
+        self.assertFalse(User.objects.filter(email="unknown.person@fleetflow.com").exists())
+
+    def test_seeded_demo_accounts_can_still_login(self):
+        demo_accounts = [
+            ("admin@fleetflow.com", "Admin@123", User.Role.ADMIN),
+            ("manager@fleetflow.com", "Manager@123", User.Role.FLEET_MANAGER),
+            ("driver@fleetflow.com", "Driver@123", User.Role.DRIVER),
+            ("customer@fleetflow.com", "Customer@123", User.Role.CUSTOMER),
+        ]
+        for email, pwd, role in demo_accounts:
+            user = User.objects.filter(email=email).first()
+            if not user:
+                user = User.objects.create_user(
+                    email=email,
+                    password=pwd,
+                    full_name=f"Demo {role}",
+                    role=role,
+                    is_email_verified=True,
+                    approval_status=User.ApprovalStatus.APPROVED,
+                )
+            else:
+                user.set_password(pwd)
+                user.is_email_verified = True
+                user.approval_status = User.ApprovalStatus.APPROVED
+                user.save()
+
+            res = self.client.post("/api/auth/login/", {"email": email, "password": pwd})
+            self.assertEqual(res.status_code, status.HTTP_200_OK, f"Failed to login demo user {email}")
+            self.assertIn("access", res.data)
 
 
 

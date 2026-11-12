@@ -6,10 +6,12 @@
  * Format money to 'Rs. 1,250' or '₹1,250'
  */
 export function formatMoney(amount, symbol = 'Rs. ') {
-  if (amount === null || amount === undefined || amount === '') return `${symbol}0`;
+  if (amount === null || amount === undefined || amount === '' || Number(amount) === 0) {
+    return 'Rs.';
+  }
   const num = Number(amount);
-  if (isNaN(num)) return `${symbol}0`;
-  return `${symbol}${num.toLocaleString('en-IN', {
+  if (isNaN(num)) return 'Rs.';
+  return `Rs. ${num.toLocaleString('en-IN', {
     maximumFractionDigits: 2,
     minimumFractionDigits: num % 1 === 0 ? 0 : 2,
   })}`;
@@ -24,6 +26,32 @@ export function formatRupees(amount) {
   if (amount === null || amount === undefined || amount === '') return '₹0.00';
   const num = Number(amount);
   if (isNaN(num)) return '₹0.00';
+  return `₹${num.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/**
+ * Format payable amount ensuring zero is never displayed as confirmed payable amount.
+ * If fare not calculated yet -> "Fare Pending"
+ * If payment not due -> "No Payment Due"
+ * Display actual amount if valid (> 0)
+ */
+export function formatPayableAmount(amount, options = {}) {
+  const { paymentStatus, tripStatus, notDue = false } = options;
+  if (notDue || paymentStatus === 'NO_PAYMENT_DUE' || tripStatus === 'CANCELLED') {
+    return 'No Payment Due';
+  }
+  if (amount === null || amount === undefined || amount === '') {
+    if (paymentStatus === 'PAID') return 'Paid';
+    return 'Fare Pending';
+  }
+  const num = Number(amount);
+  if (isNaN(num) || num <= 0) {
+    if (paymentStatus === 'PAID') return 'Paid';
+    return 'Fare Pending';
+  }
   return `₹${num.toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

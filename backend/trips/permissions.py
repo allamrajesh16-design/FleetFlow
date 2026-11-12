@@ -23,11 +23,14 @@ class TripPermission(BasePermission):
                 "list",
                 "retrieve",
                 "my_trips",
+                "my_trips_summary",
                 "history",
                 "driver_summary",
                 "start",
                 "location",
+                "fare_preview",
                 "complete",
+                "receipt_pdf",
             ]:
                 return True
             return False

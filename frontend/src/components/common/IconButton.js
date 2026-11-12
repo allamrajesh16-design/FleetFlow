@@ -66,9 +66,9 @@ export default function IconButton({
   };
 
   const config = action ? actionConfigs[action] : null;
-  const resolvedLabel = label || (config ? config.defaultLabel : 'Action');
-  const resolvedTitle = title || resolvedLabel;
-  const resolvedAriaLabel = ariaLabel || resolvedTitle;
+  const resolvedLabel = label || (config ? config.defaultLabel : '');
+  const resolvedTitle = title || label || (config ? config.defaultLabel : ariaLabel || '');
+  const resolvedAriaLabel = ariaLabel || title || label || (config ? config.defaultLabel : 'Button');
   const resolvedVariant = variant || (config ? config.defaultVariant : 'secondary');
 
   const normalizedSize = size === 'small' ? 'sm' : size === 'large' ? 'lg' : size === 'medium' ? 'md' : (size || 'md');
@@ -119,7 +119,7 @@ export default function IconButton({
       <span className="icon-btn-icon" aria-hidden="true">
         {loading ? <span className="icon-btn-spinner" /> : renderedIcon}
       </span>
-      <span className="icon-btn-label">{resolvedLabel}</span>
+      {resolvedLabel ? <span className="icon-btn-label">{resolvedLabel}</span> : null}
     </button>
   );
 }

@@ -25,8 +25,9 @@ export default function VerifyOtpPage() {
   const location = useLocation();
   const toast = useToast();
 
-  // Email passed from register or login page
-  const initialEmail = location.state?.email || '';
+  // Email passed from register, login page, or URL query param
+  const queryEmail = new URLSearchParams(location.search).get('email') || '';
+  const initialEmail = location.state?.email || queryEmail;
   const initialMessage = location.state?.message || '';
   const initialEmailMode = location.state?.email_mode || '';
 
@@ -39,15 +40,20 @@ export default function VerifyOtpPage() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState(initialMessage);
 
-  const [screenState, setScreenState] = useState('VERIFY'); // 'VERIFY' | 'CUSTOMER_COMPLETE' | 'WAITING_ADMIN' | 'WAITING_MANAGER'
+  const [screenState, setScreenState] = useState('VERIFY'); // 'VERIFY' | 'SUCCESS_REDIRECT'
+  const [verifiedRole, setVerifiedRole] = useState(location.state?.role || 'CUSTOMER');
+  const redirectTimerRef = useRef(null);
 
   const inputRefs = useRef([]);
 
-  // Auto-focus first digit on mount
+  // Auto-focus first digit on mount & cleanup redirect timer
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    };
   }, []);
 
   // 60-second countdown timer for Resend OTP
@@ -124,18 +130,19 @@ export default function VerifyOtpPage() {
       });
 
       const userRole = res?.role || location.state?.role || 'CUSTOMER';
-      const userStatus = res?.approval_status;
+      setVerifiedRole(userRole);
+      setScreenState('SUCCESS_REDIRECT');
+      toast?.success('Email verified successfully');
 
-      if (userRole === 'FLEET_MANAGER' || (userStatus === 'PENDING' && userRole === 'FLEET_MANAGER')) {
-        setScreenState('WAITING_ADMIN');
-        toast?.info(MESSAGES.VERIFY_STAFF_WAITING);
-      } else if (userRole === 'DRIVER' || (userStatus === 'PENDING' && userRole === 'DRIVER')) {
-        setScreenState('WAITING_MANAGER');
-        toast?.info(MESSAGES.VERIFY_STAFF_WAITING);
-      } else {
-        setScreenState('CUSTOMER_COMPLETE');
-        toast?.success(MESSAGES.VERIFY_CUSTOMER_DONE);
-      }
+      const targetState = {
+        prefillEmail: email.trim(),
+        role: userRole,
+        verifiedSuccess: true,
+      };
+
+      redirectTimerRef.current = setTimeout(() => {
+        navigate('/login', { replace: true, state: targetState });
+      }, 1500);
     } catch (err) {
       const respData = err?.response?.data;
       let rawMsg = '';
@@ -203,120 +210,58 @@ export default function VerifyOtpPage() {
       </div>
 
       <div className="auth-centered-card fade-in">
-        {screenState === 'CUSTOMER_COMPLETE' && (
-          <div className="auth-form-card-inner">
-            <div className="auth-form-header" style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: 'var(--success-bg)',
-                  color: 'var(--success)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '32px',
-                  margin: '0 auto 16px',
-                  boxShadow: '0 0 0 8px var(--success-bg)',
-                }}
-              >
-                ✓
-              </div>
-              <h1 className="auth-form-title">Registration Complete</h1>
-              <p className="auth-form-subtitle" style={{ marginTop: '8px', lineHeight: '1.5' }}>
-                Your email has been verified successfully. Your account is active and you can now log in to start booking and tracking trips.
-              </p>
+        {(screenState === 'SUCCESS_REDIRECT' || screenState === 'CUSTOMER_COMPLETE' || screenState === 'WAITING_ADMIN' || screenState === 'WAITING_MANAGER') && (
+          <div className="auth-form-card-inner" style={{ textAlign: 'center' }}>
+            <div
+              className="otp-check-circle animated-check"
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'var(--success-bg)',
+                color: 'var(--success)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '32px',
+                margin: '0 auto 16px',
+                boxShadow: '0 0 0 8px var(--success-bg)',
+              }}
+            >
+              ✓
             </div>
-            <div style={{ marginTop: '24px' }}>
+            <h1 className="auth-form-title">Email Verified!</h1>
+            <p className="auth-form-subtitle" style={{ marginTop: '8px', lineHeight: '1.5' }}>
+              Your email has been verified successfully.
+            </p>
+            <p
+              style={{
+                marginTop: '16px',
+                fontSize: '0.9375rem',
+                color: 'var(--text-muted)',
+                fontWeight: 500,
+              }}
+            >
+              Opening login...
+            </p>
+            <div style={{ marginTop: '20px' }}>
               <Button
                 variant="primary"
                 size="large"
                 fullWidth
-                onClick={() =>
+                onClick={() => {
+                  if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
                   navigate('/login', {
                     replace: true,
-                    state: { message: 'Registration complete! You can login now.' },
-                  })
-                }
-              >
-                Proceed to Login
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {screenState === 'WAITING_ADMIN' && (
-          <div className="auth-form-card-inner">
-            <div className="auth-form-header" style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: 'var(--warning-bg)',
-                  color: 'var(--amber-500)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '28px',
-                  margin: '0 auto 16px',
-                  boxShadow: '0 0 0 8px var(--warning-bg)',
+                    state: {
+                      prefillEmail: email.trim(),
+                      role: verifiedRole,
+                      verifiedSuccess: true,
+                    },
+                  });
                 }}
               >
-                ⏳
-              </div>
-              <h1 className="auth-form-title">Waiting for Admin Approval</h1>
-              <p className="auth-form-subtitle" style={{ marginTop: '8px', lineHeight: '1.5' }}>
-                Your email has been verified successfully. Your Fleet Manager registration is currently pending review and approval by an Administrator. An email notification will be sent once your account is activated.
-              </p>
-            </div>
-            <div style={{ marginTop: '24px' }}>
-              <Button
-                variant="secondary"
-                size="large"
-                fullWidth
-                onClick={() => navigate('/login', { replace: true })}
-              >
-                Return to Login
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {screenState === 'WAITING_MANAGER' && (
-          <div className="auth-form-card-inner">
-            <div className="auth-form-header" style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: 'var(--warning-bg)',
-                  color: 'var(--amber-500)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '28px',
-                  margin: '0 auto 16px',
-                  boxShadow: '0 0 0 8px var(--warning-bg)',
-                }}
-              >
-                ⏳
-              </div>
-              <h1 className="auth-form-title">Waiting for Fleet Manager Approval</h1>
-              <p className="auth-form-subtitle" style={{ marginTop: '8px', lineHeight: '1.5' }}>
-                Your email has been verified successfully. Your Driver registration is currently pending review and approval by a Fleet Manager. An email notification will be sent once your account is activated.
-              </p>
-            </div>
-            <div style={{ marginTop: '24px' }}>
-              <Button
-                variant="secondary"
-                size="large"
-                fullWidth
-                onClick={() => navigate('/login', { replace: true })}
-              >
-                Return to Login
+                Login now
               </Button>
             </div>
           </div>
@@ -331,6 +276,16 @@ export default function VerifyOtpPage() {
                 <strong style={{ color: 'var(--color-text-primary)' }}>
                   {maskEmail(email)}
                 </strong>
+                {' • '}
+                <Link
+                  to="/register"
+                  state={{ prefillEmail: email }}
+                  className="auth-link"
+                  style={{ fontSize: '13px', fontWeight: 600 }}
+                  title="Change registered email address"
+                >
+                  Change email
+                </Link>
               </p>
               <p className="otp-spam-tip">Tip: Check your Spam folder if you don't see the code in your inbox.</p>
               {emailMode === 'console' && (

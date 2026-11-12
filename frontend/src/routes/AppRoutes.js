@@ -1,6 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getStoredToken } from '../utils/authStorage';
 import ProtectedRoute from './ProtectedRoute';
 
 // Layouts
@@ -45,7 +46,8 @@ import ManagerDashboardPage from '../pages/manager/ManagerDashboardPage';
 import ManagerApprovalsPage from '../pages/manager/ManagerApprovalsPage';
 import ManagerBookingsPage from '../pages/manager/ManagerBookingsPage';
 import ManagerAssignmentsPage from '../pages/manager/ManagerAssignmentsPage';
-import ManagerTripsPage from '../pages/manager/ManagerTripsPage';
+import ManagerCreateAssignmentPage from '../pages/manager/ManagerCreateAssignmentPage';
+import ManagerAssignmentDetailsPage from '../pages/manager/ManagerAssignmentDetailsPage';
 import ManagerBusMonitorPage from '../pages/manager/ManagerBusMonitorPage';
 import ManagerMaintenancePage from '../pages/manager/ManagerMaintenancePage';
 import ManagerPaymentsPage from '../pages/manager/ManagerPaymentsPage';
@@ -67,6 +69,8 @@ import DriverDocumentsPage from '../pages/driver/DriverDocumentsPage';
 import CustomerDashboardPage from '../pages/customer/CustomerDashboardPage';
 import CustomerVehicleSelectPage from '../pages/customer/CustomerVehicleSelectPage';
 import CustomerBookingFormPage from '../pages/customer/CustomerBookingFormPage';
+import CustomerBikeBookingPage from '../pages/customer/CustomerBikeBookingPage';
+import CustomerCarBookingPage from '../pages/customer/CustomerCarBookingPage';
 import CustomerBusBookingPage from '../pages/customer/CustomerBusBookingPage';
 import CustomerMyBookingsPage from '../pages/customer/CustomerMyBookingsPage';
 import CustomerBookingDetailsPage from '../pages/customer/CustomerBookingDetailsPage';
@@ -78,6 +82,24 @@ import CustomerPaymentReceiptPage from '../pages/customer/CustomerPaymentReceipt
 // Dev Motion testbench (lazy loaded, separate chunk)
 const DevMotionPage = React.lazy(() => import('../pages/public/DevMotionPage'));
 
+
+function NotFoundOrLogin() {
+  const location = useLocation();
+  const hasToken = !!getStoredToken('fleetflow_access_token');
+  if (!hasToken) {
+    return <Navigate to="/login" state={{ from: location, message: 'Please login to continue.' }} replace />;
+  }
+  return <NotFoundPage />;
+}
+
+function UnauthorizedOrLogin() {
+  const location = useLocation();
+  const hasToken = !!getStoredToken('fleetflow_access_token');
+  if (!hasToken) {
+    return <Navigate to="/login" state={{ from: location, message: 'Please login to continue.' }} replace />;
+  }
+  return <UnauthorizedPage />;
+}
 
 // Wrapper that picks DriverMobileLayout for drivers and DashboardLayout for other roles
 function SharedLayoutWrapper() {
@@ -172,11 +194,15 @@ export default function AppRoutes() {
         <Route path="approvals" element={<ManagerApprovalsPage />} />
         <Route path="bookings" element={<ManagerBookingsPage />} />
         <Route path="assignments" element={<ManagerAssignmentsPage />} />
-        <Route path="trips" element={<ManagerTripsPage />} />
+        <Route path="assignments/new" element={<ManagerCreateAssignmentPage />} />
+        <Route path="assignments/new/:bookingId" element={<ManagerCreateAssignmentPage />} />
+        <Route path="assignments/:id" element={<ManagerAssignmentDetailsPage />} />
+        <Route path="trips" element={<Navigate to="/manager/assignments" replace />} />
         <Route path="bus-monitor" element={<ManagerBusMonitorPage />} />
         <Route path="bus-schedules" element={<AdminBusSchedulesPage />} />
         <Route path="fleet" element={<FleetManagementPage />} />
         <Route path="vehicles" element={<Navigate to="/manager/fleet" replace />} />
+        <Route path="drivers" element={<AdminDriversPage />} />
         <Route path="maintenance" element={<ManagerMaintenancePage />} />
         <Route path="fuel" element={<FuelManagementPage />} />
         <Route path="expenses" element={<ExpensesManagementPage />} />
@@ -225,6 +251,8 @@ export default function AppRoutes() {
         <Route path="dashboard" element={<CustomerDashboardPage />} />
         <Route path="book" element={<CustomerVehicleSelectPage />} />
         <Route path="book/vehicle" element={<CustomerBookingFormPage />} />
+        <Route path="book/bike" element={<CustomerBikeBookingPage />} />
+        <Route path="book/car" element={<CustomerCarBookingPage />} />
         <Route path="book/bus" element={<CustomerBusBookingPage />} />
         <Route path="bookings" element={<CustomerMyBookingsPage />} />
         <Route path="bookings/:id" element={<CustomerBookingDetailsPage />} />
@@ -237,9 +265,9 @@ export default function AppRoutes() {
       </Route>
 
       {/* Status & Error Pages */}
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      <Route path="/404" element={<NotFoundPage />} />
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedOrLogin />} />
+      <Route path="/404" element={<NotFoundOrLogin />} />
+      <Route path="*" element={<NotFoundOrLogin />} />
     </Routes>
   );
 }

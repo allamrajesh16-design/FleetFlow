@@ -20,6 +20,7 @@ class BusScheduleSerializer(serializers.ModelSerializer):
     available_seats = serializers.IntegerField(read_only=True)
     min_passengers = serializers.IntegerField(read_only=True)
     booking_deadline = serializers.DateTimeField(read_only=True)
+    is_expired = serializers.BooleanField(read_only=True)
     vehicle_registration = serializers.CharField(
         source="vehicle.registration_number", read_only=True, default=None, allow_null=True
     )
@@ -43,6 +44,7 @@ class BusScheduleSerializer(serializers.ModelSerializer):
             "available_seats",
             "min_passengers",
             "booking_deadline",
+            "is_expired",
         ]
         read_only_fields = [
             "id",
@@ -54,6 +56,7 @@ class BusScheduleSerializer(serializers.ModelSerializer):
             "available_seats",
             "min_passengers",
             "booking_deadline",
+            "is_expired",
         ]
 
     def validate_vehicle(self, vehicle):
@@ -83,6 +86,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
     customer_name = serializers.SerializerMethodField(read_only=True)
     customer_email = serializers.EmailField(source="customer.email", read_only=True, default=None, allow_null=True)
+    customer_phone = serializers.CharField(source="customer.phone", read_only=True, default=None, allow_null=True)
     vehicle_registration = serializers.CharField(
         source="vehicle.registration_number", read_only=True, default=None, allow_null=True
     )
@@ -100,6 +104,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "customer",
             "customer_name",
             "customer_email",
+            "customer_phone",
             "booking_type",
             "vehicle_type",
             "vehicle",
@@ -109,6 +114,12 @@ class BookingSerializer(serializers.ModelSerializer):
             "drop_location",
             "travel_datetime",
             "passengers",
+            "trip_type",
+            "return_datetime",
+            "luggage_type",
+            "special_instructions",
+            "pickup_details",
+            "drop_details",
             "estimated_distance_km",
             "estimated_fare",
             "estimated_fare_basis",
@@ -131,6 +142,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "customer",
             "customer_name",
             "customer_email",
+            "customer_phone",
             "vehicle_registration",
             "estimated_fare",
             "estimated_fare_basis",
@@ -153,6 +165,12 @@ class BookingSerializer(serializers.ModelSerializer):
             "drop_location": {"required": False},
             "travel_datetime": {"required": False},
             "vehicle_type": {"required": False},
+            "trip_type": {"required": False},
+            "return_datetime": {"required": False},
+            "luggage_type": {"required": False},
+            "special_instructions": {"required": False},
+            "pickup_details": {"required": False},
+            "drop_details": {"required": False},
         }
 
     @extend_schema_field(serializers.IntegerField(allow_null=True))
@@ -231,8 +249,13 @@ class BookingSerializer(serializers.ModelSerializer):
             if not bus_schedule:
                 raise serializers.ValidationError({"bus_schedule": "bus_schedule is required for BUS_SEAT."})
 
-            # Check deadline and availability
+            # Check expiration, deadline and availability
             now = timezone.now()
+            if bus_schedule.status == BusSchedule.Status.EXPIRED or bus_schedule.departure_datetime <= now:
+                raise serializers.ValidationError(
+                    {"bus_schedule": "This bus trip has expired and is no longer available for booking."}
+                )
+
             if now >= bus_schedule.booking_deadline:
                 raise serializers.ValidationError(
                     {"bus_schedule": "Booking closed for this bus schedule (within 10 hours of departure)."}
@@ -269,6 +292,40 @@ class BookingSerializer(serializers.ModelSerializer):
             if travel_datetime <= timezone.now():
                 raise serializers.ValidationError({"travel_datetime": "travel_datetime must be in the future."})
 
+            # Check if pickup_details dictionary provided to construct readable full pickup_location if needed
+            pickup_details = attrs.get("pickup_details")
+            if pickup_details and isinstance(pickup_details, dict):
+                parts = []
+                for k in ["house_street", "area", "city"]:
+                    v = pickup_details.get(k)
+                    if v and str(v).strip():
+                        parts.append(str(v).strip())
+                if parts:
+                    addr = ", ".join(parts)
+                    if pickup_details.get("pincode"):
+                        addr += f" - {str(pickup_details['pincode']).strip()}"
+                    if pickup_details.get("landmark"):
+                        addr += f" (Near {str(pickup_details['landmark']).strip()})"
+                    if not attrs.get("pickup_location"):
+                        attrs["pickup_location"] = addr
+
+            # Check if drop_details dictionary provided to construct readable full drop_location if needed
+            drop_details = attrs.get("drop_details")
+            if drop_details and isinstance(drop_details, dict):
+                parts = []
+                for k in ["house_street", "area", "city"]:
+                    v = drop_details.get(k)
+                    if v and str(v).strip():
+                        parts.append(str(v).strip())
+                if parts:
+                    addr = ", ".join(parts)
+                    if drop_details.get("pincode"):
+                        addr += f" - {str(drop_details['pincode']).strip()}"
+                    if drop_details.get("landmark"):
+                        addr += f" (Near {str(drop_details['landmark']).strip()})"
+                    if not attrs.get("drop_location"):
+                        attrs["drop_location"] = addr
+
             if not attrs.get("pickup_location"):
                 raise serializers.ValidationError({"pickup_location": "pickup_location is required."})
             attrs["pickup_location"] = " ".join(str(attrs["pickup_location"]).split()).title()
@@ -276,6 +333,19 @@ class BookingSerializer(serializers.ModelSerializer):
             if not attrs.get("drop_location"):
                 raise serializers.ValidationError({"drop_location": "drop_location is required."})
             attrs["drop_location"] = " ".join(str(attrs["drop_location"]).split()).title()
+
+            # Trip type & return datetime validation
+            trip_type = attrs.get("trip_type", Booking.TripType.ONE_WAY)
+            return_datetime = attrs.get("return_datetime")
+            if trip_type == Booking.TripType.ROUND_TRIP:
+                if not return_datetime:
+                    raise serializers.ValidationError(
+                        {"return_datetime": "Return date and time are required for Round Trip bookings."}
+                    )
+                if return_datetime <= travel_datetime:
+                    raise serializers.ValidationError(
+                        {"return_datetime": "Return date and time must be after journey pickup time."}
+                    )
 
             vehicle = attrs.get("vehicle")
             if vehicle:
@@ -285,13 +355,33 @@ class BookingSerializer(serializers.ModelSerializer):
                     )
                 if vehicle.status != Vehicle.Status.ACTIVE:
                     raise serializers.ValidationError({"vehicle": "Selected vehicle is not active."})
+                if vehicle_type == Booking.VehicleType.BIKE and passengers > 2:
+                    raise serializers.ValidationError({"passengers": "Bike bookings can have at most 2 passengers."})
                 if vehicle.seating_capacity < passengers:
                     raise serializers.ValidationError(
                         {"passengers": f"Vehicle capacity ({vehicle.seating_capacity}) cannot accommodate {passengers} passengers."}
                     )
+
+                # Check specific vehicle availability and conflict prevention
+                from trips.assignment_rules import is_vehicle_free, trip_time_window
+                dist_km = attrs.get("estimated_distance_km")
+                t_start, t_end = trip_time_window(travel_datetime, dist_km)
+                is_free, reason = is_vehicle_free(vehicle, t_start, t_end)
+                if not is_free:
+                    raise serializers.ValidationError(
+                        {"vehicle": f"Selected vehicle is not available for this time window ({reason})."}
+                    )
             else:
-                if vehicle_type == Booking.VehicleType.BIKE and passengers > 1:
-                    raise serializers.ValidationError({"passengers": "Bikes cannot carry more than 1 passenger."})
+                if vehicle_type == Booking.VehicleType.BIKE:
+                    max_capacity = Vehicle.objects.filter(
+                        vehicle_type=Vehicle.VehicleType.BIKE,
+                        status=Vehicle.Status.ACTIVE
+                    ).aggregate(Max("seating_capacity"))["seating_capacity__max"]
+                    max_allowed = min(2, max_capacity or 1)
+                    if passengers > max_allowed:
+                        raise serializers.ValidationError(
+                            {"passengers": f"Bike bookings cannot accommodate more than {max_allowed} passenger(s)."}
+                        )
                 elif vehicle_type == Booking.VehicleType.CAR:
                     max_capacity = Vehicle.objects.filter(
                         vehicle_type=Vehicle.VehicleType.CAR,
@@ -389,6 +479,12 @@ class BookingSerializer(serializers.ModelSerializer):
                 drop_location=validated_data["drop_location"],
                 travel_datetime=validated_data["travel_datetime"],
                 passengers=passengers,
+                trip_type=validated_data.get("trip_type", Booking.TripType.ONE_WAY),
+                return_datetime=validated_data.get("return_datetime"),
+                luggage_type=validated_data.get("luggage_type", Booking.LuggageType.NONE),
+                special_instructions=validated_data.get("special_instructions", ""),
+                pickup_details=validated_data.get("pickup_details", {}),
+                drop_details=validated_data.get("drop_details", {}),
                 estimated_distance_km=estimated_distance,
                 estimated_fare=estimated_fare,
                 status=Booking.Status.PENDING,

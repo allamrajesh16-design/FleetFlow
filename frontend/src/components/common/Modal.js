@@ -16,70 +16,141 @@ export default function Modal({
   const modalRef = useRef(null);
   const previouslyFocusedElement = useRef(null);
   const mouseDownTargetIsOverlay = useRef(false);
+  const onCloseRef = useRef(onClose);
+  const hasFocusedRef = useRef(false);
+
+  // Keep onClose ref updated without re-triggering effects
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen) {
       previouslyFocusedElement.current = document.activeElement;
+
+      // Fixed position body scroll lock: prevents background movement & wobble
+      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || 0;
+
+      const originalOverflow = document.body.style.overflow;
+      const originalPosition = document.body.style.position;
+      const originalTop = document.body.style.top;
+      const originalLeft = document.body.style.left;
+      const originalWidth = document.body.style.width;
+      const originalHeight = document.body.style.height;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = `-${scrollX}px`;
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
 
-      // Focus first focusable element inside modal
-      const timer = setTimeout(() => {
-        if (modalRef.current) {
-          const focusable = modalRef.current.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      // Move focus ONCE when modal opens: prefer first input/textarea/select, never close button
+      let timer = null;
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        timer = setTimeout(() => {
+          if (!modalRef.current) return;
+
+          // 1. Look for first form input/textarea/select
+          const formInputs = modalRef.current.querySelectorAll(
+            'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
           );
-          if (focusable.length > 0) {
-            focusable[0].focus();
+          if (formInputs.length > 0) {
+            formInputs[0].focus();
+            return;
           }
-        }
-      }, 50);
 
-      const handleKeyDown = (e) => {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          onClose?.();
-          return;
-        }
-
-        // Trap focus inside modal
-        if (e.key === 'Tab' && modalRef.current) {
-          const focusable = Array.from(
+          // 2. Fall back to first actionable button (excluding close button) or link
+          const actionable = Array.from(
             modalRef.current.querySelectorAll(
-              'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+              'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
             )
-          );
+          ).filter((el) => !el.classList.contains('modal-close-btn') && !el.classList.contains('modal-close'));
 
-          if (focusable.length === 0) return;
-
-          const firstElement = focusable[0];
-          const lastElement = focusable[focusable.length - 1];
-
-          if (e.shiftKey) {
-            if (document.activeElement === firstElement) {
-              e.preventDefault();
-              lastElement.focus();
-            }
-          } else {
-            if (document.activeElement === lastElement) {
-              e.preventDefault();
-              firstElement.focus();
-            }
+          if (actionable.length > 0) {
+            actionable[0].focus();
+            return;
           }
-        }
-      };
 
-      window.addEventListener('keydown', handleKeyDown);
+          // 3. Fallback to close button only if no other focusable element exists
+          const closeBtn = modalRef.current.querySelector('.modal-close-btn, .modal-close');
+          if (closeBtn) {
+            closeBtn.focus();
+          }
+        }, 50);
+      }
 
       return () => {
-        clearTimeout(timer);
-        document.body.style.overflow = 'unset';
-        window.removeEventListener('keydown', handleKeyDown);
-        if (previouslyFocusedElement.current && previouslyFocusedElement.current.focus) {
+        if (timer) clearTimeout(timer);
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.body.style.overflow = originalOverflow;
+        document.body.style.position = originalPosition;
+        document.body.style.top = originalTop;
+        document.body.style.left = originalLeft;
+        document.body.style.width = originalWidth;
+        document.body.style.height = originalHeight;
+        if (typeof window.scrollTo === 'function') {
+          try {
+            window.scrollTo(scrollX, scrollY);
+          } catch (_) {}
+        }
+        if (previouslyFocusedElement.current && typeof previouslyFocusedElement.current.focus === 'function') {
           previouslyFocusedElement.current.focus();
         }
+        hasFocusedRef.current = false;
       };
+    } else {
+      hasFocusedRef.current = false;
     }
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  // Keyboard navigation (Tab focus trap & Escape key)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCloseRef.current?.();
+        return;
+      }
+
+      // Trap focus inside modal on Tab key
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = Array.from(
+          modalRef.current.querySelectorAll(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        );
+
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -89,7 +160,7 @@ export default function Modal({
 
   const handleOverlayMouseUp = (e) => {
     if (mouseDownTargetIsOverlay.current && e.target === e.currentTarget) {
-      onClose?.();
+      onCloseRef.current?.();
     }
     mouseDownTargetIsOverlay.current = false;
   };
@@ -120,7 +191,7 @@ export default function Modal({
           )}
           <IconButton
             icon={<CloseIcon size={20} />}
-            onClick={onClose}
+            onClick={() => onCloseRef.current?.()}
             ariaLabel="Close dialog"
             title="Close"
             variant="ghost"

@@ -1,0 +1,578 @@
+/* FleetFlow TripMap Styles - Clean, Attractive, No Distracting Animations */
+.trip-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  background: var(--surface-muted, #F8FAFC);
+  border: 1px solid var(--border, #E2E8F0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.trip-map-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Ensure Leaflet zoom buttons sit neatly at top-left with proper spacing */
+.trip-map-container .leaflet-top.leaflet-left {
+  top: 10px;
+  left: 10px;
+}
+
+.trip-map-container .leaflet-control-zoom {
+  margin: 0 !important;
+  border: 1px solid rgba(203, 213, 225, 0.9) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1) !important;
+}
+
+.trip-map-container .leaflet-control-zoom a {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1E293B !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  transition: all 0.15s ease;
+}
+
+.trip-map-container .leaflet-control-zoom a:hover {
+  background: #FFFFFF !important;
+  color: #2563EB !important;
+}
+
+/* Dark mode tile dimming */
+[data-theme="dark"] .trip-map-container .leaflet-tile-pane,
+.theme-dark .trip-map-container .leaflet-tile-pane,
+.dark .trip-map-container .leaflet-tile-pane {
+  filter: brightness(0.72) invert(0.9) contrast(1.15) hue-rotate(180deg);
+}
+
+/* Floating Info Chips (Top Left - shifted right of Leaflet zoom buttons) */
+.trip-map-floating-chips {
+  position: absolute;
+  top: 14px;
+  left: 60px;
+  right: 180px;
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.trip-map-chip {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1E293B;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+[data-theme="dark"] .trip-map-chip {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(51, 65, 85, 0.9);
+  color: #F8FAFC;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Status Chips - Crisp & Solid (No infinite pulsating) */
+.trip-map-chip-live {
+  color: #047857;
+  border-color: #A7F3D0;
+  background: rgba(240, 253, 244, 0.95);
+}
+
+.trip-map-chip-live .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.25);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.trip-map-chip-stale {
+  color: #B45309;
+  border-color: #FDE68A;
+  background: rgba(254, 252, 232, 0.95);
+}
+
+.trip-map-chip-nosignal {
+  color: #64748B;
+  border-color: #E2E8F0;
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.trip-map-chip-offroute {
+  background: #FFF7ED;
+  color: #C2410C;
+  border-color: #FDBA74;
+}
+
+/* Floating Controls (Top Right) */
+.trip-map-controls-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-map-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid #CBD5E1;
+  border-radius: var(--radius-md, 8px);
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  transition: all 0.15s ease;
+}
+
+.trip-map-control-btn:hover {
+  background: #FFFFFF;
+  border-color: #94A3B8;
+  color: #0F172A;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+
+.trip-map-control-btn.active {
+  background: var(--primary, #2563EB);
+  border-color: var(--primary, #2563EB);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+[data-theme="dark"] .trip-map-control-btn {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: #334155;
+  color: #E2E8F0;
+}
+
+[data-theme="dark"] .trip-map-control-btn:hover {
+  background: #1E293B;
+  border-color: #475569;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .trip-map-control-btn.active {
+  background: var(--primary, #2563EB);
+  border-color: var(--primary, #2563EB);
+  color: #FFFFFF;
+}
+
+/* Map Legend (Bottom Left) */
+.trip-map-legend {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 1000;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+[data-theme="dark"] .trip-map-legend {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(51, 65, 85, 0.9);
+  color: #94A3B8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.trip-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-swatch {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.legend-swatch.route-planned {
+  background: var(--map-route, #1D4ED8);
+  height: 4px;
+}
+
+.legend-swatch.route-travelled {
+  background: #64748B;
+  height: 4px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.legend-dot.pickup {
+  background: #10B981;
+}
+
+.legend-dot.drop {
+  background: #EF4444;
+}
+
+/* Markers */
+.trip-pin-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trip-pin-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.3);
+  border: 2.5px solid #FFFFFF;
+}
+
+.trip-pin-pickup {
+  background: #10B981;
+}
+
+.trip-pin-drop {
+  background: #EF4444;
+}
+
+/* Permanent Place Label Chips */
+.leaflet-tooltip.trip-map-place-chip {
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: #F8FAFC !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 4px 9px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaflet-tooltip.trip-map-place-chip::before {
+  border-top-color: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Vehicle Marker - Crisp, Clean, Steady */
+.trip-vehicle-marker-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  transition: transform 0.15s ease-out;
+}
+
+.trip-vehicle-ring {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 2.5px solid #2563EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.22);
+  position: relative;
+}
+
+.trip-vehicle-ring.live {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2), 0 3px 10px rgba(15, 23, 42, 0.22);
+}
+
+.trip-vehicle-ring.stale,
+.trip-vehicle-ring.no-signal {
+  border-color: #94A3B8;
+  filter: grayscale(0.8);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+.sim-pill {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #7C3AED;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* Overview vehicle pill */
+.overview-vehicle-pill {
+  background: #FFFFFF;
+  color: #0F172A;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1.5px solid #2563EB;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.overview-vehicle-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+/* Fix Places Instruction Banner */
+.trip-map-fix-banner {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+}
+
+/* ==========================================================================
+   Rapido / Uber Navigation Map Visuals
+   ========================================================================== */
+
+/* Vehicle Marker Wrapper */
+.rapido-vehicle-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.rapido-vehicle-marker-wrapper {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.rapido-vehicle-halo {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28);
+  border: 2.5px solid #2563EB;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rapido-vehicle-halo.live {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2), 0 6px 16px rgba(15, 23, 42, 0.25);
+  animation: rapidoRadarPulse 2.4s infinite ease-out;
+}
+
+.rapido-vehicle-halo.stale {
+  border-color: #94A3B8;
+  filter: grayscale(0.7);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+}
+
+@keyframes rapidoRadarPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5), 0 4px 14px rgba(15, 23, 42, 0.28);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(37, 99, 235, 0), 0 4px 14px rgba(15, 23, 42, 0.28);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0), 0 4px 14px rgba(15, 23, 42, 0.28);
+  }
+}
+
+/* Heading Arrow indicator */
+.rapido-heading-arrow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: transform 0.3s ease-out;
+}
+
+.rapido-arrow-tip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 9px solid #1E3A8A;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.rapido-vehicle-icon-circle {
+  color: #1E3A8A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Floating Plate & Speed Pill below vehicle */
+.rapido-floating-badge {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.94);
+  color: #FFFFFF;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.rapido-badge-plate {
+  color: #93C5FD;
+}
+
+.rapido-badge-speed {
+  color: #34D399;
+  font-family: monospace;
+}
+
+/* Rapido Teardrop Pins */
+.rapido-pin-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.rapido-pin-container {
+  position: relative;
+  width: 36px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rapido-pin-teardrop {
+  width: 34px;
+  height: 34px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--pin-bg, #10B981);
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 2.5px solid #FFFFFF;
+}
+
+.rapido-pin-letter {
+  transform: rotate(45deg);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  font-family: var(--font-family-base, 'Inter', sans-serif);
+}
+
+.rapido-pin-pulse {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  filter: blur(1px);
+}
+
+/* Route Direction Arrow Marker */
+.route-direction-arrow-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.route-arrow-marker {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  pointer-events: none;
+}

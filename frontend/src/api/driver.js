@@ -17,14 +17,25 @@ export async function getDriverMeApi() {
 }
 
 /**
- * Driver Trips list with optional status filter (e.g. 'upcoming', 'in_progress', 'completed')
+ * Driver Trips list with optional status filter (e.g. 'upcoming', 'in_progress', 'completed') and search
  */
-export async function getMyTripsApi(status) {
+export async function getMyTripsApi(status, search = '') {
   const params = {};
   if (status && status !== 'all') {
     params.status = status;
   }
+  if (search && search.trim()) {
+    params.search = search.trim();
+  }
   const response = await apiClient.get('/trips/my-trips/', { params });
+  return response.data;
+}
+
+/**
+ * Driver Trips summary statistics (total, upcoming, in_progress, completed, cancelled)
+ */
+export async function getMyTripsSummaryApi() {
+  const response = await apiClient.get('/trips/my-trips-summary/');
   return response.data;
 }
 
@@ -37,12 +48,14 @@ export async function getTripDetailsApi(id) {
 }
 
 /**
- * Start a scheduled trip with starting odometer reading
+ * Start a scheduled trip with optional starting odometer reading
  */
 export async function startTripApi(id, startOdometer) {
-  const response = await apiClient.post(`/trips/${id}/start/`, {
-    start_odometer: Number(startOdometer),
-  });
+  const payload = {};
+  if (startOdometer !== undefined && startOdometer !== null && startOdometer !== '') {
+    payload.start_odometer = Number(startOdometer);
+  }
+  const response = await apiClient.post(`/trips/${id}/start/`, payload);
   return response.data;
 }
 
@@ -57,13 +70,55 @@ export async function completeTripApi(id, endOdometer) {
 }
 
 /**
+ * Preview trip fare with live distance / odometer
+ */
+export async function getTripFarePreviewApi(id, params) {
+  const response = await apiClient.get(`/trips/${id}/fare-preview/`, { params });
+  return response.data;
+}
+
+/**
+ * Complete trip with distance and/or end odometer
+ */
+export async function completeTripWithDistanceApi(id, data) {
+  const response = await apiClient.post(`/trips/${id}/complete/`, data);
+  return response.data;
+}
+
+/**
+ * Collect CASH or ONLINE payment for completed trip
+ */
+export async function collectPaymentApi(paymentId, data) {
+  const payload = {
+    method: data.method || data.payment_method || 'CASH',
+    ...data,
+  };
+  const response = await apiClient.post(`/payments/${paymentId}/collect/`, payload);
+  return response.data;
+}
+
+/**
+ * Settle cash payment with driver
+ */
+export async function settleCashPaymentApi(paymentId) {
+  const response = await apiClient.post(`/payments/${paymentId}/settle-cash/`);
+  return response.data;
+}
+
+/**
  * Send driver GPS location update during in-progress trip
  */
-export async function sendTripLocationApi(id, latitude, longitude) {
-  const response = await apiClient.post(`/trips/${id}/location/`, {
+export async function sendTripLocationApi(id, latitude, longitude, extra = {}) {
+  const payload = {
     latitude: Number(latitude).toFixed(6),
     longitude: Number(longitude).toFixed(6),
-  });
+  };
+  if (extra.speed_kmh != null) payload.speed_kmh = Number(extra.speed_kmh);
+  if (extra.heading != null && !isNaN(extra.heading)) payload.heading = Number(extra.heading);
+  if (extra.accuracy_m != null) payload.accuracy_m = Number(extra.accuracy_m);
+  if (extra.is_simulated != null) payload.is_simulated = Boolean(extra.is_simulated);
+
+  const response = await apiClient.post(`/trips/${id}/location/`, payload);
   return response.data;
 }
 
@@ -108,6 +163,16 @@ export async function rejectPaymentProofApi(paymentId, reason) {
  */
 export async function downloadReceiptPdfApi(paymentId) {
   const response = await apiClient.get(`/payments/${paymentId}/receipt/pdf/`, {
+    responseType: 'blob',
+  });
+  return response.data;
+}
+
+/**
+ * Download official PDF receipt for a trip as a Blob
+ */
+export async function downloadTripReceiptPdfApi(tripId) {
+  const response = await apiClient.get(`/trips/${tripId}/receipt/pdf/`, {
     responseType: 'blob',
   });
   return response.data;

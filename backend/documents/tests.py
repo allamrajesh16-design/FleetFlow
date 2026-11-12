@@ -320,7 +320,7 @@ class DocumentManagementTests(APITestCase):
         self.assertIn("Total notification items dispatched: 0", out2.getvalue())
 
     def test_driver_downloading_other_driver_document_and_customer_get_403(self):
-        """A driver downloading another driver's document gets 403, and a customer gets 403."""
+        """A driver downloading another driver's document gets 404 (no existence leak), and a customer gets 403."""
         # Create a document belonging to self.driver_profile
         doc = Document.objects.create(
             driver=self.driver_profile,
@@ -331,10 +331,10 @@ class DocumentManagementTests(APITestCase):
             file=SimpleUploadedFile("license.pdf", b"%PDF-1.4 sample license data", content_type="application/pdf"),
         )
 
-        # 1. Other driver tries to download -> 403
+        # 1. Other driver tries to download -> 404 (does not leak existence)
         self.client.force_authenticate(user=self.other_driver_user)
         res_other_driver = self.client.get(f"/api/documents/{doc.id}/download/")
-        self.assertEqual(res_other_driver.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res_other_driver.status_code, status.HTTP_404_NOT_FOUND)
 
         # 2. Customer tries to download -> 403
         self.client.force_authenticate(user=self.customer)
@@ -345,4 +345,53 @@ class DocumentManagementTests(APITestCase):
         self.client.force_authenticate(user=self.driver_user)
         res_owner = self.client.get(f"/api/documents/{doc.id}/download/")
         self.assertEqual(res_owner.status_code, status.HTTP_200_OK)
+
+        # 4. Fleet Manager can download -> 200 FileResponse
+        self.client.force_authenticate(user=self.manager)
+        res_mgr = self.client.get(f"/api/documents/{doc.id}/download/")
+        self.assertEqual(res_mgr.status_code, status.HTTP_200_OK)
+
+    def test_driver_can_download_vehicle_document_from_recent_trip_but_not_old_or_unassigned(self):
+        """Driver can download vehicle document if vehicle appeared on recent trip (<60d), but 404 if >60d or unassigned."""
+        # Vehicle document
+        veh_doc = Document.objects.create(
+            vehicle=self.vehicle,
+            doc_type=Document.DocType.INSURANCE,
+            document_number="INS-VEH-RECENT",
+            expiry_date=date.today() + timedelta(days=200),
+            uploaded_by=self.admin,
+            file=SimpleUploadedFile("ins.pdf", b"%PDF-1.4 insurance file", content_type="application/pdf"),
+        )
+
+        # Before any trip: Driver has not driven vehicle -> 404
+        self.client.force_authenticate(user=self.driver_user)
+        res_unassigned = self.client.get(f"/api/documents/{veh_doc.id}/download/")
+        self.assertEqual(res_unassigned.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Create old completed trip (70 days ago) -> still 404
+        Trip.objects.create(
+            vehicle=self.vehicle,
+            driver=self.driver_profile,
+            source="A",
+            destination="B",
+            scheduled_datetime=timezone.now() - timedelta(days=70),
+            completed_at=timezone.now() - timedelta(days=70),
+            status=Trip.Status.COMPLETED,
+        )
+        res_old = self.client.get(f"/api/documents/{veh_doc.id}/download/")
+        self.assertEqual(res_old.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Create recent trip (completed 10 days ago) -> 200
+        Trip.objects.create(
+            vehicle=self.vehicle,
+            driver=self.driver_profile,
+            source="A",
+            destination="B",
+            scheduled_datetime=timezone.now() - timedelta(days=10),
+            completed_at=timezone.now() - timedelta(days=10),
+            status=Trip.Status.COMPLETED,
+        )
+        res_recent = self.client.get(f"/api/documents/{veh_doc.id}/download/")
+        self.assertEqual(res_recent.status_code, status.HTTP_200_OK)
+
 

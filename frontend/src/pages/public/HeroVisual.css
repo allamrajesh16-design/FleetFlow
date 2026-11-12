@@ -28,33 +28,24 @@
   display: block;
 }
 
-/* Ambient cloud drift */
+/* Ambient visuals - clean & steady */
 .hv-clouds {
-  animation: ffCloudDriftSlow 18s ease-in-out infinite;
+  animation: none;
 }
 
-/* Ambient road dash movement */
+/* Road dashes */
 .hv-road-dashes {
-  animation: hvRoadMove 1.4s linear infinite;
+  animation: none;
 }
 
-@keyframes hvRoadMove {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-56px);
-  }
-}
-
-/* Wheels turn */
+/* Wheels */
 .hv-wheel {
-  animation: ffWheelTurn 1.8s linear infinite;
+  animation: none;
 }
 
 /* Floating telemetry chip */
 .hv-floating-chip {
-  animation: ffFloat 4s ease-in-out infinite;
+  animation: none;
 }
 
 /* On phones: keep only lightweight animations */

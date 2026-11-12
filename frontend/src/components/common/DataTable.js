@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar';
 import Select from './Select';
 import Button from './Button';
@@ -6,6 +6,7 @@ import EmptyState from './EmptyState';
 import ErrorState from './ErrorState';
 import ViewSwitch from './ViewSwitch';
 import Pagination from './Pagination';
+import useBreakpoint from '../../hooks/useBreakpoint';
 import { safeGet, normalizeList } from '../../utils/safeHelpers';
 import './DataTable.css';
 
@@ -107,6 +108,41 @@ export default function DataTable({
     }
   };
 
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(1200);
+  const { isPhone } = useBreakpoint();
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    if (typeof ResizeObserver === 'undefined') return;
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect && entry.contentRect.width > 0) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      }
+    });
+
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const isNarrow = containerWidth < 720;
+  const isMedium = containerWidth >= 720 && containerWidth <= 1000;
+
+  let renderAsCards = false;
+  if (activeViewMode === 'cards') {
+    renderAsCards = true;
+  } else if (activeViewMode === 'table') {
+    renderAsCards = false;
+  } else {
+    // 'auto' mode driven strictly by container width (< 720px)
+    renderAsCards = isNarrow;
+  }
+
+  const containerMode = renderAsCards ? 'cards' : isMedium ? 'table-medium' : 'table-wide';
+
   const handleHeaderClick = (col) => {
     if (!col.sortable || !onOrderingChange) return;
     const currentKey = col.key;
@@ -177,7 +213,12 @@ export default function DataTable({
   const densityClass = `density-${density}`;
 
   return (
-    <div className={`datatable-wrapper ${viewModeClass} ${densityClass} ${className}`}>
+    <div
+      ref={containerRef}
+      className={`datatable-wrapper ${viewModeClass} ${densityClass} ${className}`}
+      data-container-mode={containerMode}
+      data-container-width={Math.round(containerWidth)}
+    >
       {/* Top Toolbar: Search, Filters, ViewSwitch, Density, and Action Buttons */}
       {(onSearchChange || filters.length > 0 || actions || enableViewSwitch) && (
         <div className="datatable-toolbar">
@@ -206,19 +247,21 @@ export default function DataTable({
           </div>
 
           <div className="datatable-toolbar-right">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="density-toggle-btn"
-              onClick={toggleDensity}
-              title={`Switch density (currently ${density})`}
-            >
-              {density === 'comfortable' ? '⇕ Compact' : '⇕ Comfortable'}
-            </Button>
-            {enableViewSwitch && (
+            {!isPhone && !isNarrow && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="density-toggle-btn"
+                onClick={toggleDensity}
+                title={`Switch density (currently ${density})`}
+              >
+                {density === 'comfortable' ? '⇕ Compact' : '⇕ Comfortable'}
+              </Button>
+            )}
+            {enableViewSwitch && !isPhone && !isNarrow && (
               <ViewSwitch
-                view={activeViewMode === 'cards' ? 'cards' : 'table'}
+                view={renderAsCards ? 'cards' : 'table'}
                 onChange={handleViewModeChange}
                 storageKey={storageKey}
               />
@@ -328,6 +371,7 @@ export default function DataTable({
                                 key={col.key || col.accessor || cIdx}
                                 style={{
                                   textAlign,
+                                  minWidth: col.minWidth || (isActions ? '200px' : undefined),
                                   whiteSpace: isActions ? 'nowrap' : undefined,
                                 }}
                                 className={`datatable-td ${

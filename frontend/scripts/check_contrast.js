@@ -91,6 +91,11 @@ const pairs = [
   // 3. Auth Side Panel & Landing Hero
   ['Auth Panel Text on Navy-900', '#FFFFFF', tokens['--navy-900'], 4.5],
   ['Auth Panel Gradient Worst Stop (#0B1F3A)', '#FFFFFF', tokens['--navy-900'], 4.5],
+  ['Auth Photo Overlay (Light Mode Worst White Pixel)', '#FFFFFF', '#4B515F', 4.5],
+  ['Auth Photo Overlay (Dark Mode Base Overlay)', '#FFFFFF', '#222A3B', 4.5],
+  ['Auth Photo Accent Line & Badge (#93C5FD on Overlay)', '#93C5FD', '#222A3B', 4.5],
+  ['Auth Photo Logo Flow (#93C5FD on Overlay)', '#93C5FD', '#222A3B', 4.5],
+  ['Auth Photo Tagline Muted Text on Overlay', '#E2E8F0', '#222A3B', 4.5],
   ['Landing Hero Title on Surface', tokens['--navy-900'], tokens['--surface'], 4.5],
   ['Landing Hero Subtitle on Surface', tokens['--neutral-text'], tokens['--surface'], 4.5],
 

@@ -38,3 +38,4 @@ class EnvironmentValidationTests(SimpleTestCase):
         with mock.patch.dict(os.environ, env):
             # Should not raise
             validate_environment()
+

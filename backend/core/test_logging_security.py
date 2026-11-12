@@ -89,3 +89,4 @@ class LoggingAndSecurityTests(TestCase):
         log_output = "\n".join(cm.output)
         self.assertIn(self.user.email, log_output)
         self.assertNotIn("WrongPassword@999", log_output)
+

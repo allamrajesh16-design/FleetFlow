@@ -17,7 +17,7 @@ export function parseNumberString(val) {
   // Regex to match prefix, number (with commas/dots), and suffix
   const match = str.match(/^([^\d\-+.]*)([\d,]+(?:\.\d+)?)(.*)$/);
   if (!match) {
-    return { prefix: '', number: 0, suffix: str, decimals: 0 };
+    return { prefix: '', number: null, suffix: str, decimals: 0, isNonNumeric: true };
   }
 
   const prefix = match[1] || '';
@@ -43,14 +43,14 @@ export function parseNumberString(val) {
  * }
  */
 export default function useCountUp(targetValue, { duration = 800, startImmediately = true, decimals: explicitDecimals } = {}) {
-  const { prefix, number, suffix, decimals: parsedDecimals, hasComma } = parseNumberString(targetValue);
+  const { prefix, number, suffix, decimals: parsedDecimals, hasComma, isNonNumeric } = parseNumberString(targetValue);
   const decimals = explicitDecimals !== undefined ? explicitDecimals : parsedDecimals;
-  const [currentVal, setCurrentVal] = useState(() => (isMotionDisabled() ? number : 0));
+  const [currentVal, setCurrentVal] = useState(() => (isMotionDisabled() || isNonNumeric || number === null ? (number ?? 0) : 0));
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    if (isMotionDisabled() || !startImmediately || number === 0) {
-      setCurrentVal(number);
+    if (isNonNumeric || number === null || isMotionDisabled() || !startImmediately || number === 0) {
+      setCurrentVal(number ?? 0);
       return;
     }
 
@@ -82,10 +82,13 @@ export default function useCountUp(targetValue, { duration = 800, startImmediate
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [number, duration, startImmediately]);
+  }, [number, duration, startImmediately, isNonNumeric]);
 
   // Format the display string
   const formattedNumber = (() => {
+    if (isNonNumeric || number === null) {
+      return '';
+    }
     if (decimals > 0) {
       return currentVal.toFixed(decimals);
     }
@@ -97,7 +100,9 @@ export default function useCountUp(targetValue, { duration = 800, startImmediate
     return rounded.toString();
   })();
 
-  const display = `${prefix}${formattedNumber}${suffix}`;
+  const display = (isNonNumeric || number === null)
+    ? String(targetValue ?? '')
+    : `${prefix}${formattedNumber}${suffix}`;
 
   return {
     value: display,

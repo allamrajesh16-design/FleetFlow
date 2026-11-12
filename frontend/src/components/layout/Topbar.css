@@ -27,16 +27,11 @@
   left: var(--sidebar-width-rail, 72px);
 }
 
-@media (max-width: 1024px) {
-  .topbar {
-    left: 0;
-  }
-}
-
 .topbar-left {
   display: flex;
   align-items: center;
   gap: var(--space-4, 16px);
+  min-width: 0;
 }
 
 .topbar-toggle-btn {
@@ -90,6 +85,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-4, 16px);
+  flex-shrink: 0;
 }
 
 /* Search bar in Topbar */
@@ -243,7 +239,7 @@
   padding-top: 8px;
 }
 
-/* Icon Buttons (Notification Bell) */
+/* Icon Buttons (Notification Bell, Theme Toggle) */
 .topbar-icon-btn {
   position: relative;
   width: 44px;
@@ -309,6 +305,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .topbar-user-btn {
@@ -325,7 +322,7 @@
   cursor: pointer;
   outline: none !important;
   transition: all var(--transition-fast, 150ms ease) !important;
-  box-sizing: border-box ;
+  box-sizing: border-box;
   line-height: normal !important;
 }
 
@@ -460,53 +457,9 @@
   background: var(--danger-bg);
 }
 
-/* Tablet & Mobile Breakpoints: unified at 1024px */
-@media (max-width: 1024px) {
-  .topbar-toggle-btn {
-    display: flex;
-  }
-}
-
-@media (max-width: 768px) {
-  .topbar {
-    padding: 0 var(--space-4, 16px);
-  }
-  .topbar-search {
-    display: none;
-  }
-  .topbar-mobile-search-toggle {
-    display: flex;
-  }
-  .topbar-user-info {
-    display: none;
-  }
-  .topbar-user-btn {
-    padding: 4px;
-    gap: 0;
-    width: 44px;
-    height: 44px;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .topbar {
-    padding: 0 12px;
-  }
-  .topbar-title {
-    font-size: 1rem;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-
-/* Page header below fixed topbar */
 .page-header {
   scroll-margin-top: 80px;
 }
-
 
 .topbar-back-btn {
   display: inline-flex;
@@ -523,4 +476,163 @@
 
 .topbar-back-btn:hover {
   background: var(--color-surface-hover, var(--bg));
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES (Cascading after base styles)
+   ========================================================================== */
+
+/* Tablet (768px - 1023px): Align topbar with 72px rail */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .topbar {
+    left: var(--sidebar-width-rail, 72px);
+  }
+  .topbar-toggle-btn {
+    display: none;
+  }
+}
+
+/* Phone (<= 767px): Topbar takes full width, hamburger visible, compact icon controls */
+@media (max-width: 767px) {
+  .topbar {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: 56px;
+    min-height: 56px;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  .topbar-left {
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  .topbar-right {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .topbar-toggle-btn {
+    display: flex !important;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .topbar-search {
+    display: none !important;
+  }
+
+  .topbar-mobile-search-toggle {
+    display: flex !important;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .topbar-theme-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .topbar-icon-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .topbar-user-info {
+    display: none !important;
+  }
+
+  .topbar-user-btn {
+    padding: 0 !important;
+    gap: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+  }
+
+  .topbar-user-btn .btn-text {
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  .topbar-avatar {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* Extra Compact Mobile (<= 360px): Extra compact touch targets so nothing overflows */
+@media (max-width: 360px) {
+  .topbar {
+    padding: 0 6px !important;
+  }
+
+  .topbar-title {
+    display: none !important; /* Hide title on 320px screens so icons remain comfortably spaced */
+  }
+
+  .topbar-left {
+    gap: 4px;
+    flex: 0 0 auto;
+  }
+
+  .topbar-right {
+    gap: 3px;
+    margin-left: auto;
+  }
+
+  .topbar-toggle-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .topbar-mobile-search-toggle,
+  .topbar-theme-toggle,
+  .topbar-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .topbar-user-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+  }
+
+  .topbar-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
 }

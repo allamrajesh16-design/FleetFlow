@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
@@ -9,16 +10,55 @@ from accounts.models import User
 from bookings.models import Booking, BusSchedule
 from drivers.models import Driver
 from vehicles.models import Vehicle
-from .models import Trip, TripLocation
+from .models import Trip, TripLocation, TripAssignmentLog
 
 
 class TripLocationSerializer(serializers.ModelSerializer):
-    """Serializer for Trip Location coordinates."""
+    """Serializer for Trip Location coordinates and telemetry."""
 
     class Meta:
         model = TripLocation
-        fields = ["id", "latitude", "longitude", "recorded_at"]
+        fields = [
+            "id",
+            "latitude",
+            "longitude",
+            "speed_kmh",
+            "heading",
+            "accuracy_m",
+            "is_simulated",
+            "recorded_at",
+        ]
         read_only_fields = ["id", "recorded_at"]
+
+
+class TripAssignmentLogSerializer(serializers.ModelSerializer):
+    """Serializer for Trip Assignment History Log."""
+
+    performed_by_name = serializers.CharField(source="performed_by.full_name", read_only=True, default=None)
+    old_vehicle_plate = serializers.CharField(source="old_vehicle.registration_number", read_only=True, default=None)
+    new_vehicle_plate = serializers.CharField(source="new_vehicle.registration_number", read_only=True, default=None)
+    old_driver_name = serializers.CharField(source="old_driver.user.full_name", read_only=True, default=None)
+    new_driver_name = serializers.CharField(source="new_driver.user.full_name", read_only=True, default=None)
+
+    class Meta:
+        model = TripAssignmentLog
+        fields = [
+            "id",
+            "action",
+            "performed_by",
+            "performed_by_name",
+            "timestamp",
+            "old_vehicle",
+            "old_vehicle_plate",
+            "new_vehicle",
+            "new_vehicle_plate",
+            "old_driver",
+            "old_driver_name",
+            "new_driver",
+            "new_driver_name",
+            "reason",
+        ]
+        read_only_fields = ["id", "timestamp"]
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -44,9 +84,23 @@ class TripSerializer(serializers.ModelSerializer):
     last_known_location = serializers.SerializerMethodField(read_only=True)
     customer_name = serializers.SerializerMethodField(read_only=True)
     customer_email = serializers.SerializerMethodField(read_only=True)
+    customer_phone = serializers.SerializerMethodField(read_only=True)
+    booking_amount = serializers.SerializerMethodField(read_only=True)
     passengers = serializers.SerializerMethodField(read_only=True)
     pickup_location = serializers.CharField(source="source", read_only=True, default="")
     drop_location = serializers.CharField(source="destination", read_only=True, default="")
+    rate_per_km = serializers.SerializerMethodField(read_only=True)
+    unpaid_payment_id = serializers.SerializerMethodField(read_only=True)
+    payment_status = serializers.SerializerMethodField(read_only=True)
+    can_start = serializers.SerializerMethodField(read_only=True)
+    start_date_status = serializers.SerializerMethodField(read_only=True)
+    start_date_label = serializers.SerializerMethodField(read_only=True)
+    scheduled_date_formatted = serializers.SerializerMethodField(read_only=True)
+    trip_start_rule = serializers.SerializerMethodField(read_only=True)
+    booking_id = serializers.SerializerMethodField(read_only=True)
+    vehicle_previous_odometer = serializers.SerializerMethodField(read_only=True)
+    receipt_data = serializers.SerializerMethodField(read_only=True)
+    assignment_logs = TripAssignmentLogSerializer(many=True, read_only=True)
 
     class Meta:
         model = Trip
@@ -67,9 +121,22 @@ class TripSerializer(serializers.ModelSerializer):
             "drop_location",
             "customer_name",
             "customer_email",
+            "customer_phone",
+            "booking_amount",
             "passengers",
             "scheduled_datetime",
             "status",
+            "dispatch_note",
+            "assignment_logs",
+            "pickup_lat",
+            "pickup_lng",
+            "drop_lat",
+            "drop_lng",
+            "route_geojson",
+            "route_distance_km",
+            "route_duration_min",
+            "geo_status",
+            "route_source",
             "start_odometer",
             "end_odometer",
             "distance_km",
@@ -79,6 +146,17 @@ class TripSerializer(serializers.ModelSerializer):
             "last_known_location",
             "assigned_by",
             "assigned_by_name",
+            "rate_per_km",
+            "unpaid_payment_id",
+            "payment_status",
+            "can_start",
+            "start_date_status",
+            "start_date_label",
+            "scheduled_date_formatted",
+            "trip_start_rule",
+            "booking_id",
+            "vehicle_previous_odometer",
+            "receipt_data",
             "created_at",
             "updated_at",
         ]
@@ -107,6 +185,18 @@ class TripSerializer(serializers.ModelSerializer):
             return obj.booking.customer.email
         return None
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_customer_phone(self, obj):
+        if obj.booking and obj.booking.customer:
+            return getattr(obj.booking.customer, "phone", None) or getattr(obj.booking.customer, "phone_number", None) or "N/A"
+        return "N/A"
+
+    @extend_schema_field(serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True))
+    def get_booking_amount(self, obj):
+        if obj.booking:
+            return obj.booking.final_fare or obj.booking.estimated_fare or getattr(obj.booking, "base_fare", None) or obj.total_fare
+        return obj.total_fare
+
     @extend_schema_field(serializers.IntegerField())
     def get_passengers(self, obj):
         if obj.booking:
@@ -120,6 +210,80 @@ class TripSerializer(serializers.ModelSerializer):
         if obj.vehicle:
             return f"{obj.vehicle.brand} {obj.vehicle.model}".strip()
         return ""
+
+    @extend_schema_field(serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True))
+    def get_rate_per_km(self, obj):
+        if obj.vehicle and obj.vehicle.rate_per_km:
+            return obj.vehicle.rate_per_km
+        return None
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_unpaid_payment_id(self, obj):
+        unpaid = obj.payments.filter(status__in=["UNPAID", "PAYMENT_INITIATED"]).first()
+        return unpaid.id if unpaid else None
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_payment_status(self, obj):
+        first_p = obj.payments.first()
+        if first_p:
+            return first_p.status
+        if obj.status == Trip.Status.COMPLETED:
+            return "UNPAID"
+        return "PENDING"
+
+    @extend_schema_field(serializers.BooleanField())
+    def get_can_start(self, obj):
+        rule = getattr(settings, "TRIP_START_RULE", "same_day")
+        if rule == "any":
+            return True
+        if not obj.scheduled_datetime:
+            return True
+        today = timezone.localdate()
+        trip_date = timezone.localdate(obj.scheduled_datetime)
+        return today == trip_date
+
+    @extend_schema_field(serializers.CharField())
+    def get_start_date_status(self, obj):
+        if not obj.scheduled_datetime:
+            return "TODAY"
+        today = timezone.localdate()
+        trip_date = timezone.localdate(obj.scheduled_datetime)
+        diff = (trip_date - today).days
+        if diff == 0:
+            return "TODAY"
+        elif diff == 1:
+            return "TOMORROW"
+        elif diff > 1:
+            return "FUTURE"
+        else:
+            return "PASSED"
+
+    @extend_schema_field(serializers.CharField())
+    def get_start_date_label(self, obj):
+        if not obj.scheduled_datetime:
+            return "Today"
+        today = timezone.localdate()
+        trip_date = timezone.localdate(obj.scheduled_datetime)
+        diff = (trip_date - today).days
+        if diff == 0:
+            return "Today"
+        elif diff == 1:
+            return "Tomorrow"
+        elif diff > 1:
+            return f"in {diff} days"
+        else:
+            return "Date passed"
+
+    @extend_schema_field(serializers.CharField())
+    def get_scheduled_date_formatted(self, obj):
+        if not obj.scheduled_datetime:
+            return ""
+        trip_date = timezone.localdate(obj.scheduled_datetime)
+        return f"{trip_date.day} {trip_date.strftime('%b %Y')}"
+
+    @extend_schema_field(serializers.CharField())
+    def get_trip_start_rule(self, obj):
+        return getattr(settings, "TRIP_START_RULE", "same_day")
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -151,6 +315,83 @@ class TripSerializer(serializers.ModelSerializer):
             return TripLocationSerializer(latest).data
         return None
 
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_booking_id(self, obj):
+        return obj.booking_id if obj.booking_id else None
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_vehicle_previous_odometer(self, obj):
+        if not obj.vehicle:
+            return 0
+        last_trip = (
+            Trip.objects.filter(
+                vehicle=obj.vehicle,
+                end_odometer__isnull=False,
+                status=Trip.Status.COMPLETED,
+            )
+            .exclude(id=obj.id)
+            .order_by("-completed_at", "-id")
+            .first()
+        )
+        return last_trip.end_odometer if (last_trip and last_trip.end_odometer) else 0
+
+    @extend_schema_field(serializers.DictField(allow_null=True))
+    def get_receipt_data(self, obj):
+        payment = obj.payments.first()
+        receipt = getattr(payment, "receipt", None) if payment else None
+
+        if receipt and receipt.receipt_number:
+            receipt_number = receipt.receipt_number
+        elif payment:
+            receipt_number = f"FF-{timezone.now().year}-{payment.id:06d}"
+        else:
+            receipt_number = f"FF-{timezone.now().year}-T{obj.id:05d}"
+
+        booking_id_str = f"#{obj.booking_id}" if obj.booking_id else (f"Bus Schedule #{obj.bus_schedule_id}" if obj.bus_schedule_id else "Direct Dispatch")
+
+        payment_method = "N/A"
+        payment_status = "PENDING"
+        txn_ref = None
+        payment_id = None
+        if payment:
+            payment_id = payment.id
+            payment_status = payment.status
+            payment_method = "Cash" if payment.payment_method == "CASH" else ("UPI (Static QR)" if payment.payment_method == "ONLINE" else str(payment.payment_method))
+            txn_ref = payment.transaction_reference or payment.gateway_reference or None
+        elif obj.bus_schedule:
+            payment_method = "Bus Bookings"
+            payment_status = "COMPLETED"
+
+        fare_amt = str(obj.total_fare) if obj.total_fare is not None else ("0.00" if not payment else str(payment.amount))
+
+        dist_val = obj.distance_km
+        if dist_val is None and obj.start_odometer and obj.end_odometer:
+            dist_val = max(0, obj.end_odometer - obj.start_odometer)
+
+        return {
+            "receipt_number": receipt_number,
+            "trip_id": obj.id,
+            "booking_id": booking_id_str,
+            "customer_name": self.get_customer_name(obj) or "Valued Customer",
+            "driver_name": obj.driver.user.full_name if (obj.driver and obj.driver.user) else "Assigned Driver",
+            "vehicle_registration": obj.vehicle.registration_number if obj.vehicle else "N/A",
+            "vehicle_brand_model": self.get_vehicle_brand_model(obj),
+            "pickup_location": obj.source or (f"{obj.pickup_lat},{obj.pickup_lng}" if obj.pickup_lat else "Pickup"),
+            "drop_location": obj.destination or (f"{obj.drop_lat},{obj.drop_lng}" if obj.drop_lat else "Drop"),
+            "started_at": obj.started_at.isoformat() if obj.started_at else None,
+            "completed_at": obj.completed_at.isoformat() if obj.completed_at else None,
+            "start_odometer": obj.start_odometer,
+            "end_odometer": obj.end_odometer,
+            "distance_km": dist_val,
+            "base_fare": fare_amt,
+            "additional_charges": "0.00",
+            "total_fare": fare_amt,
+            "payment_id": payment_id,
+            "payment_method": payment_method,
+            "payment_status": payment_status,
+            "transaction_reference": txn_ref or ("CASH-SETTLED" if payment_method == "Cash" else "N/A"),
+        }
+
 
 class TripAssignSerializer(serializers.Serializer):
     """Payload for assigning a vehicle and driver to a trip."""
@@ -176,6 +417,7 @@ class TripAssignSerializer(serializers.Serializer):
     source = serializers.CharField(required=False, allow_blank=True)
     destination = serializers.CharField(required=False, allow_blank=True)
     scheduled_datetime = serializers.DateTimeField(required=False)
+    dispatch_note = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
 
     def validate(self, attrs):
         booking = attrs.get("booking")
@@ -296,10 +538,25 @@ class TripAssignSerializer(serializers.Serializer):
         return attrs
 
 
+class TripReassignSerializer(serializers.Serializer):
+    """Payload for reassigning a scheduled trip's vehicle or driver."""
+
+    vehicle_id = serializers.IntegerField(required=False, allow_null=True)
+    driver_id = serializers.IntegerField(required=False, allow_null=True)
+    reason = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate(self, attrs):
+        v_id = attrs.get("vehicle_id")
+        d_id = attrs.get("driver_id")
+        if not v_id and not d_id:
+            raise serializers.ValidationError("Either vehicle_id or driver_id must be provided.")
+        return attrs
+
+
 class TripStartSerializer(serializers.Serializer):
     """Payload for starting a trip with initial odometer reading."""
 
-    start_odometer = serializers.IntegerField(required=True, min_value=1)
+    start_odometer = serializers.IntegerField(required=False, allow_null=True, min_value=0)
 
 
 class TripLocationUpdateSerializer(serializers.Serializer):
@@ -307,12 +564,36 @@ class TripLocationUpdateSerializer(serializers.Serializer):
 
     latitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
     longitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
+    speed_kmh = serializers.FloatField(required=False, allow_null=True)
+    heading = serializers.FloatField(required=False, allow_null=True)
+    accuracy_m = serializers.FloatField(required=False, allow_null=True)
+    is_simulated = serializers.BooleanField(required=False, default=False)
+
+
+class TripPlacesUpdateSerializer(serializers.Serializer):
+    """Payload for manually setting trip pickup and drop coordinates."""
+
+    pickup_lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
+    pickup_lng = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
+    drop_lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
+    drop_lng = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
 
 
 class TripCompleteSerializer(serializers.Serializer):
-    """Payload for completing a trip with final odometer reading."""
+    """Payload for completing a trip with final odometer reading and/or distance and actual trip details."""
 
-    end_odometer = serializers.IntegerField(required=True, min_value=1)
+    end_odometer = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    distance_km = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, allow_null=True, min_value=Decimal("0.01")
+    )
+    actual_pickup = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    actual_drop = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    additional_charges = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, default=Decimal("0.00"), min_value=Decimal("0.00")
+    )
+    remarks = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    actual_start_time = serializers.DateTimeField(required=False, allow_null=True)
+    actual_end_time = serializers.DateTimeField(required=False, allow_null=True)
 
 
 class TripSummarySerializer(serializers.Serializer):

@@ -116,3 +116,4 @@ jobs:
       - name: Run Secrets Scanner
         run: |
           python scripts/scan_secrets.py
+

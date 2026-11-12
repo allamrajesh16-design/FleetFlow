@@ -11,9 +11,28 @@ export function ThemeProvider({ children }) {
       if (savedTheme === 'dark' || savedTheme === 'light') {
         return savedTheme;
       }
+      // Support system preference when no saved theme exists
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
     }
     return 'light';
   });
+
+  useEffect(() => {
+    // Listen for system theme changes if user has not explicitly chosen a theme
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemChange = (e) => {
+        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+        if (!savedTheme) {
+          setThemeState(e.matches ? 'dark' : 'light');
+        }
+      };
+      mediaQuery.addEventListener('change', handleSystemChange);
+      return () => mediaQuery.removeEventListener('change', handleSystemChange);
+    }
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;

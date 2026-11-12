@@ -18,9 +18,9 @@ class BookingFilter(django_filters.FilterSet):
 
     def filter_has_trip(self, queryset, name, value):
         if value is True:
-            return queryset.filter(trips__isnull=False).distinct()
+            return queryset.filter(trips__status__in=["SCHEDULED", "IN_PROGRESS"]).distinct()
         elif value is False:
-            return queryset.filter(trips__isnull=True).distinct()
+            return queryset.exclude(trips__status__in=["SCHEDULED", "IN_PROGRESS"]).distinct()
         return queryset
 
 
@@ -39,7 +39,7 @@ class BusScheduleFilter(django_filters.FilterSet):
 
     def filter_has_trip(self, queryset, name, value):
         if value is True:
-            return queryset.filter(trips__isnull=False).distinct()
+            return queryset.filter(trips__status__in=["SCHEDULED", "IN_PROGRESS"]).distinct()
         elif value is False:
-            return queryset.filter(trips__isnull=True).distinct()
+            return queryset.exclude(trips__status__in=["SCHEDULED", "IN_PROGRESS"]).distinct()
         return queryset

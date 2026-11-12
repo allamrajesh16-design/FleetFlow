@@ -23,8 +23,9 @@ from .emails import (
     send_approval_email,
     send_rejection_email,
     EmailDeliveryError,
+    EmailRecipientRefusedError,
 )
-from .email_validation import validate_real_email
+from .email_validation import validate_real_email, EmailValidationError
 from .models import User, EmailOTP, PasswordResetSession, PasswordResetToken
 
 logger = logging.getLogger(__name__)
@@ -56,11 +57,14 @@ from .throttles import (
 )
 
 
+import secrets
+
+
 def generate_and_send_otp(user: User, purpose: str = EmailOTP.Purpose.REGISTER):
-    """Generates a secure 6-digit OTP, stores its SHA-256 hash in EmailOTP, and sends an email."""
-    otp_code = f"{random.randint(100000, 999999)}"
+    """Generates a cryptographically secure 6-digit OTP, stores its SHA-256 hash in EmailOTP, and sends an email."""
+    otp_code = f"{secrets.randbelow(900000) + 100000}"
     otp_hash = EmailOTP.hash_otp(otp_code)
-    expires_at = timezone.now() + timedelta(minutes=10)
+    expires_at = timezone.now() + timedelta(minutes=5)
 
     # Invalidate previous unused OTPs for this user and purpose
     EmailOTP.objects.filter(user=user, purpose=purpose, is_used=False).update(is_used=True)
@@ -144,31 +148,59 @@ class RegisterView(APIView):
                             status=status.HTTP_400_BAD_REQUEST,
                         )
 
-                # Determine initial approval status
-                # Approval is NOT_REQUIRED initially; after OTP verification it becomes PENDING for Fleet Manager & Driver
-                user = User.objects.create_user(
-                    email=email,
-                    password=password,
-                    full_name=full_name,
-                    phone=phone,
-                    role=role,
-                    is_active=True,
-                    is_email_verified=False,
-                    approval_status=User.ApprovalStatus.NOT_REQUIRED,
-                )
+                # Check for existing unverified user to replace
+                existing_unverified = User.objects.select_for_update().filter(email__iexact=email, is_email_verified=False).first()
+                if existing_unverified:
+                    user = existing_unverified
+                    user.set_password(password)
+                    user.full_name = full_name
+                    user.phone = phone
+                    user.role = role
+                    user.is_active = True
+                    user.approval_status = User.ApprovalStatus.NOT_REQUIRED
+                    user.save()
 
-                # For DRIVER, create Driver profile with INACTIVE status
-                if role == User.Role.DRIVER:
-                    from drivers.models import Driver
-                    Driver.objects.create(
-                        user=user,
-                        license_number=data["license_number"],
-                        license_expiry=data["license_expiry"],
-                        status=Driver.Status.INACTIVE,
+                    if role == User.Role.DRIVER:
+                        from drivers.models import Driver
+                        Driver.objects.update_or_create(
+                            user=user,
+                            defaults={
+                                "license_number": data.get("license_number", ""),
+                                "license_expiry": data.get("license_expiry"),
+                                "status": Driver.Status.INACTIVE,
+                            },
+                        )
+                else:
+                    # Determine initial approval status
+                    # Approval is NOT_REQUIRED initially; after OTP verification it becomes PENDING for Fleet Manager & Driver
+                    user = User.objects.create_user(
+                        email=email,
+                        password=password,
+                        full_name=full_name,
+                        phone=phone,
+                        role=role,
+                        is_active=True,
+                        is_email_verified=False,
+                        approval_status=User.ApprovalStatus.NOT_REQUIRED,
                     )
+
+                    # For DRIVER, create Driver profile with INACTIVE status
+                    if role == User.Role.DRIVER:
+                        from drivers.models import Driver
+                        Driver.objects.create(
+                            user=user,
+                            license_number=data["license_number"],
+                            license_expiry=data["license_expiry"],
+                            status=Driver.Status.INACTIVE,
+                        )
 
                 # Generate and send 6-digit OTP (rolls back transaction if email fails)
                 generate_and_send_otp(user)
+        except EmailRecipientRefusedError:
+            return Response(
+                {"detail": "We could not deliver to this email. Please check the spelling."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except EmailDeliveryError:
             return Response(
                 {"detail": "We could not send the email. Please try again."},
@@ -1263,16 +1295,50 @@ class CheckEmailView(APIView):
     def post(self, request):
         email = request.data.get("email", "").strip()
         if not email:
-            return Response({"valid": False, "message": "Email is required."}, status=status.HTTP_200_OK)
+            return Response({"valid": False, "code": "FORMAT", "message": "Email is required."}, status=status.HTTP_200_OK)
 
         try:
-            validate_real_email(email)
-            return Response({"valid": True}, status=status.HTTP_200_OK)
+            normalized = validate_real_email(email)
+
+            # Check if an account already exists with this email that is VERIFIED
+            existing_verified = User.objects.filter(email__iexact=normalized, is_email_verified=True).exists()
+            if existing_verified:
+                return Response(
+                    {
+                        "valid": False,
+                        "code": "ALREADY_REGISTERED",
+                        "message": "A user with this email already exists.",
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            return Response(
+                {
+                    "valid": True,
+                    "message": "Looks fine. We will send a code to confirm it.",
+                },
+                status=status.HTTP_200_OK,
+            )
+        except EmailValidationError as e:
+            resp_data = {
+                "valid": False,
+                "code": e.code,
+                "message": e.message,
+            }
+            if e.suggestion:
+                resp_data["suggestion"] = e.suggestion
+            return Response(resp_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             msg = e.message if hasattr(e, "message") else str(e)
-            return Response({"valid": False, "message": msg}, status=status.HTTP_200_OK)
+            return Response(
+                {"valid": False, "code": "FORMAT", "message": msg},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({"valid": False, "message": str(e)}, status=status.HTTP_200_OK)
+            return Response(
+                {"valid": False, "code": "FORMAT", "message": str(e)},
+                status=status.HTTP_200_OK,
+            )
 
 
 

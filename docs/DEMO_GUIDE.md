@@ -41,14 +41,16 @@ This document provides a step-by-step presentation script for showcasing FleetFl
 
 ---
 
-### ⏱️ Minute 3:00 - 4:45 | Fleet Manager Approval & Trip Dispatch
+### ⏱️ Minute 3:00 - 4:45 | Fleet Manager Approval & Dispatch Center
 - **Actor / Screen**: Switch to Fleet Manager `manager@fleetflow.com`.
 - **What to Click**:
-  1. Go to **Bookings** (`/fleet/bookings`). Click on Customer 1's pending booking. Click **Approve Booking**.
-  2. Click **Assign Vehicle & Driver**. Select an active vehicle (e.g., `AP 05 AB 1001 - Swift Dzire`) and Driver (`Suresh Kumar`). Click **Dispatch Trip**.
+  1. Go to **Approvals** (`/manager/approvals` or `/manager/bookings`). Click on Customer 1's pending booking. Click **Approve Booking**.
+  2. Go to **Dispatch Center** (`/manager/assignments`). Select Customer 1's booking from the ticket queue.
+  3. The system checks real availability (active status, no overlapping trip, valid documents, adequate seating). Select an available vehicle and driver. Click **Dispatch Trip**.
+  4. View live route & GPS monitoring at **Trip Monitoring** (`/manager/trips`).
 - **Expected Result**: Booking updates to **APPROVED** and an active Trip is generated with status **SCHEDULED**.
 - **What to Say**:
-  > *"Fleet managers maintain full operational oversight, verifying vehicle maintenance readiness and driver availability before authorizing trip dispatches."*
+  > *"Fleet managers maintain full operational oversight in the Dispatch Center, verifying vehicle maintenance readiness and driver availability before authorizing trip dispatches."*
 
 ---
 

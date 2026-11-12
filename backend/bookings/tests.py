@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from accounts.models import User
 from drivers.models import Driver
 from notifications.models import Notification
+from documents.models import Document
 from trips.models import Trip, TripLocation
 from vehicles.models import Vehicle
 from .models import BusSchedule, Booking
@@ -679,3 +680,216 @@ class Stage4BookingBusRulesTests(APITestCase):
         self.assertEqual(booking.status, Booking.Status.APPROVED)
         self.assertEqual(booking.vehicle, self.car)
         self.assertIsNone(booking.estimated_fare)
+
+    def test_bike_passenger_limit_and_round_trip(self):
+        """Bike passenger limit (max 2) and round trip return datetime validation."""
+        self.client.force_authenticate(user=self.customer1)
+
+        # 3 passengers on bike must be rejected (max 2 rule)
+        now = timezone.now()
+        payload = {
+            "booking_type": "VEHICLE",
+            "vehicle_type": "BIKE",
+            "pickup_location": "RTC Complex",
+            "drop_location": "Beach Road",
+            "travel_datetime": (now + timedelta(days=1)).isoformat(),
+            "passengers": 3,
+        }
+        res = self.client.post("/api/bookings/", payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("passengers", res.data)
+
+        # Create a 2-seater bike in fleet
+        Vehicle.objects.create(
+            registration_number="KA01BIKE200",
+            vehicle_type=Vehicle.VehicleType.BIKE,
+            brand="Royal Enfield",
+            model="Classic 350",
+            seating_capacity=2,
+            rate_per_km=Decimal("10.00"),
+            status=Vehicle.Status.ACTIVE,
+        )
+
+        # 2 passengers on bike is allowed when 2-seater bike is in fleet
+        payload["passengers"] = 2
+        payload["trip_type"] = "ROUND_TRIP"
+        # Round trip without return_datetime must fail
+        res2 = self.client.post("/api/bookings/", payload)
+        self.assertEqual(res2.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("return_datetime", res2.data)
+
+        # Round trip with return_datetime after travel_datetime succeeds
+        payload["return_datetime"] = (now + timedelta(days=1, hours=4)).isoformat()
+        res3 = self.client.post("/api/bookings/", payload)
+        self.assertEqual(res3.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res3.data["passengers"], 2)
+        self.assertEqual(res3.data["trip_type"], "ROUND_TRIP")
+
+    def test_structured_pickup_and_drop_details(self):
+        """Structured pickup and drop details are stored and synthesized correctly."""
+        self.client.force_authenticate(user=self.customer1)
+        now = timezone.now()
+        payload = {
+            "booking_type": "VEHICLE",
+            "vehicle_type": "CAR",
+            "pickup_details": {
+                "house_street": "Flat 402, Royal Residency",
+                "area": "Danavaipeta",
+                "city": "Rajahmundry",
+                "pincode": "533103",
+                "landmark": "Opposite SBI Bank",
+                "instructions": "Please wait at the gate",
+            },
+            "drop_details": {
+                "house_street": "Terminal 1",
+                "area": "Madhurapudi",
+                "city": "Rajahmundry",
+                "pincode": "533102",
+                "landmark": "Near Departure Gate",
+            },
+            "travel_datetime": (now + timedelta(days=2)).isoformat(),
+            "passengers": 3,
+            "luggage_type": "MEDIUM",
+        }
+        res = self.client.post("/api/bookings/", payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        b = Booking.objects.get(id=res.data["id"])
+        self.assertIn("Danavaipeta", b.pickup_location)
+        self.assertIn("Opposite Sbi Bank", b.pickup_location)
+        self.assertEqual(b.pickup_details["pincode"], "533103")
+        self.assertEqual(b.luggage_type, "MEDIUM")
+
+    def test_manager_assignment_rules_customer_selected_vehicle(self):
+        """Section 6 & 7: Manager cannot reassign a customer-selected vehicle or mismatch type."""
+        # Active car 2
+        car2 = Vehicle.objects.create(
+            registration_number="AP 05 ZZ 9999",
+            vehicle_type=Vehicle.VehicleType.CAR,
+            brand="Honda",
+            model="City",
+            seating_capacity=4,
+            rate_per_km=Decimal("15.00"),
+            status=Vehicle.Status.ACTIVE,
+        )
+        # Create documents for car2 so compliance check passes
+        Document.objects.create(
+            vehicle=car2,
+            doc_type=Document.DocType.INSURANCE,
+            review_status=Document.ReviewStatus.APPROVED,
+            expiry_date=timezone.localdate() + timedelta(days=365),
+        )
+        Document.objects.create(
+            vehicle=car2,
+            doc_type=Document.DocType.REGISTRATION_RC,
+            review_status=Document.ReviewStatus.APPROVED,
+            expiry_date=timezone.localdate() + timedelta(days=365),
+        )
+
+        # Booking with customer selected car
+        booking = Booking.objects.create(
+            customer=self.customer1,
+            booking_type=Booking.BookingType.VEHICLE,
+            vehicle_type=Booking.VehicleType.CAR,
+            vehicle=self.car,  # Customer specifically selected self.car
+            pickup_location="Origin Point",
+            drop_location="Drop Point",
+            travel_datetime=timezone.now() + timedelta(days=2),
+            passengers=2,
+            status=Booking.Status.APPROVED,
+        )
+
+        driver_profile, _ = Driver.objects.get_or_create(
+            user=self.driver,
+            defaults={
+                "license_number": "DL-AP-101010",
+                "license_expiry": timezone.localdate() + timedelta(days=365),
+                "status": Driver.Status.ACTIVE,
+            },
+        )
+
+        self.client.force_authenticate(user=self.fleet_manager)
+
+        # 1. Manager attempts to assign car2 instead of self.car -> must be rejected!
+        assign_payload = {
+            "booking": booking.id,
+            "vehicle": car2.id,  # Different car!
+            "driver": driver_profile.id,
+            "source": booking.pickup_location,
+            "destination": booking.drop_location,
+            "scheduled_datetime": booking.travel_datetime.isoformat(),
+        }
+        res = self.client.post("/api/trips/assign/", assign_payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Customer specifically selected vehicle", res.data["detail"])
+
+        # 2. Manager assigns self.car (the customer-selected vehicle) -> succeeds!
+        assign_payload["vehicle"] = self.car.id
+        res2 = self.client.post("/api/trips/assign/", assign_payload)
+        self.assertEqual(res2.status_code, status.HTTP_201_CREATED)
+
+    def test_expired_bus_schedule_lifecycle_and_customer_protection(self):
+        """Bus schedules whose departure has passed are marked EXPIRED, hidden from customers, and cannot be booked."""
+        from bookings.services import sync_expired_bus_schedules
+
+        # 1. Create a bus schedule in the past
+        past_dep = timezone.now() - timedelta(hours=2)
+        past_schedule = BusSchedule.objects.create(
+            vehicle=self.bus,
+            source="Kakinada",
+            destination="Visakhapatnam",
+            departure_datetime=past_dep,
+            fare_per_seat=Decimal("350.00"),
+            status=BusSchedule.Status.OPEN,
+            created_by=self.fleet_manager,
+        )
+
+        # Also create a previous booking by customer1 to verify preservation
+        prev_booking = Booking.objects.create(
+            customer=self.customer1,
+            booking_type=Booking.BookingType.BUS_SEAT,
+            bus_schedule=past_schedule,
+            vehicle_type=Booking.VehicleType.BUS,
+            vehicle=self.bus,
+            pickup_location="Kakinada",
+            drop_location="Visakhapatnam",
+            travel_datetime=past_dep,
+            passengers=2,
+            status=Booking.Status.APPROVED,
+        )
+
+        # Run sync
+        result = sync_expired_bus_schedules()
+        self.assertGreaterEqual(result["expired_schedules"], 1)
+
+        past_schedule.refresh_from_db()
+        self.assertEqual(past_schedule.status, BusSchedule.Status.EXPIRED)
+        self.assertTrue(past_schedule.is_expired)
+
+        # Verify previous booking is completely preserved
+        prev_booking.refresh_from_db()
+        self.assertEqual(prev_booking.status, Booking.Status.APPROVED)
+        self.assertEqual(prev_booking.passengers, 2)
+
+        # 2. Customer listing schedules does not see past_schedule
+        self.client.force_authenticate(user=self.customer2)
+        c_res = self.client.get("/api/bus-schedules/")
+        self.assertEqual(c_res.status_code, status.HTTP_200_OK)
+        ids = [s["id"] for s in c_res.data["results"]]
+        self.assertNotIn(past_schedule.id, ids)
+
+        # 3. Customer attempts to book the expired schedule -> 400 rejected
+        book_res = self.client.post("/api/bookings/", {
+            "booking_type": "BUS_SEAT",
+            "bus_schedule": past_schedule.id,
+            "passengers": 1,
+        })
+        self.assertEqual(book_res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("expired", str(book_res.data).lower())
+
+        # 4. Manager/Admin can view expired schedules
+        self.client.force_authenticate(user=self.fleet_manager)
+        m_res = self.client.get("/api/bus-schedules/?status=EXPIRED")
+        self.assertEqual(m_res.status_code, status.HTTP_200_OK)
+        exp_ids = [s["id"] for s in m_res.data["results"]]
+        self.assertIn(past_schedule.id, exp_ids)
+

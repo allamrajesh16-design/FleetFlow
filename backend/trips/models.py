@@ -13,6 +13,7 @@ class Trip(models.Model):
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         COMPLETED = "COMPLETED", "Completed"
         CANCELLED = "CANCELLED", "Cancelled"
+        EXPIRED = "EXPIRED", "Expired"
 
     booking = models.ForeignKey(
         Booking,
@@ -63,6 +64,40 @@ class Trip(models.Model):
         blank=True,
         related_name="assigned_trips",
     )
+    dispatch_note = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+    )
+    unstarted_notified = models.BooleanField(
+        default=False,
+    )
+    # Geo places & routing fields
+    pickup_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    pickup_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    drop_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    drop_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    route_geojson = models.JSONField(null=True, blank=True)
+    route_distance_km = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    route_duration_min = models.PositiveIntegerField(null=True, blank=True)
+    geo_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("OK", "OK"),
+            ("APPROXIMATE", "Approximate"),
+            ("FAILED", "Failed"),
+            ("MANUAL", "Manual"),
+        ],
+        default="APPROXIMATE",
+    )
+    route_source = models.CharField(
+        max_length=20,
+        choices=[
+            ("OSRM", "OSRM"),
+            ("STRAIGHT", "Straight"),
+        ],
+        default="STRAIGHT",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -91,6 +126,10 @@ class TripLocation(models.Model):
     )
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    speed_kmh = models.FloatField(null=True, blank=True)
+    heading = models.FloatField(null=True, blank=True)
+    accuracy_m = models.FloatField(null=True, blank=True)
+    is_simulated = models.BooleanField(default=False)
     recorded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -100,3 +139,87 @@ class TripLocation(models.Model):
 
     def __str__(self):
         return f"Trip #{self.trip_id} Location ({self.latitude}, {self.longitude}) at {self.recorded_at}"
+
+
+class GeoCache(models.Model):
+    """Cached geocoding results for location search queries (cached for 90 days)."""
+
+    query_text = models.CharField(max_length=500, unique=True, db_index=True)
+    lat = models.DecimalField(max_digits=9, decimal_places=6)
+    lng = models.DecimalField(max_digits=9, decimal_places=6)
+    display_name = models.CharField(max_length=500, blank=True)
+    provider = models.CharField(max_length=50, default="nominatim")
+    fetched_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-fetched_at"]
+        verbose_name = "Geo Cache"
+        verbose_name_plural = "Geo Caches"
+
+    def __str__(self):
+        return f"{self.query_text} -> ({self.lat}, {self.lng})"
+
+
+class TripAssignmentLog(models.Model):
+    """Log of trip assignments, reassignments, and cancellations."""
+
+    class Action(models.TextChoices):
+        ASSIGNED = "ASSIGNED", "Assigned"
+        REASSIGNED = "REASSIGNED", "Reassigned"
+        CANCELLED = "CANCELLED", "Cancelled"
+
+    trip = models.ForeignKey(
+        Trip,
+        on_delete=models.CASCADE,
+        related_name="assignment_logs",
+    )
+    action = models.CharField(
+        max_length=20,
+        choices=Action.choices,
+    )
+    performed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="performed_trip_logs",
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+    old_vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    new_vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    old_driver = models.ForeignKey(
+        Driver,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    new_driver = models.ForeignKey(
+        Driver,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    reason = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "Trip Assignment Log"
+        verbose_name_plural = "Trip Assignment Logs"
+
+    def __str__(self):
+        return f"{self.action} on Trip #{self.trip_id} at {self.timestamp}"
+

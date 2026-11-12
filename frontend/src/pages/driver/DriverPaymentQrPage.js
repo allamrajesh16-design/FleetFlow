@@ -240,7 +240,11 @@ export default function DriverPaymentQrPage() {
             <div className="driver-completed-fare-box">
               <span className="driver-fare-label">Total Fare</span>
               <span className="driver-completed-fare">
-                <CountUp value={fareNumber} format="rupees" duration={800} />
+                {fareNumber > 0 ? (
+                  <CountUp value={fareNumber} format="rupees" duration={800} />
+                ) : (
+                  'Fare Pending'
+                )}
               </span>
             </div>
           </div>

@@ -23,19 +23,21 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import ErrorBoundary from '../common/ErrorBoundary';
 import PageTransition from '../common/PageTransition';
+import useBreakpoint from '../../hooks/useBreakpoint';
 import './DriverMobileLayout.css';
 import './DashboardLayout.css';
 
 /**
  * Driver Responsive Layout:
- * - Desktop (>= 1024px) & Tablet (768px to 1023px): Standard Sidebar + Topbar layout (full width, proper grid)
- * - Mobile (< 768px): Native-like mobile header + bottom navigation bar
- * No phone frame or narrow centered column on desktop.
+ * - Desktop (>= 1024px) & Tablet (768px - 1023px): Standard Sidebar + Topbar layout (72px rail on tablet)
+ * - Mobile (<= 767px): Native-like mobile header + fixed bottom navigation bar
+ * Exactly ONE layout root bearing data-layout attribute is rendered.
  */
 export default function DriverMobileLayout() {
   const location = useLocation();
   const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { layout, isPhone, isTablet } = useBreakpoint();
 
   const getInitials = (name) => {
     if (!name) return 'D';
@@ -46,21 +48,10 @@ export default function DriverMobileLayout() {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const [isDesktopOrTablet, setIsDesktopOrTablet] = useState(
-    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
-  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktopOrTablet(window.innerWidth >= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Close more sheet on route change
   useEffect(() => {
@@ -104,12 +95,16 @@ export default function DriverMobileLayout() {
     location.pathname.startsWith('/profile');
 
   // Desktop (>= 1024px) & Tablet (768px - 1023px): Standard Sidebar + Topbar layout
-  if (isDesktopOrTablet) {
+  if (!isPhone) {
     return (
-      <div className="dashboard-layout driver-desktop-layout">
+      <div
+        className={`dashboard-layout driver-desktop-layout ${isTablet ? 'sidebar-collapsed' : ''}`}
+        data-layout={layout}
+      >
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          isCollapsed={isTablet}
         />
         <div className="dashboard-main">
           <Topbar
@@ -126,9 +121,9 @@ export default function DriverMobileLayout() {
     );
   }
 
-  // Mobile view (< 768px): Full-width mobile layout with bottom navigation
+  // Mobile view (<= 767px): Full-width mobile layout with bottom navigation
   return (
-    <div className="driver-mobile-view-wrapper">
+    <div className="driver-mobile-view-wrapper" data-layout="phone">
       {/* Mobile Top Header */}
       <header className="driver-header">
         <div className="driver-header-left">
@@ -202,7 +197,7 @@ export default function DriverMobileLayout() {
           className={`driver-nav-item ${isTripsActive ? 'active' : ''}`}
         >
           <TripIcon size={20} />
-          <span>My Trips</span>
+          <span>Trips</span>
         </NavLink>
 
         <NavLink
@@ -224,31 +219,21 @@ export default function DriverMobileLayout() {
         <Button
           type="button"
           variant="ghost"
-          className={`driver-nav-item ${isMoreActive || isMoreOpen ? 'active' : ''}`}
           onClick={() => setIsMoreOpen(!isMoreOpen)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-          leftIcon={
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="1" />
-              <circle cx="12" cy="5" r="1" />
-              <circle cx="12" cy="19" r="1" />
-            </svg>
-          }
+          className={`driver-nav-item ${isMoreActive && !isMoreOpen ? 'active' : ''}`}
+          aria-expanded={isMoreOpen}
+          aria-label="More navigation options"
         >
-          More
+          <div className="driver-nav-dots-icon">
+            <span />
+            <span />
+            <span />
+          </div>
+          <span>More</span>
         </Button>
       </nav>
 
-      {/* More Bottom Sheet */}
+      {/* Mobile "More" Drawer Sheet */}
       {isMoreOpen && (
         <>
           <div
@@ -256,16 +241,18 @@ export default function DriverMobileLayout() {
             onClick={() => setIsMoreOpen(false)}
             aria-hidden="true"
           />
-          <div className="driver-more-sheet">
+          <div className="driver-more-sheet slide-up">
             <div className="driver-more-handle" />
-            <div className="driver-more-title">More Options</div>
-            <div className="driver-more-list">
+            <h3 className="driver-more-title">More Options</h3>
+            <div className="driver-more-grid">
               <NavLink
                 to="/driver/history"
                 className="driver-more-item"
                 onClick={() => setIsMoreOpen(false)}
               >
-                <BookingIcon size={18} />
+                <div className="driver-more-icon-box">
+                  <BookingIcon size={22} />
+                </div>
                 <span>Trip History</span>
               </NavLink>
 
@@ -274,21 +261,47 @@ export default function DriverMobileLayout() {
                 className="driver-more-item"
                 onClick={() => setIsMoreOpen(false)}
               >
-                <DocumentIcon size={18} />
-                <span>My Documents & License</span>
+                <div className="driver-more-icon-box">
+                  <DocumentIcon size={22} />
+                </div>
+                <span>Documents</span>
               </NavLink>
 
+              <NavLink
+                to="/profile"
+                className="driver-more-item"
+                onClick={() => setIsMoreOpen(false)}
+              >
+                <div className="driver-more-icon-box">
+                  <div className="topbar-avatar" style={{ width: '24px', height: '24px', fontSize: '11px' }}>
+                    {getInitials(user?.full_name || user?.name || user?.email)}
+                  </div>
+                </div>
+                <span>My Profile</span>
+              </NavLink>
+
+              <NavLink
+                to="/notifications"
+                className="driver-more-item"
+                onClick={() => setIsMoreOpen(false)}
+              >
+                <div className="driver-more-icon-box">
+                  <BellIcon size={22} />
+                  {unreadCount > 0 && <span className="driver-more-badge" />}
+                </div>
+                <span>Notifications</span>
+              </NavLink>
+            </div>
+            <div className="driver-more-footer">
               <Button
-                type="button"
-                variant="danger"
+                variant="outline"
                 size="md"
-                fullWidth
-                icon={<LogoutIcon size={18} />}
-                className="driver-more-item danger"
+                className="driver-more-logout-btn"
                 onClick={() => {
                   setIsMoreOpen(false);
                   setShowLogoutConfirm(true);
                 }}
+                leftIcon={<LogoutIcon size={18} />}
               >
                 Log Out
               </Button>
@@ -297,13 +310,10 @@ export default function DriverMobileLayout() {
         </>
       )}
 
-      {/* Logout confirmation dialog */}
+      {/* Logout Confirmation Dialog */}
       <LogoutDialog
         isOpen={showLogoutConfirm}
-        onClose={() => {
-          setShowLogoutConfirm(false);
-          setIsMoreOpen(false);
-        }}
+        onClose={() => setShowLogoutConfirm(false)}
       />
     </div>
   );

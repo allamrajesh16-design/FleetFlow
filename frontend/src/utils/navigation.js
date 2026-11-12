@@ -55,7 +55,7 @@ export function getDetailPath(role, type, id) {
           return id ? `/manager/bookings${openParam}` : '/manager/bookings';
         case 'trip':
         case 'trips':
-          return id ? `/manager/trips${openParam}` : '/manager/trips';
+          return id ? `/manager/assignments${openParam}` : '/manager/assignments';
         case 'payment':
         case 'payments':
           return id ? `/manager/payments${openParam}` : '/manager/payments';

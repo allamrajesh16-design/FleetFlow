@@ -31,13 +31,25 @@ export default function LoginPage() {
   const { login, logout, user, isAuthenticated } = useAuth();
   const toast = useToast();
 
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState(location.state?.prefillEmail || '');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sessionAlert, setSessionAlert] = useState(location.state?.message || '');
   const [statusAlert, setStatusAlert] = useState(null); // { type: 'warning'|'error', title, message }
+
+  const roleBanner = (() => {
+    if (!location.state?.verifiedSuccess && !location.state?.prefillEmail) return null;
+    const r = String(location.state?.role || '').toUpperCase();
+    if (r === 'CUSTOMER') {
+      return 'Registration complete. Please login.';
+    }
+    if (r === 'FLEET_MANAGER' || r === 'DRIVER') {
+      return 'Email verified. Your request is waiting for approval. You can login after it is approved.';
+    }
+    return 'Registration complete. Please login.';
+  })();
 
   const handleSwitchUser = async () => {
     await logout({ silent: true, showToast: false });
@@ -49,7 +61,20 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (location.state?.message) {
+    if (location.state?.prefillEmail) {
+      setIdentifier(location.state.prefillEmail);
+      setTimeout(() => {
+        const pwdInput = document.querySelector('input[type="password"], #password');
+        if (pwdInput) {
+          pwdInput.focus();
+        }
+      }, 120);
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('expired') === '1') {
+      setSessionAlert('Your session expired. Please login again.');
+    } else if (location.state?.message) {
       setSessionAlert(location.state.message);
     }
 
@@ -67,7 +92,7 @@ export default function LoginPage() {
       toast?.clearToasts?.();
       toast?.success(MESSAGES.LOGOUT_SUCCESS, 3000);
     }
-  }, [location.state, toast]);
+  }, [location.state, location.search, toast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,7 +130,7 @@ export default function LoginPage() {
         rememberMe
       );
 
-      // Redirect strictly to the role's own dashboard first
+      // Destination after login: always redirect to user's home dashboard as requested
       const destination = getHomePath(loggedInUser?.role);
       const firstName = loggedInUser?.full_name?.split(' ')[0] || loggedInUser?.name || 'User';
       toast?.success(MESSAGES.LOGIN_SUCCESS(firstName));
@@ -235,6 +260,13 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Post-OTP Role Banner */}
+            {roleBanner && (
+              <div className="auth-alert info">
+                <span>{roleBanner}</span>
+              </div>
+            )}
+
             {/* Session Expiry or Redirect Notification */}
             {sessionAlert && (
               <div className="auth-alert warning">
@@ -268,7 +300,7 @@ export default function LoginPage() {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
-                autoFocus
+                autoFocus={!location.state?.prefillEmail}
                 autoComplete="username"
               />
 
@@ -279,6 +311,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoFocus={Boolean(location.state?.prefillEmail)}
                 autoComplete="current-password"
               />
 

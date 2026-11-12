@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import useApiList from '../../hooks/useApiList';
 import {
   listFuelLogsApi,
-  getFuelSummaryApi,
   createFuelLogApi,
   getFuelReceiptUrl,
 } from '../../api/fuel';
@@ -89,25 +88,9 @@ export default function DriverFuelPage() {
     fetchFn: listFuelLogsApi,
   });
 
-  // Summary
-  const [summary, setSummary] = useState(null);
-  const [summaryLoading, setSummaryLoading] = useState(true);
-
-  const fetchSummary = useCallback(async () => {
-    setSummaryLoading(true);
-    try {
-      const data = await getFuelSummaryApi();
-      setSummary(data);
-    } catch {
-      // ignore
-    } finally {
-      setSummaryLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSummary();
-  }, [fetchSummary]);
+  // Compute driver-specific fuel metrics directly from fuel logs
+  const totalQuantity = (fuelLogs || []).reduce((acc, log) => acc + (parseFloat(log.quantity) || 0), 0);
+  const totalCost = (fuelLogs || []).reduce((acc, log) => acc + (parseFloat(log.total_cost) || 0), 0);
 
   // Modal & Receipt viewer state
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -227,7 +210,6 @@ export default function DriverFuelPage() {
       toast.success('Fuel entry saved! Submitted for review (Pending).');
       setIsAddOpen(false);
       refresh();
-      fetchSummary();
     } catch (err) {
       if (err.response?.data && typeof err.response.data === 'object') {
         const errors = {};
@@ -345,19 +327,15 @@ export default function DriverFuelPage() {
         <div className="ff-stat-grid" style={{ marginBottom: 'var(--space-6)' }}>
           <StatCard
             label="Fuel Quantity This Month"
-            value={
-              summary?.total_quantity != null
-                ? `${Number(summary.total_quantity).toLocaleString()} L`
-                : '0 L'
-            }
+            value={`${Number(totalQuantity.toFixed(1)).toLocaleString()} L`}
             icon={<FuelIcon size={24} />}
-            loading={summaryLoading}
+            loading={loading}
           />
           <StatCard
             label="Fuel Cost This Month"
-            value={formatRupees(summary?.total_cost || 0)}
+            value={formatRupees(totalCost)}
             icon={<ReceiptIcon size={24} />}
-            loading={summaryLoading}
+            loading={loading}
           />
         </div>
 

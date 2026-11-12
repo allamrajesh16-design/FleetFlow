@@ -80,8 +80,8 @@ export async function logoutApi(refreshToken) {
   }
 }
 
-export async function checkEmailApi(email) {
-  const response = await apiClient.post('/auth/check-email/', { email });
+export async function checkEmailApi(email, options = {}) {
+  const response = await apiClient.post('/auth/check-email/', { email }, options);
   return response.data;
 }
 

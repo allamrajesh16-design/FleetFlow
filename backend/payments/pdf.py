@@ -60,6 +60,21 @@ def generate_receipt_pdf(receipt: Receipt) -> bytes:
     paid_at_raw = data.get("paid_at") or (payment.paid_at.isoformat() if payment.paid_at else None)
     paid_at_formatted = format_ist_datetime(paid_at_raw)
 
+    method_raw = str(payment.payment_method or data.get("payment_method") or "").upper()
+    paid_by_val = "Cash" if method_raw == "CASH" else "UPI"
+
+    driver_name = ""
+    if payment.collected_by and payment.collected_by.full_name:
+        driver_name = payment.collected_by.full_name
+    elif data.get("collected_by"):
+        driver_name = data.get("collected_by")
+    elif payment.trip and payment.trip.driver and payment.trip.driver.user:
+        driver_name = payment.trip.driver.user.full_name
+    elif data.get("driver"):
+        driver_name = str(data.get("driver")).split(" (")[0]
+    else:
+        driver_name = "Assigned Driver"
+
     fields = [
         ("Customer Name", data.get("customer_name", "N/A")),
         ("Customer Email", data.get("customer_email", "N/A")),
@@ -67,6 +82,8 @@ def generate_receipt_pdf(receipt: Receipt) -> bytes:
         ("Assigned Vehicle", data.get("vehicle", "N/A")),
         ("Assigned Driver", data.get("driver", "N/A")),
         ("Distance Traveled", f"{data.get('distance_km', '0')} km" if data.get("distance_km") else "N/A"),
+        ("Paid by", paid_by_val),
+        ("Collected by", driver_name),
         ("Payment Method", str(data.get("payment_method", "N/A"))),
         ("Gateway Reference", str(data.get("gateway_reference", "N/A"))),
         ("Paid At", paid_at_formatted),

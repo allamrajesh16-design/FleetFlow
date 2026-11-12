@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import useApiList from '../../hooks/useApiList';
 import useRenderGuard from '../../hooks/useRenderGuard';
+import { ToastContext } from '../../context/ToastContext';
+import { createBusScheduleApi, listVehiclesApi } from '../../api/adminManager';
 import DataTable from '../../components/common/DataTable';
 import Badge from '../../components/common/Badge';
-import { BusIcon, AlertCircleIcon } from '../../components/common/Icons';
+import Button from '../../components/common/Button';
+import FormModal from '../../components/common/FormModal';
+import { BusIcon, AlertCircleIcon, PlusIcon } from '../../components/common/Icons';
+import { Select, TextInput, DateTimeInput, NumberInput } from '../../components/forms';
 import { formatDateTime } from '../../utils/formatters';
 import '../admin/AdminPages.css';
 import './ManagerPages.css';
@@ -57,6 +62,64 @@ export default function ManagerBusMonitorPage() {
     initialFilters: { status: '' },
     pageSize: 10,
   });
+
+  const toastContext = useContext(ToastContext);
+  const toast = toastContext || {
+    success: (m) => console.log(m),
+    error: (m) => console.error(m),
+    warning: (m) => console.warn(m),
+  };
+
+  const [buses, setBuses] = useState([]);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const initialForm = {
+    vehicle: '',
+    source: '',
+    destination: '',
+    departure_datetime: '',
+    fare_per_seat: '',
+  };
+  const [formData, setFormData] = useState(initialForm);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    listVehiclesApi({ vehicle_type: 'BUS', page_size: 100 })
+      .then((res) => {
+        const list = res?.results || res;
+        setBuses(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleOpenAdd = () => {
+    setFormData({
+      ...initialForm,
+      vehicle: buses[0]?.id || '',
+    });
+    setFieldErrors({});
+    setIsAddOpen(true);
+  };
+
+  const handleSaveAdd = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setSubmitting(true);
+    setFieldErrors({});
+    try {
+      await createBusScheduleApi(formData);
+      toast.success(`Bus schedule for "${formData.source} → ${formData.destination}" created.`);
+      setIsAddOpen(false);
+      refresh();
+    } catch (err) {
+      const errors = err?.response?.data || {};
+      if (typeof errors === 'object') {
+        setFieldErrors(errors);
+      }
+      toast.error(errors.detail || errors.non_field_errors?.[0] || 'Failed to create bus schedule.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Single shared 1-second countdown timer for all cards
   // Pauses automatically when tab is hidden to save CPU
@@ -166,6 +229,7 @@ export default function ManagerBusMonitorPage() {
       render: (s) => {
         const booked = s.booked_seats || 0;
         const minReq = s.min_passengers || 0;
+        if (s.status === 'EXPIRED') return <Badge status="EXPIRED" label="Expired" />;
         if (s.status === 'CONFIRMED') return <Badge status="CONFIRMED" />;
         if (s.status === 'CANCELLED') return <Badge status="CANCELLED" />;
         if (s.status === 'COMPLETED') return <Badge status="COMPLETED" />;
@@ -187,6 +251,7 @@ export default function ManagerBusMonitorPage() {
         { value: '', label: 'All Status' },
         { value: 'OPEN', label: 'Open' },
         { value: 'CONFIRMED', label: 'Confirmed' },
+        { value: 'EXPIRED', label: 'Expired' },
         { value: 'CANCELLED', label: 'Cancelled' },
         { value: 'COMPLETED', label: 'Completed' },
       ],
@@ -196,11 +261,19 @@ export default function ManagerBusMonitorPage() {
 
   return (
     <div className="admin-page-container fade-in">
-      <div className="admin-header-row">
+      <div className="admin-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1>Bus Passenger Monitor</h1>
           <p>Real-time passenger quota tracking, countdown timers, and minimum passenger rule enforcement</p>
         </div>
+        <Button
+          type="button"
+          variant="primary"
+          icon={<PlusIcon size={18} />}
+          onClick={handleOpenAdd}
+        >
+          Schedule Bus
+        </Button>
       </div>
 
       {/* Prominent Info Card Banner */}
@@ -231,6 +304,70 @@ export default function ManagerBusMonitorPage() {
         onPageChange={setPage}
         filters={filterOptions}
       />
+
+      {/* Schedule Bus Modal */}
+      <FormModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Schedule New Bus Departure"
+        onSubmit={handleSaveAdd}
+        submitLabel="Schedule Departure"
+        loading={submitting}
+      >
+        <Select
+          label="Select Bus"
+          required
+          value={formData.vehicle}
+          onChange={(e) => setFormData({ ...formData, vehicle: e.target.value })}
+          error={fieldErrors.vehicle}
+          placeholder="Select an available bus"
+          options={buses.map((b) => ({
+            value: b.id,
+            label: `${b.registration_number} - ${b.brand} ${b.model} (${b.seating_capacity} Seats)`,
+          }))}
+        />
+
+        <div className="form-grid-2">
+          <TextInput
+            label="Origin / Source"
+            required
+            placeholder="e.g. Kakinada"
+            value={formData.source}
+            onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+            error={fieldErrors.source}
+          />
+
+          <TextInput
+            label="Destination"
+            required
+            placeholder="e.g. Rajahmundry"
+            value={formData.destination}
+            onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+            error={fieldErrors.destination}
+          />
+        </div>
+
+        <div className="form-grid-2">
+          <DateTimeInput
+            label="Departure Date & Time"
+            required
+            value={formData.departure_datetime}
+            onChange={(e) => setFormData({ ...formData, departure_datetime: e.target.value })}
+            error={fieldErrors.departure_datetime}
+          />
+
+          <NumberInput
+            label="Fare Per Seat (₹)"
+            required
+            step="0.01"
+            min={0}
+            placeholder="e.g. 150.00"
+            value={formData.fare_per_seat}
+            onChange={(e) => setFormData({ ...formData, fare_per_seat: e.target.value })}
+            error={fieldErrors.fare_per_seat}
+          />
+        </div>
+      </FormModal>
     </div>
   );
 }

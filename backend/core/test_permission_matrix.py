@@ -337,7 +337,7 @@ class PermissionMatrixTests(APITestCase):
         """Verifies public registration cannot create an ADMIN when an active ADMIN already exists."""
         self.assertTrue(User.objects.filter(role=User.Role.ADMIN, is_active=True).exists())
         payload = {
-            "email": "rogue_admin@gmail.com",
+            "email": "rogue.admin@gmail.com",
             "password": "Password@12345",
             "full_name": "Rogue Admin",
             "role": "ADMIN",

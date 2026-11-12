@@ -18,11 +18,15 @@ function walk(dir, list = []) {
 const SRC_DIR = path.resolve(__dirname, '../src');
 const allFiles = walk(SRC_DIR);
 
-// Allowed files: tokens.css, and SVG illustrations / charts that read or define raw visual elements
+// Allowed files: tokens.css, and SVG illustrations / charts / maps that read or define raw visual elements
 const ALLOWED_FILES = [
   path.normalize('src/styles/tokens.css'),
   path.normalize('src/components/common/Charts.js'),
   path.normalize('src/components/common/Logo.js'),
+  path.normalize('src/components/common/TripMap.js'),
+  path.normalize('src/components/common/TripMap.css'),
+  path.normalize('src/components/common/SignatureDesign.js'),
+  path.normalize('src/components/common/SignatureDesign.css'),
   path.normalize('src/pages/public/HeroVisual.js'),
   path.normalize('src/config/images.js'),
   path.normalize('src/__tests__/TripsTable.test.js')

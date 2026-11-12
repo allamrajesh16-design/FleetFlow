@@ -20,6 +20,9 @@
     "check:contrast": "node scripts/check_contrast.js",
     "check:tables": "node scripts/check_tables.js",
     "check:buttons": "node scripts/check_buttons.js",
+    "check:typing": "node scripts/check_typing.js",
+    "check:cells": "node scripts/check_cells.js",
+    "check:responsive": "node scripts/check_responsive.js",
     "lint": "eslint src",
     "eject": "react-scripts eject"
   },

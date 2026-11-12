@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Button from './Button';
 import IconButton from './IconButton';
@@ -19,6 +19,44 @@ export default function ReviewDrawer({
 }) {
   const [rejectMode, setRejectMode] = useState(false);
   const [reason, setReason] = useState('');
+
+  // Fixed position body scroll lock
+  useEffect(() => {
+    if (!isOpen || !data) return;
+    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || 0;
+
+    const origBodyOverflow = document.body.style.overflow;
+    const origBodyPosition = document.body.style.position;
+    const origBodyTop = document.body.style.top;
+    const origBodyLeft = document.body.style.left;
+    const origBodyWidth = document.body.style.width;
+    const origBodyHeight = document.body.style.height;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = `-${scrollX}px`;
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+
+    return () => {
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.overflow = origBodyOverflow;
+      document.body.style.position = origBodyPosition;
+      document.body.style.top = origBodyTop;
+      document.body.style.left = origBodyLeft;
+      document.body.style.width = origBodyWidth;
+      document.body.style.height = origBodyHeight;
+      if (typeof window.scrollTo === 'function') {
+        try {
+          window.scrollTo(scrollX, scrollY);
+        } catch (_) {}
+      }
+    };
+  }, [isOpen, data]);
 
   if (!isOpen || !data) return null;
 

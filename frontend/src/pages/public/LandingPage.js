@@ -15,6 +15,7 @@ import {
   CheckIcon,
   SunIcon,
   MoonIcon,
+  CloseIcon,
 } from '../../components/common/Icons';
 import HeroVisual from './HeroVisual';
 import useReveal from '../../hooks/useReveal';
@@ -80,6 +81,7 @@ export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [activeNav, setActiveNav] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,7 +117,8 @@ export default function LandingPage() {
       {/* Navigation Header */}
       <header className={`landing-header ${scrolled ? 'landing-header-scrolled' : ''}`}>
         <div className="landing-header-inner">
-          <Logo size="medium" />
+          <Logo size="medium" className="landing-logo-desktop" />
+          <Logo size="small" className="landing-logo-mobile" />
 
           <nav className="landing-nav" aria-label="Main Navigation">
             <a
@@ -163,13 +166,63 @@ export default function LandingPage() {
             <Link to="/login" className="landing-login-btn">
               Sign In
             </Link>
-            <Link to="/register">
+            <Link to="/register" className="landing-cta-link">
               <Button variant="primary" size="small" className="landing-nav-cta">
                 Get Started
               </Button>
             </Link>
+            <IconButton
+              icon={
+                mobileMenuOpen ? (
+                  <CloseIcon size={20} />
+                ) : (
+                  <span className="hamburger-box">
+                    <span className="hamburger-line"></span>
+                    <span className="hamburger-line"></span>
+                    <span className="hamburger-line"></span>
+                  </span>
+                )
+              }
+              ariaLabel={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              title={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              variant="ghost"
+              shape="round"
+              className="landing-mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            />
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="landing-mobile-drawer fade-in">
+            <nav className="landing-mobile-nav">
+              <a href="#home" className="landing-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                Home
+              </a>
+              <a href="#how-it-works" className="landing-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                How it works
+              </a>
+              <a href="#features" className="landing-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </a>
+              <a href="#services" className="landing-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                Services
+              </a>
+              <a href="#contact" className="landing-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                Contact
+              </a>
+            </nav>
+            <div className="landing-mobile-actions">
+              <Link to="/login" className="btn btn-outline btn-md landing-drawer-btn" onClick={() => setMobileMenuOpen(false)}>
+                Sign In
+              </Link>
+              <Link to="/register" className="btn btn-primary btn-md landing-drawer-btn" onClick={() => setMobileMenuOpen(false)}>
+                Get Started
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}

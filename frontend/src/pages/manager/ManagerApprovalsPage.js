@@ -69,7 +69,14 @@ export default function ManagerApprovalsPage() {
     try {
       if (activeTab === 'bookings') {
         await approveBookingApi(item.id);
-        success(`Booking BKG-${String(item.id).padStart(4, '0')} approved.`);
+        success(`Booking BKG-${String(item.id).padStart(4, '0')} approved.`, 6000, {
+          label: 'Assign now',
+          onClick: () => {
+            if (typeof window !== 'undefined') {
+              window.location.href = `/manager/assignments?booking=${item.id}`;
+            }
+          },
+        });
         bookingsList.refresh();
       } else {
         const res = await approveUserApi(item.id);

@@ -26,7 +26,6 @@ import ReceiptViewer from '../../components/common/ReceiptViewer';
 import { VehiclePlate } from '../../components/common/SignatureDesign';
 import {
   ReceiptIcon,
-  PlusIcon,
   TrashIcon,
   CheckIcon,
 } from '../../components/common/Icons';
@@ -172,6 +171,7 @@ export default function ExpensesManagementPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // eslint-disable-next-line no-unused-vars
   const handleOpenAdd = () => {
     setFormData(initialForm);
     setFieldErrors({});
@@ -573,12 +573,6 @@ export default function ExpensesManagementPage() {
         <PageHeader
           title="Expense Management"
           subtitle="Track, audit, and approve operational, toll, and maintenance expenses"
-          actions={
-            <Button id="btn-add-expense" variant="primary" onClick={handleOpenAdd}>
-              <PlusIcon size={18} />
-              Add Expense
-            </Button>
-          }
         />
 
         {/* Top Summary Section */}
@@ -753,11 +747,6 @@ export default function ExpensesManagementPage() {
           renderCard={renderCard}
           emptyTitle="No expenses found"
           emptyDescription="Operational expenses will show up here as they are filed."
-          emptyAction={
-            <Button variant="primary" onClick={handleOpenAdd}>
-              <PlusIcon size={16} /> Add First Expense
-            </Button>
-          }
         />
 
         {/* Add Expense Modal */}

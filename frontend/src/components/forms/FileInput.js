@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useId } from 'react';
 import FormField from './FormField';
 import IconButton from '../common/IconButton';
 import { CloseIcon } from '../common/Icons';
@@ -25,7 +25,8 @@ export default function FileInput({
   const [internalError, setInternalError] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const fileInputId = id || name || 'file-input';
+  const autoId = useId();
+  const fileInputId = id || name || `file-input-${autoId}`;
   const effectiveError = externalError || internalError;
 
   const validateAndSetFile = (file) => {
@@ -72,6 +73,17 @@ export default function FileInput({
     }
 
     if (onChange) {
+      if (file) {
+        try {
+          if (!file.target) {
+            Object.defineProperty(file, 'target', {
+              value: { files: [file], value: file.name },
+              writable: true,
+              configurable: true,
+            });
+          }
+        } catch (_) {}
+      }
       onChange(file);
     }
   };

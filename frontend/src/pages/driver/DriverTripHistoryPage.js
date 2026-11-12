@@ -8,9 +8,9 @@ import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
 import Pagination from '../../components/common/Pagination';
 import { Skeleton } from '../../components/common/Loader';
-import { RefreshIcon } from '../../components/common/Icons';
 import { getTripHistoryApi } from '../../api/driver';
 import { getApiErrorMessage } from '../../api/client';
+import { formatPayableAmount } from '../../utils/formatters';
 import './DriverPages.css';
 
 export default function DriverTripHistoryPage() {
@@ -78,14 +78,6 @@ export default function DriverTripHistoryPage() {
       {/* Top Header */}
       <div className="driver-page-header">
         <h1 className="driver-page-title">Trip History</h1>
-        <IconButton
-          icon={<RefreshIcon size={18} />}
-          tooltip="Refresh History"
-          ariaLabel="Refresh History"
-          variant="secondary"
-          size="medium"
-          onClick={() => fetchHistory(1, false)}
-        />
       </div>
 
       {/* Filter Chips */}
@@ -163,7 +155,7 @@ export default function DriverTripHistoryPage() {
                           <Badge status={item.status} />
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 700 }}>
-                          ₹{item.total_fare || '0'}
+                          {formatPayableAmount(item.total_fare, { tripStatus: item.status })}
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <IconButton

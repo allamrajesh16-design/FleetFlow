@@ -238,7 +238,30 @@ cd backend; .\venv\Scripts\python.exe manage.py run_scheduled_jobs
 
 ---
 
-## 9. Documentation Links
+## 9. Email Verification: What Can and Cannot Be Checked
+
+When a user signs up on FleetFlow, the registration system performs real-time automated validation on the email address:
+
+### What CAN be checked:
+- **Syntax & Normalization**: Standard ASCII characters, exactly one `@`, valid domain labels, length limits (<= 64 for local part, <= 254 total).
+- **Provider Rules**: Enforces Gmail rules (6-30 characters, only letters, digits, and dots, no leading/trailing or consecutive dots) and Yahoo rules (4-32 characters, starts with a letter).
+- **Dummy Pattern Detection**: Rejects dummy addresses including characters repeated 4+ times, <= 2 unique characters on length >= 6, keyboard/sequential runs (`qwerty`, `123456`, `asdfgh`), Shannon entropy < 1.6 on length >= 8, and dummy dictionary words (`test`, `demo`, `dummy`, `user`, etc.).
+- **Domain Verification**: Blocks disposable domains (250+ domains in `backend/accounts/data/disposable_domains.txt`), reserved/test domains (`example.com`, `test.com`, `.local`, `.test`), and domains lacking MX or A records.
+- **Typo Suggestions**: Automatically flags typos within edit distance <= 2 for popular domains (`gmial.com`, `hotmial.com`, `outlok.com`) and offers a one-click button to fix the address.
+
+### What CANNOT be checked programmatically:
+- **Individual Mailbox Existence**: A server cannot verify whether a specific mailbox exists at a provider like Google or Yahoo without actually sending an email. Most mail providers disable SMTP `VRFY` and catch-all probes to prevent spam harvesting.
+- **Spam Filtering & Inbox Placement**: Server-side checks cannot determine if a mail provider's anti-spam engine will deliver to inbox vs spam.
+
+### The OTP is the Final Proof:
+Because a program cannot confirm a mailbox exists without sending mail, FleetFlow relies on the **6-digit OTP as the final proof** of email ownership:
+- An account is completely unusable until the email OTP is entered and verified.
+- Unverified sign-ups older than 24 hours are automatically cleaned up (`python manage.py purge_unverified`).
+- Re-registering with an unverified email replaces the pending record with fresh credentials and OTP, ensuring real owners are never locked out by accidental typos.
+
+---
+
+## 10. Documentation Links
 
 - [30 Essentials Master Checklist](docs/ESSENTIALS_CHECKLIST.md)
 - [Database Backup & Restore Guide](docs/BACKUP.md)

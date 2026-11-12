@@ -18,12 +18,17 @@ class EmailDeliveryAndOTPTests(TestCase):
         self.register_url = "/api/auth/register/"
         self.verify_url = "/api/auth/verify-otp/"
         self.resend_url = "/api/auth/resend-otp/"
+        self.dns_patcher = patch("accounts.email_validation.check_domain_dns", return_value=True)
+        self.dns_patcher.start()
+
+    def tearDown(self):
+        self.dns_patcher.stop()
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEBUG=True)
     def test_register_sends_exactly_one_email_with_6_digit_otp(self):
         mail.outbox = []
         payload = {
-            "email": "customer_test@example.com",
+            "email": "customer.delivery@fleetflow.com",
             "password": "SecurePassword123!",
             "password_confirm": "SecurePassword123!",
             "full_name": "Test Customer",
@@ -40,7 +45,7 @@ class EmailDeliveryAndOTPTests(TestCase):
         # Sends exactly one email to the right address
         self.assertEqual(len(mail.outbox), 1)
         sent_email = mail.outbox[0]
-        self.assertIn("customer_test@example.com", sent_email.to)
+        self.assertIn("customer.delivery@fleetflow.com", sent_email.to)
         self.assertIn("FleetFlow - Verify Your Email", sent_email.subject)
 
         # Contains 6-digit OTP
@@ -52,7 +57,7 @@ class EmailDeliveryAndOTPTests(TestCase):
     def test_register_send_failure_returns_503_and_rolls_back(self, mock_send):
         mock_send.side_effect = EmailDeliveryError("SMTP connection failed")
         payload = {
-            "email": "rollback_test@example.com",
+            "email": "rollback.delivery@fleetflow.com",
             "password": "SecurePassword123!",
             "password_confirm": "SecurePassword123!",
             "full_name": "Rollback User",
@@ -64,7 +69,7 @@ class EmailDeliveryAndOTPTests(TestCase):
         self.assertIn("We could not send the email. Please try again.", res.data.get("detail", ""))
 
         # Verify user is completely rolled back so same email can register again
-        self.assertFalse(User.objects.filter(email="rollback_test@example.com").exists())
+        self.assertFalse(User.objects.filter(email="rollback.delivery@fleetflow.com").exists())
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_resend_works_after_60_seconds(self):
@@ -196,7 +201,7 @@ class EmailDeliveryAndOTPTests(TestCase):
 
     def test_console_mode_flag_only_when_debug_true(self):
         payload = {
-            "email": "flag_test@example.com",
+            "email": "flag.delivery@fleetflow.com",
             "password": "SecurePassword123!",
             "password_confirm": "SecurePassword123!",
             "full_name": "Flag User",

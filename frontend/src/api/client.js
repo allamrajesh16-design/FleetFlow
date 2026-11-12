@@ -88,6 +88,17 @@ apiClient.interceptors.response.use(
         originalRequest.url?.includes('/auth/login/') ||
         originalRequest.url?.includes('/auth/token/refresh/')
       ) {
+        if (originalRequest.url?.includes('/auth/token/refresh/')) {
+          clearFleetFlowStorage();
+          window.dispatchEvent(
+            new CustomEvent('fleetflow_auth_logout', {
+              detail: { message: 'Your session expired. Please login again.' },
+            })
+          );
+          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+            window.location.replace('/login?expired=1');
+          }
+        }
         return Promise.reject(error);
       }
 
@@ -116,6 +127,9 @@ apiClient.interceptors.response.use(
             detail: { message: 'Your session expired. Please login again.' },
           })
         );
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+          window.location.replace('/login?expired=1');
+        }
         return Promise.reject(error);
       }
 
@@ -146,9 +160,24 @@ apiClient.interceptors.response.use(
             detail: { message: 'Your session expired. Please login again.' },
           })
         );
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+          window.location.replace('/login?expired=1');
+        }
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
+      }
+    }
+
+    if (error.response?.status === 401) {
+      clearFleetFlowStorage();
+      window.dispatchEvent(
+        new CustomEvent('fleetflow_auth_logout', {
+          detail: { message: 'Your session expired. Please login again.' },
+        })
+      );
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.replace('/login?expired=1');
       }
     }
 

@@ -1,39 +1,28 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import ErrorBoundary from '../common/ErrorBoundary';
 import PageTransition from '../common/PageTransition';
+import useBreakpoint from '../../hooks/useBreakpoint';
 import './DashboardLayout.css';
 
 export default function DashboardLayout({ title }) {
+  const { layout, isPhone, isTablet } = useBreakpoint();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(() => {
+  const [manualCollapsed, setManualCollapsed] = useState(() => {
     try {
       const saved = localStorage.getItem('ff_sidebar_collapsed');
-      if (saved !== null) {
-        return saved === 'true';
-      }
-      if (typeof window !== 'undefined' && window.innerWidth < 1100 && window.innerWidth > 1024) {
-        return true;
-      }
+      if (saved !== null) return saved === 'true';
     } catch {}
     return false;
   });
 
-  // Auto-collapse when viewport drops below 1100px (desktop/tablet threshold)
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1100 && window.innerWidth > 1024) {
-        setIsCollapsed(true);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Tablet tier strictly enforces 72px rail mode per RESPONSIVE.md
+  const isCollapsed = isTablet || (!isPhone && manualCollapsed);
 
   const handleToggleCollapse = useCallback(() => {
-    setIsCollapsed((prev) => {
+    setManualCollapsed((prev) => {
       const next = !prev;
       try {
         localStorage.setItem('ff_sidebar_collapsed', String(next));
@@ -43,8 +32,11 @@ export default function DashboardLayout({ title }) {
   }, []);
 
   return (
-    <div className={`dashboard-layout ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
-      {/* Sidebar with Rail Collapse Mode */}
+    <div
+      className={`dashboard-layout ${isCollapsed ? 'sidebar-collapsed' : ''}`}
+      data-layout={layout}
+    >
+      {/* Sidebar (Full, 72px Rail on Tablet, or Slide-in Drawer on Phone) */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

@@ -93,13 +93,22 @@ export async function downloadPrivateFile(url, fileName, showToastError) {
     return blobUrl;
   } catch (error) {
     const status = error.response?.status;
-    if (status === 403) {
-      notifyError('Access denied. You do not have permission to download this file.');
+    let message = 'Failed to download file.';
+    if (status === 401) {
+      message = 'Please login again.';
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    } else if (status === 403) {
+      message = 'You are not allowed to open this file';
     } else if (status === 404) {
-      notifyError('The requested file was not found on the server.');
+      message = 'The file is missing on the server. Please contact your Fleet Manager';
+    } else if (status && status >= 500) {
+      message = 'Server problem. Please try again';
     } else {
-      notifyError(getErrorMessage(error) || 'Failed to download file.');
+      message = getErrorMessage(error) || 'Failed to download file.';
     }
+    notifyError(message);
     return null;
   }
 }
@@ -147,13 +156,26 @@ export async function fetchPrivateFileBlobUrl(url, showToastError) {
     };
   } catch (error) {
     const status = error.response?.status;
-    if (status === 403) {
-      notifyError('Access denied. You do not have permission to view this file.');
+    let message = 'Failed to preview file.';
+    if (status === 401) {
+      message = 'Please login again.';
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    } else if (status === 403) {
+      message = 'You are not allowed to open this file';
     } else if (status === 404) {
-      notifyError('File not found or has been removed.');
+      message = 'The file is missing on the server. Please contact your Fleet Manager';
+    } else if (status && status >= 500) {
+      message = 'Server problem. Please try again';
     } else {
-      notifyError(getErrorMessage(error) || 'Failed to preview file.');
+      message = getErrorMessage(error) || 'Failed to preview file.';
     }
-    return null;
+    notifyError(message);
+    return {
+      error: true,
+      status: status || 0,
+      errorMessage: message,
+    };
   }
 }

@@ -30,6 +30,7 @@ import {
   formatDocType,
 } from '../../utils/formatters';
 import { DateInput } from '../../components/forms';
+import { VehiclePlate } from '../../components/common/SignatureDesign';
 import './AdminPages.css';
 import '../shared/FuelExpensesDocuments.css';
 
@@ -503,8 +504,8 @@ export default function AdminReportsPage({ isManager = false }) {
             <EmptyState title="No Records Found" description="Try selecting a different date range or category." />
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', width: '100%' }}>
-            <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-responsive-wrapper" style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+            <table className="table" style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse' }}>
               <thead>
                 {activeTab === 'bookings' && (
                   <tr>
@@ -573,13 +574,13 @@ export default function AdminReportsPage({ isManager = false }) {
                 )}
                 {activeTab === 'documents-expiry' && (
                   <tr>
-                    <th>Entity Type</th>
-                    <th>Owner / Registration</th>
-                    <th>Document Type</th>
-                    <th>Document No.</th>
-                    <th>Issue Date</th>
-                    <th>Expiry Date</th>
-                    <th>Status</th>
+                    <th style={{ width: '120px' }}>Entity Type</th>
+                    <th style={{ width: '180px' }}>Owner / Registration</th>
+                    <th style={{ width: '160px' }}>Document Type</th>
+                    <th style={{ width: '150px' }}>Document No.</th>
+                    <th style={{ width: '120px' }}>Issue Date</th>
+                    <th style={{ width: '120px' }}>Expiry Date</th>
+                    <th style={{ minWidth: '150px' }}>Status</th>
                   </tr>
                 )}
                 {activeTab === 'vehicle-cost' && (
@@ -601,7 +602,7 @@ export default function AdminReportsPage({ isManager = false }) {
                       <td>
                         <strong>BKG-{String(r.id).padStart(4, '0')}</strong>
                       </td>
-                      <td>{r.customer}</td>
+                      <td>{r.customer || 'Not recorded'}</td>
                       <td>{r.booking_type}</td>
                       <td>
                         {r.pickup_location} → {r.drop_location}
@@ -619,8 +620,8 @@ export default function AdminReportsPage({ isManager = false }) {
                       <td>
                         <strong>TRP-{String(r.id).padStart(4, '0')}</strong>
                       </td>
-                      <td>{r.vehicle}</td>
-                      <td>{r.driver}</td>
+                      <td>{r.vehicle || 'Not recorded'}</td>
+                      <td>{r.driver || 'Not recorded'}</td>
                       <td>
                         {r.source} → {r.destination}
                       </td>
@@ -640,7 +641,7 @@ export default function AdminReportsPage({ isManager = false }) {
                       <td>
                         <strong>PAY-{String(r.id).padStart(4, '0')}</strong>
                       </td>
-                      <td>{r.customer}</td>
+                      <td>{r.customer || 'Not recorded'}</td>
                       <td>
                         <strong>{formatMoney(r.amount)}</strong>
                       </td>
@@ -656,7 +657,7 @@ export default function AdminReportsPage({ isManager = false }) {
                   rows.map((r) => (
                     <tr key={r.vehicle_id || r.registration_number}>
                       <td>
-                        <strong>{r.registration_number}</strong>
+                        <strong>{r.registration_number || 'Not recorded'}</strong>
                       </td>
                       <td>{r.vehicle_type}</td>
                       <td>{r.trips_count}</td>
@@ -675,9 +676,9 @@ export default function AdminReportsPage({ isManager = false }) {
                     <tr key={r.id}>
                       <td>{formatDate(r.date)}</td>
                       <td>
-                        <strong>{r.vehicle_registration}</strong>
+                        <strong>{r.vehicle_registration || 'Not recorded'}</strong>
                       </td>
-                      <td>{r.driver_name || '-'}</td>
+                      <td>{r.driver_name || 'Not recorded'}</td>
                       <td>{getFuelTypeLabel(r.fuel_type)}</td>
                       <td>{formatFuelQuantity(r.quantity, r.fuel_type)}</td>
                       <td>{formatRupees(r.price_per_unit)}</td>
@@ -696,12 +697,12 @@ export default function AdminReportsPage({ isManager = false }) {
                       <td>
                         <strong>{r.category_display || r.category}</strong>
                       </td>
-                      <td>{r.vehicle_registration || '-'}</td>
+                      <td>{r.vehicle_registration || 'Not recorded'}</td>
                       <td>{r.trip_id ? `#${r.trip_id}` : '-'}</td>
                       <td>
                         <strong>{formatRupees(r.amount)}</strong>
                       </td>
-                      <td>{r.submitted_by_name || '-'}</td>
+                      <td>{r.submitted_by_name || 'Not recorded'}</td>
                       <td>
                         <Badge status={r.status} />
                       </td>
@@ -709,26 +710,39 @@ export default function AdminReportsPage({ isManager = false }) {
                   ))}
 
                 {activeTab === 'documents-expiry' &&
-                  rows.map((r) => (
-                    <tr key={r.id}>
-                      <td>
-                        <Badge
-                          variant={r.entity_type === 'VEHICLE' ? 'blue' : 'purple'}
-                          status={r.entity_type}
-                        />
-                      </td>
-                      <td>
-                        <strong>{r.owner_name}</strong>
-                      </td>
-                      <td>{formatDocType(r.doc_type_display || r.doc_type)}</td>
-                      <td>{r.document_number || '-'}</td>
-                      <td>{r.issue_date ? formatDate(r.issue_date) : '-'}</td>
-                      <td>{formatDate(r.expiry_date)}</td>
-                      <td>
-                        <ExpiryBadge status={r.expiry_status} daysLeft={r.days_left} />
-                      </td>
-                    </tr>
-                  ))}
+                  rows.map((r) => {
+                    const isVehicle = (r.entity_type || r.target_type) === 'VEHICLE';
+                    const entityLabel = isVehicle ? 'Vehicle' : 'Driver';
+                    const ownerValue = r.owner_name || r.target || 'Not recorded';
+
+                    return (
+                      <tr key={r.id}>
+                        <td>
+                          <Badge variant={isVehicle ? 'blue' : 'purple'} status={entityLabel}>
+                            {entityLabel}
+                          </Badge>
+                        </td>
+                        <td>
+                          {isVehicle && ownerValue !== 'Not recorded' ? (
+                            <VehiclePlate registrationNumber={ownerValue} size="sm" />
+                          ) : (
+                            <strong>{ownerValue}</strong>
+                          )}
+                        </td>
+                        <td>{formatDocType(r.doc_type_display || r.doc_type) || 'Not recorded'}</td>
+                        <td>{r.document_number && r.document_number !== '-' ? r.document_number : 'Not recorded'}</td>
+                        <td>{r.issue_date ? formatDate(r.issue_date) : 'Not recorded'}</td>
+                        <td>{r.expiry_date ? formatDate(r.expiry_date) : 'Not recorded'}</td>
+                        <td style={{ minWidth: '150px' }}>
+                          <ExpiryBadge
+                            expiryStatus={r.expiry_status}
+                            daysLeft={r.days_left}
+                            expiryDate={r.expiry_date}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
 
                 {activeTab === 'vehicle-cost' &&
                   rows.map((r) => (

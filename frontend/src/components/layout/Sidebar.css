@@ -281,15 +281,25 @@
   }
 }
 
-/* Responsive sidebar for mobile & zoomed layouts */
-@media (max-width: 1024px) {
+/* Tablet (768px - 1023px): Icon Rail mode */
+@media (min-width: 768px) and (max-width: 1023px) {
   .sidebar-container {
+    width: var(--sidebar-width-rail, 72px);
+    transform: translateX(0);
+  }
+}
+
+/* Phone (<= 767px): Mobile slide-in drawer with backdrop */
+@media (max-width: 767px) {
+  .sidebar-container {
+    width: 280px;
+    max-width: 85vw;
     transform: translateX(-100%);
   }
 
   .sidebar-container.open {
     transform: translateX(0);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   }
 
   .sidebar-close-mobile {

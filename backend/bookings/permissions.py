@@ -54,7 +54,14 @@ class BookingPermission(BasePermission):
                 User.Role.FLEET_MANAGER,
             ] or request.user.is_superuser
 
-        if view.action in ["cancel", "bus_response"]:
+        if view.action == "cancel":
+            return request.user.role in [
+                User.Role.CUSTOMER,
+                User.Role.ADMIN,
+                User.Role.FLEET_MANAGER,
+            ] or request.user.is_superuser
+
+        if view.action == "bus_response":
             return request.user.role == User.Role.CUSTOMER
 
         return True

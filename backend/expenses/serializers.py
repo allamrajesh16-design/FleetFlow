@@ -16,6 +16,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
     submitted_by_name = serializers.CharField(source="submitted_by.full_name", read_only=True)
     reviewed_by_name = serializers.CharField(source="reviewed_by.full_name", read_only=True)
     has_receipt = serializers.SerializerMethodField(read_only=True)
+    description = serializers.CharField(required=False, allow_blank=True, default="")
 
     class Meta:
         model = Expense
@@ -56,11 +57,22 @@ class ExpenseSerializer(serializers.ModelSerializer):
         return bool(obj.receipt_image)
 
     def validate_category(self, value):
-        if str(value).upper() == "FUEL":
+        val = str(value).upper()
+        aliases = {
+            "MAINTENANCE_REPAIR": "REPAIR",
+            "CHALLAN_FINE": "FINE",
+            "ACCOMMODATION": "DRIVER_ALLOWANCE",
+            "CLEANING": "OTHER",
+        }
+        val = aliases.get(val, val)
+        if val == "FUEL":
             raise serializers.ValidationError(
                 "Fuel is not an expense category. Please use the Fuel Management module to record fuel."
             )
-        return value
+        valid_choices = [c[0] for c in Expense.Category.choices]
+        if val not in valid_choices:
+            raise serializers.ValidationError(f"'{value}' is not a valid expense category.")
+        return val
 
     def validate_amount(self, value):
         if value <= 0:
@@ -87,6 +99,11 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
         trip = attrs.get("trip") or (self.instance.trip if self.instance else None)
         vehicle = attrs.get("vehicle") or (self.instance.vehicle if self.instance else None)
+
+        # Fallback description if blank
+        if not attrs.get("description") or not str(attrs.get("description")).strip():
+            cat = attrs.get("category") or (self.instance.category if self.instance else "Trip")
+            attrs["description"] = f"{cat.replace('_', ' ').title()} operational expense"
 
         if user and user.role == User.Role.DRIVER:
             driver_profile = getattr(user, "driver_profile", None)

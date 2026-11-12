@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function Logo({ light = false, size = 'medium', to = '/', compact = false }) {
+export default function Logo({ light = false, size = 'medium', to = '/', compact = false, className = '' }) {
   const iconSizes = {
     small: 28,
     medium: 36,
@@ -18,6 +18,7 @@ export default function Logo({ light = false, size = 'medium', to = '/', compact
 
   const content = (
     <div
+      className={className}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -62,7 +63,7 @@ export default function Logo({ light = false, size = 'medium', to = '/', compact
           }}
         >
           Fleet
-          <span style={{ color: '#2563EB' }}>Flow</span>
+          <span style={{ color: light ? 'var(--on-photo-accent, #93C5FD)' : '#2563EB' }}>Flow</span>
         </span>
       )}
     </div>

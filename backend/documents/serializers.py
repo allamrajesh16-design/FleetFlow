@@ -14,8 +14,10 @@ class DocumentRejectSerializer(serializers.Serializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    days_left = serializers.IntegerField(read_only=True)
+    days_left = serializers.IntegerField(read_only=True, allow_null=True)
     expiry_status = serializers.CharField(read_only=True)
+    document_number = serializers.CharField(required=False, allow_blank=True, default="")
+    expiry_date = serializers.DateField(required=False, allow_null=True)
     vehicle_registration = serializers.CharField(source="vehicle.registration_number", read_only=True)
     driver_name = serializers.SerializerMethodField(read_only=True)
     uploaded_by_name = serializers.CharField(source="uploaded_by.full_name", read_only=True)
@@ -96,6 +98,17 @@ class DocumentSerializer(serializers.ModelSerializer):
                 "doc_type": f"Invalid doc_type '{doc_type}' for a driver. Allowed: {Document.DRIVER_DOC_TYPES}"
             })
 
+        if doc_type != Document.DocType.PROFILE_PHOTO and not expiry_date:
+            raise serializers.ValidationError({
+                "expiry_date": "Expiry date is required for this document type."
+            })
+
+        doc_num = attrs.get("document_number") if "document_number" in attrs else (self.instance.document_number if self.instance else "")
+        if doc_type != Document.DocType.PROFILE_PHOTO and not doc_num:
+            raise serializers.ValidationError({
+                "document_number": "Document number is required for this document type."
+            })
+
         if issue_date and expiry_date and issue_date > expiry_date:
             raise serializers.ValidationError({
                 "issue_date": "Issue date cannot be later than expiry date."
@@ -114,6 +127,22 @@ class DocumentSerializer(serializers.ModelSerializer):
                 has_trip = Trip.objects.filter(driver=driver_profile, vehicle=vehicle).exists()
                 if not has_trip:
                     raise serializers.ValidationError({"vehicle": "You can only upload documents for a vehicle you drive on one of your trips."})
+
+            # Duplicate upload restriction: prevent uploading a document type that already exists
+            # Only block on CREATE (self.instance is None), not on update/replace
+            if self.instance is None and driver and doc_type:
+                already_exists = Document.objects.filter(
+                    driver=driver,
+                    doc_type=doc_type,
+                ).exists()
+                if already_exists:
+                    raise serializers.ValidationError({
+                        "detail": (
+                            f"A {dict(Document.DocType.choices).get(doc_type, doc_type)} document already exists "
+                            f"for this driver. Duplicate uploads are not allowed. "
+                            f"Contact your manager if the document needs to be updated."
+                        )
+                    })
 
         return attrs
 

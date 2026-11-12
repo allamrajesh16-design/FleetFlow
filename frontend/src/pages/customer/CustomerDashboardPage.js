@@ -1,7 +1,6 @@
 import DashboardHeaderStrip from "../../components/common/DashboardHeaderStrip";
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StatusBadge from '../../components/common/StatusBadge';
 import Button from '../../components/common/Button';
 import { SkeletonCard } from '../../components/common/Skeleton';
 import ErrorState from '../../components/common/ErrorState';
@@ -9,7 +8,6 @@ import {
   BookingIcon,
   TripIcon,
   PaymentIcon,
-  ClockIcon,
 } from '../../components/common/Icons';
 import { TicketCard } from '../../components/common/SignatureDesign';
 import { useAuth } from '../../context/AuthContext';

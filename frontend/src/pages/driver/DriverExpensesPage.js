@@ -35,10 +35,10 @@ import '../shared/FuelExpensesDocuments.css';
 const DRIVER_EXPENSE_CATEGORIES = [
   { value: 'TOLL', label: 'Toll & Fastag' },
   { value: 'PARKING', label: 'Parking Charges' },
-  { value: 'MAINTENANCE_REPAIR', label: 'Minor Repair' },
-  { value: 'CHALLAN_FINE', label: 'Challan & Fine' },
-  { value: 'CLEANING', label: 'Washing & Cleaning' },
-  { value: 'ACCOMMODATION', label: 'Driver Stay / Food' },
+  { value: 'REPAIR', label: 'Minor Repair / Maintenance' },
+  { value: 'FINE', label: 'Challan & Traffic Fine' },
+  { value: 'DRIVER_ALLOWANCE', label: 'Driver Allowance & Food' },
+  { value: 'PERMIT_TAX', label: 'Permit & State Tax' },
   { value: 'OTHER', label: 'Other Operational Cost' },
 ];
 
@@ -56,15 +56,13 @@ export default function DriverExpensesPage() {
         const list = normalizeList(data).items || [];
         const filtered = list.filter((t) => {
           const s = String(t.status).toUpperCase();
-          if (['SCHEDULED', 'IN_PROGRESS', 'STARTED'].includes(s)) return true;
-          if (s === 'COMPLETED') {
-            const timeStr = t.end_time || t.completed_at || t.updated_at;
-            if (!timeStr) return true;
-            const diffHours = (Date.now() - new Date(timeStr).getTime()) / (1000 * 60 * 60);
-            return diffHours <= 24;
-          }
-          return false;
+          return ['SCHEDULED', 'IN_PROGRESS', 'STARTED', 'COMPLETED'].includes(s);
         });
+        filtered.sort(
+          (a, b) =>
+            new Date(b.scheduled_datetime || b.created_at || 0) -
+            new Date(a.scheduled_datetime || a.created_at || 0)
+        );
         setTrips(filtered);
       })
       .catch(() => {
@@ -169,12 +167,13 @@ export default function DriverExpensesPage() {
 
     try {
       const payload = new FormData();
-      if (formData.trip) payload.append('trip', formData.trip);
-      if (formData.vehicle) payload.append('vehicle', formData.vehicle);
+      if (formData.trip) payload.append('trip', String(formData.trip));
+      if (formData.vehicle) payload.append('vehicle', String(formData.vehicle));
       payload.append('category', formData.category);
       payload.append('amount', formData.amount);
       payload.append('date', formData.date || todayStr);
-      if (formData.description) payload.append('description', formData.description.trim());
+      const desc = (formData.description || '').trim() || `${getCategoryLabel(formData.category)} expense`;
+      payload.append('description', desc);
       if (formData.receipt_image) {
         payload.append('receipt_image', formData.receipt_image);
       }

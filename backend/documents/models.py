@@ -26,6 +26,8 @@ class Document(models.Model):
         # Driver document types
         DRIVING_LICENSE = "DRIVING_LICENSE", "Driving License"
         ID_PROOF = "ID_PROOF", "ID Proof"
+        PROFILE_PHOTO = "PROFILE_PHOTO", "Driver Profile Photo"
+        POLICE_VERIFICATION = "POLICE_VERIFICATION", "Police Verification Certificate"
         MEDICAL_CERTIFICATE = "MEDICAL_CERTIFICATE", "Medical Certificate"
         # General / Other
         OTHER = "OTHER", "Other"
@@ -43,6 +45,8 @@ class Document(models.Model):
     DRIVER_DOC_TYPES = [
         DocType.DRIVING_LICENSE,
         DocType.ID_PROOF,
+        DocType.PROFILE_PHOTO,
+        DocType.POLICE_VERIFICATION,
         DocType.MEDICAL_CERTIFICATE,
         DocType.OTHER,
     ]
@@ -70,9 +74,9 @@ class Document(models.Model):
         max_length=40,
         choices=DocType.choices,
     )
-    document_number = models.CharField(max_length=100)
+    document_number = models.CharField(max_length=100, blank=True, default="")
     issue_date = models.DateField(null=True, blank=True)
-    expiry_date = models.DateField()
+    expiry_date = models.DateField(null=True, blank=True)
     file = models.FileField(
         upload_to=random_document_path,
         storage=private_file_storage,
@@ -133,16 +137,18 @@ class Document(models.Model):
     def days_left(self):
         """Number of days until document expiry. Negative means expired."""
         if not self.expiry_date:
-            return 0
+            return None
         return (self.expiry_date - timezone.localdate()).days
 
     @property
     def expiry_status(self):
         """Computed status: VALID, EXPIRING_SOON (<= 30 days), or EXPIRED."""
+        if not self.expiry_date:
+            return self.ExpiryStatus.VALID
         days = self.days_left
-        if days < 0:
+        if days is not None and days < 0:
             return self.ExpiryStatus.EXPIRED
-        elif days <= 30:
+        elif days is not None and days <= 30:
             return self.ExpiryStatus.EXPIRING_SOON
         return self.ExpiryStatus.VALID
 
@@ -164,6 +170,16 @@ class Document(models.Model):
         if has_d and self.doc_type not in self.DRIVER_DOC_TYPES:
             raise ValidationError({
                 "doc_type": f"Invalid doc_type '{self.doc_type}' for a driver."
+            })
+
+        if self.doc_type != self.DocType.PROFILE_PHOTO and not self.expiry_date:
+            raise ValidationError({
+                "expiry_date": "Expiry date is required for this document type."
+            })
+
+        if self.doc_type != self.DocType.PROFILE_PHOTO and not self.document_number:
+            raise ValidationError({
+                "document_number": "Document number is required for this document type."
             })
 
         if self.issue_date and self.expiry_date and self.issue_date > self.expiry_date:

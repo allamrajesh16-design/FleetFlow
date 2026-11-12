@@ -2,11 +2,57 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from rest_framework import viewsets, serializers
 from rest_framework.filters import SearchFilter, OrderingFilter
+import django_filters
+from django.db.models import Q
+from django.utils import timezone
 
 from accounts.models import User
-from .models import Vehicle
+from .models import Vehicle, Maintenance
 from .permissions import VehiclePermission
 from .serializers import VehicleSerializer
+
+
+class VehicleFilter(django_filters.FilterSet):
+    vehicle_type = django_filters.CharFilter(field_name="vehicle_type")
+    status = django_filters.CharFilter(method="filter_status")
+    operational_status = django_filters.CharFilter(method="filter_status")
+
+    class Meta:
+        model = Vehicle
+        fields = ["vehicle_type", "status", "operational_status"]
+
+    def filter_status(self, queryset, name, value):
+        if not value:
+            return queryset
+        val_upper = value.upper()
+        today = timezone.localdate()
+        today_start = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time()))
+        today_end = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.max.time()))
+        from trips.models import Trip
+
+        if val_upper == "MAINTENANCE":
+            return queryset.filter(status=Vehicle.Status.MAINTENANCE)
+        elif val_upper == "INACTIVE":
+            return queryset.filter(status=Vehicle.Status.INACTIVE)
+        elif val_upper == "ON_TRIP":
+            trip_vids = Trip.objects.filter(status=Trip.Status.IN_PROGRESS).values_list("vehicle_id", flat=True)
+            return queryset.filter(Q(status=Vehicle.Status.ON_TRIP) | Q(id__in=trip_vids))
+        elif val_upper == "ASSIGNED_TODAY":
+            trip_vids = Trip.objects.filter(
+                scheduled_datetime__range=(today_start, today_end),
+                status=Trip.Status.SCHEDULED,
+            ).values_list("vehicle_id", flat=True)
+            return queryset.filter(id__in=trip_vids)
+        elif val_upper in ("AVAILABLE", "ACTIVE"):
+            busy_vids = Trip.objects.filter(
+                Q(status=Trip.Status.IN_PROGRESS) |
+                Q(scheduled_datetime__range=(today_start, today_end), status=Trip.Status.SCHEDULED)
+            ).values_list("vehicle_id", flat=True)
+            maint_vids = Maintenance.objects.filter(
+                status__in=[Maintenance.Status.SCHEDULED, Maintenance.Status.IN_PROGRESS]
+            ).values_list("vehicle_id", flat=True)
+            return queryset.filter(status=Vehicle.Status.ACTIVE).exclude(id__in=busy_vids).exclude(id__in=maint_vids)
+        return queryset.filter(status=value)
 
 
 @extend_schema_view(
@@ -48,7 +94,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     serializer_class = VehicleSerializer
     permission_classes = [VehiclePermission]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ["vehicle_type", "status"]
+    filterset_class = VehicleFilter
     search_fields = ["registration_number", "brand", "model"]
     ordering_fields = ["created_at", "rate_per_km", "seating_capacity", "brand", "model"]
     ordering = ["-created_at"]
