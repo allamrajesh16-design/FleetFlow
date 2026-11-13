@@ -57,3 +57,15 @@ docs/scope*/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Temporary Scratch & Diagnostic Probe Scripts
+scripts/scratch_*.js
+scripts/scratch_*.py
+scripts/tmp_*.js
+scripts/tmp_*.py
+scripts/debug_*.js
+scripts/debug_*.py
+scripts/probe_*.js
+scripts/probe_*.py
+scripts/capture_*.js
+
