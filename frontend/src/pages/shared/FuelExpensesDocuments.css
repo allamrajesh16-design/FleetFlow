@@ -174,7 +174,13 @@
   border-bottom: 2px solid var(--color-border-subtle, var(--border));
   margin-bottom: var(--space-5, 20px);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
   padding-bottom: 2px;
+}
+
+.ff-tabs-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .ff-tab-btn {
@@ -728,3 +734,31 @@
   border-radius: 9999px;
   transition: width 0.4s ease;
 }
+
+/* Responsive button container styles for Documents Management Page */
+.doc-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.doc-action-buttons-right {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 480px) {
+  .doc-action-buttons,
+  .doc-action-buttons-right {
+    justify-content: center;
+  }
+  .doc-action-buttons > button,
+  .doc-action-buttons-right > button {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}
+

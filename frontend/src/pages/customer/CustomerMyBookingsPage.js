@@ -217,25 +217,25 @@ export default function CustomerMyBookingsPage() {
                     : b?.travel_datetime;
 
                   return (
-                    <tr key={b?.id} className="datatable-tr">
-                      <td className="datatable-td" style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+                    <tr key={b?.id} className="datatable-tr" data-label="row">
+                      <td className="datatable-td" data-label="Booking ID" style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
                         #{b?.id}
                       </td>
-                      <td className="datatable-td">
+                      <td className="datatable-td" data-label="Type">
                         {getVehicleIcon(b?.vehicle_type)} {isBus ? 'Bus Seat' : (b?.vehicle_type || 'Vehicle')}
                       </td>
-                      <td className="datatable-td">
+                      <td className="datatable-td" data-label="Type">
                         <span style={{ fontWeight: 500 }}>{pickup}</span> → <span style={{ fontWeight: 500 }}>{drop}</span>
                       </td>
-                      <td className="datatable-td">{travelDate ? formatDateTime(travelDate) : '—'}</td>
-                      <td className="datatable-td">{b?.passengers || 1}</td>
+                      <td className="datatable-td" data-label="Type">{travelDate ? formatDateTime(travelDate) : '—'}</td>
+                      <td className="datatable-td" data-label="Type">{b?.passengers || 1}</td>
                       <td className="datatable-td align-right" style={{ fontWeight: 700 }}>
                         {b?.estimated_fare ? formatCurrency(b.estimated_fare) : '—'}
                       </td>
-                      <td className="datatable-td">
+                      <td className="datatable-td" data-label="Type">
                         <StatusBadge status={b?.status || 'PENDING'} />
                       </td>
-                      <td className="datatable-td" style={{ textAlign: 'center' }}>
+                      <td className="datatable-td datatable-actions-group" data-label="Actions" style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                           {b?.status === 'IN_PROGRESS' && (
                             <Button

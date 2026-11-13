@@ -337,7 +337,7 @@ export default function ManagerAssignmentsPage() {
           </div>
           <div className="summary-card-body">
             <div className="summary-card-value">
-              {summaryStats.pending_assignments ?? summaryStats.waiting ?? 0}
+              {assignableItems.length}
             </div>
             <div className="summary-card-label">Pending Bookings</div>
           </div>

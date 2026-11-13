@@ -73,3 +73,20 @@
   font-weight: var(--font-weight-semibold);
   box-shadow: var(--shadow-sm);
 }
+
+/* ── Mobile: horizontal scroll for line tabs ── */
+@media (max-width: 767px) {
+  .tabs-line {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+  .tabs-line::-webkit-scrollbar {
+    display: none;
+  }
+  .tabs-line .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}

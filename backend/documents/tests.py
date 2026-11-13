@@ -319,6 +319,95 @@ class DocumentManagementTests(APITestCase):
         after_run2_count = Notification.objects.count()
         self.assertIn("Total notification items dispatched: 0", out2.getvalue())
 
+    def test_check_and_notify_expired_documents_is_idempotent(self):
+        """
+        services.check_and_notify_expired_documents() must not raise IntegrityError
+        when called repeatedly for the same expired document (simulates concurrent
+        requests hitting the list / expiring endpoints at the same time).
+        """
+        from django.db import IntegrityError
+        from documents.services import check_and_notify_expired_documents
+
+        today = date.today()
+        # Create an already-expired document
+        doc = Document.objects.create(
+            vehicle=self.vehicle,
+            doc_type=Document.DocType.INSURANCE,
+            document_number="INS-RACE-001",
+            expiry_date=today - timedelta(days=3),
+            uploaded_by=self.admin,
+            review_status=Document.ReviewStatus.APPROVED,
+        )
+
+        # First call: should create AlertLog and NOT raise
+        try:
+            check_and_notify_expired_documents()
+        except IntegrityError:
+            self.fail("check_and_notify_expired_documents() raised IntegrityError on first call")
+
+        self.assertEqual(
+            AlertLog.objects.filter(document=doc, threshold_days=0, alert_type="EXPIRED").count(),
+            1,
+            "Exactly one AlertLog should exist after first call",
+        )
+
+        # Second call (simulating concurrent / repeated request): must NOT raise IntegrityError
+        try:
+            check_and_notify_expired_documents()
+        except IntegrityError:
+            self.fail("check_and_notify_expired_documents() raised IntegrityError on second call (race-condition bug)")
+
+        # Still only one AlertLog row — no duplicates
+        self.assertEqual(
+            AlertLog.objects.filter(document=doc, threshold_days=0, alert_type="EXPIRED").count(),
+            1,
+            "AlertLog count must remain 1 after repeated calls (idempotent)",
+        )
+
+    def test_document_alerts_command_idempotent_for_expired_document(self):
+        """
+        Management command document_alerts uses get_or_create so running it twice
+        for the same expired document never raises IntegrityError and never creates
+        duplicate AlertLog rows.
+        """
+        from django.db import IntegrityError
+
+        today = date.today()
+        # Document already expired
+        doc = Document.objects.create(
+            vehicle=self.vehicle,
+            doc_type=Document.DocType.REGISTRATION_RC,
+            document_number="RC-IDEMPOTENT-01",
+            expiry_date=today - timedelta(days=1),
+            uploaded_by=self.admin,
+            review_status=Document.ReviewStatus.APPROVED,
+        )
+
+        try:
+            out1 = io.StringIO()
+            call_command("document_alerts", stdout=out1)
+        except IntegrityError:
+            self.fail("document_alerts raised IntegrityError on first run")
+
+        # Verify exactly one alert log created
+        self.assertEqual(
+            AlertLog.objects.filter(document=doc, threshold_days=0, alert_type="DOCUMENT").count(),
+            1,
+        )
+
+        # Run again — must NOT raise and must NOT create a second row
+        try:
+            out2 = io.StringIO()
+            call_command("document_alerts", stdout=out2)
+        except IntegrityError:
+            self.fail("document_alerts raised IntegrityError on second (repeated) run")
+
+        self.assertEqual(
+            AlertLog.objects.filter(document=doc, threshold_days=0, alert_type="DOCUMENT").count(),
+            1,
+            "AlertLog must remain 1 row after repeated command runs",
+        )
+
     def test_driver_downloading_other_driver_document_and_customer_get_403(self):
         """A driver downloading another driver's document gets 404 (no existence leak), and a customer gets 403."""
         # Create a document belonging to self.driver_profile

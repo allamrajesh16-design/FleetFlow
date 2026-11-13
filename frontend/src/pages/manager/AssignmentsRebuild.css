@@ -456,6 +456,35 @@
   font-weight: 700;
 }
 
+@media (max-width: 430px) {
+  .assignments-summary-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+  .assignment-summary-card-metric {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+  .assignment-filter-toolbar {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .filter-category-pills {
+    justify-content: center;
+  }
+  .assignments-table-responsive-wrapper {
+    overflow-x: auto;
+  }
+  .assignments-booking-table th,
+  .assignments-booking-table td {
+    padding: var(--space-1);
+    font-size: var(--font-size-xs);
+  }
+  .assignments-table-header h3 {
+    font-size: var(--font-size-lg);
+  }
+}
+
 /* Loading & Error States */
 .assignments-pane-loading {
   display: flex;

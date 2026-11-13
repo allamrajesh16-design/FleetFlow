@@ -340,7 +340,7 @@ export default function DocumentsManagementPage() {
       width: '12%',
       minWidth: '110px',
       render: (doc) => (
-        <div style={{ display: 'flex', gap: '6px', whiteSpace: 'nowrap' }}>
+        <div className="doc-action-buttons">
           <Button
             size="small"
             variant="ghost"
@@ -368,7 +368,7 @@ export default function DocumentsManagementPage() {
       width: '20%',
       minWidth: '200px',
       render: (doc) => (
-        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', whiteSpace: 'nowrap' }}>
+        <div className="doc-action-buttons-right">
           <Button
             size="small"
             variant="outline"
@@ -492,11 +492,13 @@ export default function DocumentsManagementPage() {
               placeholder="All Document Types"
             >
               <option value="">All Document Types</option>
-              {[...VEHICLE_DOC_TYPES, ...DRIVER_DOC_TYPES].map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
+              {[...VEHICLE_DOC_TYPES, ...DRIVER_DOC_TYPES]
+                .filter((d, idx, arr) => arr.findIndex((x) => x.value === d.value) === idx)
+                .map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
             </Select>
 
             <Select

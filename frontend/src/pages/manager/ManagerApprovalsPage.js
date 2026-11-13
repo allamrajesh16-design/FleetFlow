@@ -146,7 +146,7 @@ export default function ManagerApprovalsPage() {
           return (
             <div>
               <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>{item.customer_name || 'Customer'}</div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', overflowWrap: 'break-word', wordBreak: 'break-word', maxWidth: '100%' }}>
                 {idStr} • {src} → {dst}
               </div>
             </div>

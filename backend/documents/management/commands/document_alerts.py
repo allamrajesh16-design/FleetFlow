@@ -80,11 +80,15 @@ class Command(BaseCommand):
                 )
 
             with transaction.atomic():
-                AlertLog.objects.create(
+                # get_or_create is race-condition-safe: if another process already
+                # inserted this row (concurrent cron runs), created=False and we skip.
+                alert_log, alert_created = AlertLog.objects.get_or_create(
                     document=doc,
                     threshold_days=threshold,
                     alert_type="DOCUMENT",
                 )
+                if not alert_created:
+                    continue
 
                 # In-app notifications to Admins and Fleet Managers
                 for user in admins_and_managers:
@@ -133,11 +137,15 @@ class Command(BaseCommand):
                 )
 
             with transaction.atomic():
-                AlertLog.objects.create(
+                # get_or_create is race-condition-safe: skip if already created
+                # by a concurrent or repeated run of this management command.
+                license_log, license_created = AlertLog.objects.get_or_create(
                     driver=driver,
                     threshold_days=threshold,
                     alert_type="DRIVER_LICENSE",
                 )
+                if not license_created:
+                    continue
 
                 for user in admins_and_managers:
                     notify(

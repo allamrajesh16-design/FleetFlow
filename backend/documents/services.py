@@ -25,7 +25,8 @@ def check_and_notify_expired_documents():
           * Expiry date
           * Expired status
           * Instructions to upload/update document
-      - Idempotent: Uses AlertLog (threshold_days=0, alert_type="EXPIRED") to avoid duplicate spamming.
+      - Idempotent: Uses AlertLog (threshold_days=0, alert_type="EXPIRED") with
+        get_or_create so concurrent requests can never produce a duplicate-key error.
     Also checks Driver license_expiry < today and sends driver license expired notification.
     """
     today = timezone.localdate()
@@ -37,13 +38,15 @@ def check_and_notify_expired_documents():
     ).select_related("vehicle", "driver", "driver__user")
 
     for doc in expired_docs:
-        # Check if already alerted for expiry
-        already_alerted = AlertLog.objects.filter(
+        # Atomic get-or-create: if the row already exists, created=False and we skip.
+        # This is race-condition-safe: two concurrent requests both succeed without a
+        # duplicate-key IntegrityError, because the DB handles the uniqueness atomically.
+        _, created = AlertLog.objects.get_or_create(
             document=doc,
             threshold_days=0,
             alert_type="EXPIRED",
-        ).exists()
-        if already_alerted:
+        )
+        if not created:
             continue
 
         doc_type_name = doc.get_doc_type_display()
@@ -134,21 +137,24 @@ def check_and_notify_expired_documents():
                 message=text_message,
                 html_message=html_message,
             )
-            AlertLog.objects.create(
+            # Use get_or_create so a race between two concurrent requests
+            # never raises IntegrityError on unique_doc_threshold_alert.
+            alert_log, alert_created = AlertLog.objects.get_or_create(
                 document=doc,
                 threshold_days=0,
                 alert_type="EXPIRED",
             )
-            sent_count += 1
-            if user_target:
-                notify(
-                    user=user_target,
-                    title=f"Expired Document: {doc_type_name}",
-                    message=f"The {doc_type_name} for {target_info} expired on {expiry_str}. Please upload an updated copy.",
-                    type=Notification.NotificationType.SYSTEM,
-                    item_type="document",
-                    item_id=doc.id,
-                )
+            if alert_created:
+                sent_count += 1
+                if user_target:
+                    notify(
+                        user=user_target,
+                        title=f"Expired Document: {doc_type_name}",
+                        message=f"The {doc_type_name} for {target_info} expired on {expiry_str}. Please upload an updated copy.",
+                        type=Notification.NotificationType.SYSTEM,
+                        item_type="document",
+                        item_id=doc.id,
+                    )
         except Exception as e:
             logger.error("Failed to send expired document email for doc %s: %s", doc.id, e)
 
@@ -177,20 +183,23 @@ def check_and_notify_expired_documents():
         )
         try:
             send_email(to=driver.user.email, subject=sub, message=msg)
-            AlertLog.objects.create(
+            # get_or_create prevents IntegrityError on unique_driver_license_threshold_alert
+            # if two concurrent requests race past the exists() check above.
+            license_log, license_created = AlertLog.objects.get_or_create(
                 driver=driver,
                 threshold_days=0,
                 alert_type="LICENSE_EXPIRED",
             )
-            sent_count += 1
-            notify(
-                user=driver.user,
-                title="Driving License Expired",
-                message=f"Your driving license expired on {exp_str}. Please renew and upload your new license.",
-                type=Notification.NotificationType.SYSTEM,
-                item_type="driver",
-                item_id=driver.id,
-            )
+            if license_created:
+                sent_count += 1
+                notify(
+                    user=driver.user,
+                    title="Driving License Expired",
+                    message=f"Your driving license expired on {exp_str}. Please renew and upload your new license.",
+                    type=Notification.NotificationType.SYSTEM,
+                    item_type="driver",
+                    item_id=driver.id,
+                )
         except Exception as e:
             logger.error("Failed to send expired license email for driver %s: %s", driver.id, e)
 

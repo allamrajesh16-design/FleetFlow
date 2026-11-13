@@ -191,6 +191,15 @@ apiClient.interceptors.response.use(
 export function getErrorMessage(error) {
   if (!error) return 'An unexpected error occurred.';
 
+  // Timeout or network-connection errors — show friendly message
+  if (
+    error.code === 'ECONNABORTED' ||
+    error.code === 'ERR_NETWORK' ||
+    (error.message && error.message.toLowerCase().includes('timeout'))
+  ) {
+    return 'Unable to reach the server. Please make sure the backend is running and try again.';
+  }
+
   const responseData = error.response?.data;
   if (!responseData) {
     if (error.message === 'Network Error') {
