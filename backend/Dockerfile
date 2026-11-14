@@ -31,12 +31,12 @@ RUN mkdir -p /app/logs /app/media /app/private_media /app/staticfiles && \
 
 USER fleetflow
 
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
 # Health check probing /api/health/
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:8000/api/health/ || exit 1
+  CMD curl -f http://localhost:${PORT:-8000}/api/health/ || exit 1
 
-# Start Gunicorn WSGI server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--timeout", "60", "config.wsgi:application"]
+# Collect static files, run database migrations, and start Gunicorn WSGI server
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2 --timeout 60 config.wsgi:application"]
 

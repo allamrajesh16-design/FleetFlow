@@ -21,7 +21,10 @@ def get_force_gateway_failure() -> bool:
 
 def generate_gateway_signature(payment_id: int, gateway_reference: str, amount, gateway_status: str) -> str:
     """Generate HMAC SHA-256 signature for verification."""
-    secret = getattr(settings, "PAYMENT_GATEWAY_SECRET", "fleetflow_secure_gateway_secret_key_2026")
+    secret = getattr(settings, "PAYMENT_GATEWAY_SECRET", "")
+    if not secret:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("PAYMENT_GATEWAY_SECRET is not configured.")
     formatted_amount = f"{Decimal(str(amount)):.2f}"
     payload = f"{payment_id}|{gateway_reference}|{formatted_amount}|{gateway_status}"
     return hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()

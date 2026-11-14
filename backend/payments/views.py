@@ -1,14 +1,17 @@
 import base64
 import io
 import logging
+import mimetypes
+import os
 import secrets
 
 logger = logging.getLogger("fleetflow.payments")
 from datetime import timedelta
 from decimal import Decimal
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.http import HttpResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
@@ -25,6 +28,7 @@ import qrcode.image.pil
 
 from accounts.models import User
 from bookings.models import Booking
+from core.upload_security import private_file_storage
 from notifications.models import Notification, notify
 
 from .filters import PaymentFilter
@@ -432,6 +436,12 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     )
     @action(detail=False, methods=["post"], url_path="verify")
     def verify(self, request):
+        if getattr(settings, "PAYMENT_MODE", "STATIC_QR") == "STATIC_QR":
+            return Response(
+                {"detail": "Not available in this payment mode."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         serializer = PaymentVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -675,6 +685,43 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         return Response(PaymentSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["Payments"],
+        summary="View or Download Payment Proof Screenshot",
+        description="Securely stream payment proof screenshot from private storage. Protected by PaymentPermission.",
+        responses={200: OpenApiResponse(description="Image file stream")},
+    )
+    @action(detail=True, methods=["get"], url_path="proof")
+    def proof(self, request, pk=None):
+        payment = self.get_object()
+
+        if not payment.proof_screenshot:
+            raise Http404("No proof screenshot attached to this payment.")
+
+        filename = payment.proof_screenshot.name
+
+        # Resolve file handle: check private storage first, fallback to default storage for unmigrated legacy files
+        try:
+            if private_file_storage.exists(filename):
+                file_handle = private_file_storage.open(filename, "rb")
+            elif default_storage.exists(filename):
+                file_handle = default_storage.open(filename, "rb")
+            else:
+                raise Http404("Proof screenshot file not found on disk.")
+        except Exception:
+            raise Http404("Proof screenshot file not found on disk.")
+
+        base_name = os.path.basename(filename)
+        content_type, _ = mimetypes.guess_type(base_name)
+        inline = request.query_params.get("download", "").lower() not in ("true", "1", "yes")
+
+        return FileResponse(
+            file_handle,
+            content_type=content_type or "image/jpeg",
+            as_attachment=not inline,
+            filename=base_name,
+        )
 
 
     @extend_schema(

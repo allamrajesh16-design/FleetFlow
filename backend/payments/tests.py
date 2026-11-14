@@ -10,6 +10,7 @@ from drivers.models import Driver
 from notifications.models import Notification
 from vehicles.models import Vehicle
 from trips.models import Trip
+from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from io import BytesIO
@@ -18,6 +19,7 @@ from PIL import Image
 from .gateway import (
     generate_gateway_signature,
     set_force_gateway_failure,
+    verify_gateway_signature,
 )
 from .models import Payment, Receipt, PaymentQRSetting
 
@@ -423,6 +425,41 @@ class Stage6PaymentTests(APITestCase):
         self.assertEqual(res2.status_code, status.HTTP_200_OK)
         receipt_count_2 = Receipt.objects.filter(payment=payment).count()
         self.assertEqual(receipt_count_2, 1)
+
+    def test_verify_endpoint_works_in_mock_gateway_mode_with_valid_signature(self):
+        trip = Trip.objects.create(
+            booking=self.booking_car,
+            vehicle=self.car,
+            driver=self.driver,
+            source="A",
+            destination="B",
+            scheduled_datetime=timezone.now(),
+            status=Trip.Status.COMPLETED,
+        )
+        payment = Payment.objects.create(
+            booking=self.booking_car,
+            trip=trip,
+            customer=self.customer1,
+            amount=Decimal("250.00"),
+            status=Payment.Status.UNPAID,
+        )
+        ref = "TXN_MOCK_VERIFY_999"
+        sig = generate_gateway_signature(payment.id, ref, payment.amount, "SUCCESS")
+
+        payload = {
+            "payment_id": payment.id,
+            "gateway_reference": ref,
+            "gateway_status": "SUCCESS",
+            "signature": sig,
+        }
+
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post("/api/payments/verify/", payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data.get("status"), "PAID")
+        payment.refresh_from_db()
+        self.assertEqual(payment.status, Payment.Status.PAID)
+        self.assertEqual(payment.gateway_reference, ref)
 
     # 10. Wrong signature is rejected and the payment stays unpaid
     def test_wrong_signature_rejected(self):
@@ -928,4 +965,310 @@ class StaticQRPaymentTests(APITestCase):
         res_pay = self.client.post(f"/api/payments/{self.payment.id}/pay/", {"payment_method": "UPI"})
         self.assertEqual(res_pay.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Not available in this payment mode", res_pay.data["detail"])
+
+        res_verify = self.client.post("/api/payments/verify/", {
+            "payment_id": self.payment.id,
+            "gateway_reference": "TXN_MOCK_REF",
+            "gateway_status": "SUCCESS",
+            "signature": "mock_signature_hex",
+        })
+        self.assertEqual(res_verify.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res_verify.data["detail"], "Not available in this payment mode.")
+
+    def test_verify_endpoint_returns_400_in_static_qr_mode(self):
+        self.client.force_authenticate(user=self.admin)
+        # Rejection occurs before serializer validation: even empty payload returns 400
+        res_empty = self.client.post("/api/payments/verify/", {})
+        self.assertEqual(res_empty.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res_empty.data["detail"], "Not available in this payment mode.")
+
+        # Full payload also returns 400 with exact detail message
+        payload = {
+            "payment_id": self.payment.id,
+            "gateway_reference": "TXN_MOCK_REF",
+            "gateway_status": "SUCCESS",
+            "signature": "mock_signature_hex",
+        }
+        res_full = self.client.post("/api/payments/verify/", payload)
+        self.assertEqual(res_full.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res_full.data["detail"], "Not available in this payment mode.")
+
+
+@override_settings(PAYMENT_MODE="STATIC_QR")
+class PaymentProofSecurityTests(APITestCase):
+    """Targeted security tests for Payment Proof screenshot access & storage."""
+
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            email="admin_sec@example.com",
+            password="adminpassword123",
+            full_name="Admin Sec",
+        )
+        self.fleet_manager = User.objects.create_user(
+            email="manager_sec@example.com",
+            password="managerpassword123",
+            full_name="Manager Sec",
+            role=User.Role.FLEET_MANAGER,
+        )
+        self.customer1 = User.objects.create_user(
+            email="cust1_sec@example.com",
+            password="custpassword123",
+            full_name="Alice Sec",
+            role=User.Role.CUSTOMER,
+        )
+        self.customer2 = User.objects.create_user(
+            email="cust2_sec@example.com",
+            password="custpassword123",
+            full_name="Bob Sec",
+            role=User.Role.CUSTOMER,
+        )
+        self.driver_user = User.objects.create_user(
+            email="driver_sec@example.com",
+            password="driverpassword123",
+            full_name="Dave Driver Sec",
+            role=User.Role.DRIVER,
+        )
+        self.driver = Driver.objects.create(
+            user=self.driver_user,
+            license_number="DL-SEC-1111",
+            license_expiry=date.today() + timedelta(days=365),
+            status=Driver.Status.ACTIVE,
+        )
+        self.other_driver_user = User.objects.create_user(
+            email="other_driver_sec@example.com",
+            password="driverpassword123",
+            full_name="Other Driver Sec",
+            role=User.Role.DRIVER,
+        )
+        self.other_driver = Driver.objects.create(
+            user=self.other_driver_user,
+            license_number="DL-SEC-2222",
+            license_expiry=date.today() + timedelta(days=365),
+            status=Driver.Status.ACTIVE,
+        )
+
+        self.car = Vehicle.objects.create(
+            registration_number="KA01SEC999",
+            vehicle_type=Vehicle.VehicleType.CAR,
+            brand="Honda",
+            model="City",
+            seating_capacity=4,
+            rate_per_km=Decimal("15.00"),
+            status=Vehicle.Status.ACTIVE,
+        )
+        self.booking = Booking.objects.create(
+            customer=self.customer1,
+            booking_type=Booking.BookingType.VEHICLE,
+            vehicle_type=Booking.VehicleType.CAR,
+            vehicle=self.car,
+            pickup_location="Point A",
+            drop_location="Point B",
+            travel_datetime=timezone.now() + timedelta(days=1),
+            passengers=2,
+            estimated_distance_km=Decimal("20.00"),
+            estimated_fare=Decimal("300.00"),
+            status=Booking.Status.APPROVED,
+        )
+        self.trip = Trip.objects.create(
+            booking=self.booking,
+            vehicle=self.car,
+            driver=self.driver,
+            source="Point A",
+            destination="Point B",
+            scheduled_datetime=timezone.now(),
+            status=Trip.Status.COMPLETED,
+            start_odometer=1000,
+            end_odometer=1020,
+            total_fare=Decimal("300.00"),
+        )
+        self.payment = Payment.objects.create(
+            booking=self.booking,
+            trip=self.trip,
+            customer=self.customer1,
+            amount=Decimal("300.00"),
+            status=Payment.Status.UNPAID,
+        )
+
+    def test_unauthenticated_proof_access_rejected(self):
+        # 1. Unauthenticated request to /api/payments/{id}/proof/ -> 401
+        res = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthorized_customer_cannot_access_proof(self):
+        # Customer2 cannot access Customer1's proof
+        self.client.force_authenticate(user=self.customer2)
+        res = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertIn(res.status_code, [status.HTTP_404_NOT_FOUND, status.HTTP_403_FORBIDDEN])
+
+    def test_unauthorized_driver_cannot_access_proof(self):
+        # Driver not assigned to trip cannot access proof
+        self.client.force_authenticate(user=self.other_driver_user)
+        res = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertIn(res.status_code, [status.HTTP_404_NOT_FOUND, status.HTTP_403_FORBIDDEN])
+
+    def test_missing_proof_returns_404(self):
+        # Payment has no proof screenshot attached
+        self.client.force_authenticate(user=self.customer1)
+        res = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_proof_upload_and_authorized_access_all_roles(self):
+        # Customer1 uploads proof screenshot
+        self.client.force_authenticate(user=self.customer1)
+        proof_img = generate_test_image("my_proof.png", color="green")
+        res_upload = self.client.post(
+            f"/api/payments/{self.payment.id}/submit-proof/",
+            {"transaction_reference": "TXNSEC001122", "proof_screenshot": proof_img},
+            format="multipart",
+        )
+        self.assertEqual(res_upload.status_code, status.HTTP_200_OK)
+
+        self.payment.refresh_from_db()
+        self.assertTrue(bool(self.payment.proof_screenshot))
+
+        # Check serializer returns protected URL, not direct media URL
+        serializer_data = res_upload.data
+        self.assertIn(f"/api/payments/{self.payment.id}/proof/", serializer_data["proof_screenshot"])
+        self.assertNotIn("/media/payment_proofs/", serializer_data["proof_screenshot"])
+
+        # 1. Paying customer can access proof
+        self.client.force_authenticate(user=self.customer1)
+        res_cust = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res_cust.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_cust["Content-Type"], "image/png")
+        if hasattr(res_cust, "close"):
+            res_cust.close()
+
+        # 2. Assigned driver can access proof
+        self.client.force_authenticate(user=self.driver_user)
+        res_drv = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res_drv.status_code, status.HTTP_200_OK)
+        if hasattr(res_drv, "close"):
+            res_drv.close()
+
+        # 3. Fleet manager can access proof
+        self.client.force_authenticate(user=self.fleet_manager)
+        res_mgr = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res_mgr.status_code, status.HTTP_200_OK)
+        if hasattr(res_mgr, "close"):
+            res_mgr.close()
+
+        # 4. Superuser / Admin can access proof
+        self.client.force_authenticate(user=self.admin)
+        res_adm = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res_adm.status_code, status.HTTP_200_OK)
+        if hasattr(res_adm, "close"):
+            res_adm.close()
+
+    def test_legacy_fallback_when_file_only_in_media_root(self):
+        from django.core.files.storage import default_storage
+        from core.upload_security import private_file_storage
+
+        # Save dummy image only into default_storage (MEDIA_ROOT)
+        legacy_filename = "payment_proofs/legacy_test_proof.png"
+        img = generate_test_image("legacy.png")
+        if not default_storage.exists(legacy_filename):
+            default_storage.save(legacy_filename, img)
+
+        # Ensure it does not exist in private storage
+        if private_file_storage.exists(legacy_filename):
+            private_file_storage.delete(legacy_filename)
+
+        self.payment.proof_screenshot.name = legacy_filename
+        self.payment.save(update_fields=["proof_screenshot"])
+
+        # Payer requests proof -> fallback should serve it from default_storage
+        self.client.force_authenticate(user=self.customer1)
+        res = self.client.get(f"/api/payments/{self.payment.id}/proof/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        if hasattr(res, "close"):
+            res.close()
+
+        # Clean up test legacy file from default_storage
+        if default_storage.exists(legacy_filename):
+            try:
+                default_storage.delete(legacy_filename)
+            except Exception:
+                pass
+
+    def test_public_qr_image_access_preserved(self):
+        # Admin uploads QR
+        self.client.force_authenticate(user=self.admin)
+        img = generate_test_image("qr_sec.png")
+        res_upload = self.client.post(
+            "/api/payments/qr-setting/",
+            {"title": "Secured Public QR", "upi_id": "sec@upi", "qr_image": img},
+            format="multipart",
+        )
+        self.assertEqual(res_upload.status_code, status.HTTP_201_CREATED)
+        qr_url = res_upload.data["qr_image_url"]
+        self.assertIn("/media/payment_qr/", qr_url)
+
+        # Customer reads QR info
+        self.client.force_authenticate(user=self.customer1)
+        res_get = self.client.get("/api/payments/qr-setting/")
+        self.assertEqual(res_get.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_get.data["qr_image_url"], qr_url)
+
+        # Customer cannot upload or modify QR setting (403 Forbidden)
+        res_cust_post = self.client.post(
+            "/api/payments/qr-setting/",
+            {"title": "Hacked QR", "upi_id": "hack@upi", "qr_image": img},
+            format="multipart",
+        )
+        self.assertEqual(res_cust_post.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class PaymentGatewaySecretSecurityTests(APITestCase):
+    """Targeted tests for PAYMENT_GATEWAY_SECRET security and signature verification."""
+
+    @override_settings(PAYMENT_GATEWAY_SECRET="x" * 64)
+    def test_signature_generation_and_verification_with_valid_secret(self):
+        payment_id = 42
+        ref = "TXNVALID12345"
+        amount = Decimal("150.00")
+        status_val = "SUCCESS"
+
+        sig = generate_gateway_signature(payment_id, ref, amount, status_val)
+        self.assertEqual(len(sig), 64)  # SHA-256 hex digest length
+        self.assertTrue(verify_gateway_signature(payment_id, ref, amount, status_val, sig))
+
+    @override_settings(PAYMENT_GATEWAY_SECRET="x" * 64)
+    def test_tampered_payload_rejected_by_verify_signature(self):
+        payment_id = 42
+        ref = "TXNVALID12345"
+        amount = Decimal("150.00")
+        status_val = "SUCCESS"
+
+        sig = generate_gateway_signature(payment_id, ref, amount, status_val)
+
+        # Alter amount
+        self.assertFalse(verify_gateway_signature(payment_id, ref, Decimal("151.00"), status_val, sig))
+        # Alter payment_id
+        self.assertFalse(verify_gateway_signature(99, ref, amount, status_val, sig))
+        # Alter status
+        self.assertFalse(verify_gateway_signature(payment_id, ref, amount, "FAILED", sig))
+        # Alter reference
+        self.assertFalse(verify_gateway_signature(payment_id, "TXNTAMPERED", amount, status_val, sig))
+        # Alter signature
+        self.assertFalse(verify_gateway_signature(payment_id, ref, amount, status_val, sig[:-4] + "0000"))
+
+    @override_settings(PAYMENT_GATEWAY_SECRET="")
+    def test_signature_generation_fails_fast_when_secret_not_configured(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            generate_gateway_signature(1, "TXN123", Decimal("10.00"), "SUCCESS")
+        self.assertIn("PAYMENT_GATEWAY_SECRET is not configured", str(ctx.exception))
+
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            verify_gateway_signature(1, "TXN123", Decimal("10.00"), "SUCCESS", "anysig")
+        self.assertIn("PAYMENT_GATEWAY_SECRET is not configured", str(ctx.exception))
+
+    def test_different_secrets_produce_different_signatures(self):
+        with override_settings(PAYMENT_GATEWAY_SECRET="secret_alpha_" + "a" * 40):
+            sig1 = generate_gateway_signature(1, "TXN123", Decimal("50.00"), "SUCCESS")
+
+        with override_settings(PAYMENT_GATEWAY_SECRET="secret_beta__" + "b" * 40):
+            sig2 = generate_gateway_signature(1, "TXN123", Decimal("50.00"), "SUCCESS")
+
+        self.assertNotEqual(sig1, sig2)
 

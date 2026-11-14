@@ -27,7 +27,61 @@ import {
 import { getApiErrorMessage } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import CountUp from '../../components/common/CountUp';
+import { fetchPrivateFileBlobUrl, downloadPrivateFile } from '../../utils/fileDownloader';
 import './DriverPages.css';
+
+function DriverProofThumbnail({ proofUrl, toastError }) {
+  const [blobUrl, setBlobUrl] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    let cleanup = null;
+
+    if (proofUrl) {
+      fetchPrivateFileBlobUrl(proofUrl, toastError).then((res) => {
+        if (!active) {
+          if (res?.revoke) res.revoke();
+          return;
+        }
+        if (res && !res.error && res.blobUrl) {
+          cleanup = res.revoke;
+          setBlobUrl(res.blobUrl);
+        }
+      });
+    }
+
+    return () => {
+      active = false;
+      if (cleanup) cleanup();
+      setBlobUrl(null);
+    };
+  }, [proofUrl, toastError]);
+
+  const handleDownload = (e) => {
+    e.preventDefault();
+    downloadPrivateFile(proofUrl, 'payment_proof.png', toastError);
+  };
+
+  return (
+    <div className="driver-proof-screenshot-box">
+      <span className="screenshot-label">Proof Screenshot:</span>
+      <a
+        href={blobUrl || proofUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="driver-screenshot-link"
+        onClick={handleDownload}
+      >
+        <img
+          src={blobUrl || proofUrl}
+          alt="Payment Proof"
+          className="driver-screenshot-thumb"
+        />
+        <span>View Full Image</span>
+      </a>
+    </div>
+  );
+}
 
 export default function DriverPaymentQrPage() {
   const { id } = useParams();
@@ -354,22 +408,7 @@ export default function DriverPaymentQrPage() {
                           </div>
 
                           {p.proof_screenshot && (
-                            <div className="driver-proof-screenshot-box">
-                              <span className="screenshot-label">Proof Screenshot:</span>
-                              <a
-                                href={p.proof_screenshot}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="driver-screenshot-link"
-                              >
-                                <img
-                                  src={p.proof_screenshot}
-                                  alt="Payment Proof"
-                                  className="driver-screenshot-thumb"
-                                />
-                                <span>View Full Image</span>
-                              </a>
-                            </div>
+                            <DriverProofThumbnail proofUrl={p.proof_screenshot} toastError={toastError} />
                           )}
 
                           <div className="driver-initiated-actions">

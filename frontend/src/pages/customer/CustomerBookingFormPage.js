@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams, Navigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import CustomerBikeBookingPage from './CustomerBikeBookingPage';
 import CustomerCarBookingPage from './CustomerCarBookingPage';
 

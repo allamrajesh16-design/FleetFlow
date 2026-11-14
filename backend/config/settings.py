@@ -70,6 +70,7 @@ MIDDLEWARE = [
     'core.middleware.RequestIDMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -101,26 +102,53 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.postgresql')
+DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 
-if DB_ENGINE == 'django.db.backends.sqlite3':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+if DATABASE_URL:
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
         }
-    }
+    except ImportError:
+        from urllib.parse import urlparse
+        parsed = urlparse(DATABASE_URL)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': parsed.path.lstrip('/'),
+                'USER': parsed.username or 'postgres',
+                'PASSWORD': parsed.password or '',
+                'HOST': parsed.hostname or 'localhost',
+                'PORT': parsed.port or 5432,
+            }
+        }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'fleetflow_db'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+    DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.postgresql')
+
+    if DB_ENGINE == 'django.db.backends.sqlite3':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', 'fleetflow_db'),
+                'USER': os.getenv('DB_USER', 'postgres'),
+                'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+                'HOST': os.getenv('DB_HOST', 'localhost'),
+                'PORT': os.getenv('DB_PORT', '5432'),
+            }
+        }
+
 
 
 # Password validation
@@ -158,6 +186,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Directory where collectstatic will gather static files
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Private media files – used for documents, driver licences, etc.
+# Render will set the environment variable PRIVATE_MEDIA_ROOT to the persistent‑disk mount point (e.g. /var/data).
+# If it is not set we fall back to the existing local path for local development.
+PRIVATE_MEDIA_ROOT = Path(
+    os.getenv(
+        "PRIVATE_MEDIA_ROOT",
+        str(BASE_DIR / "private_media")
+    )
+)
+
+# Ensure the directory exists at startup (no‑op if it already does)
+os.makedirs(PRIVATE_MEDIA_ROOT, exist_ok=True)
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -241,18 +286,23 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # Media files configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(
+    os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
+)
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Private Media (Documents, Fuel receipts, Expense receipts stored outside public MEDIA_URL)
-PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_media'
-os.makedirs(PRIVATE_MEDIA_ROOT, exist_ok=True)
+
 
 # Trip Assignment Document Expiry Enforcement
 BLOCK_TRIPS_ON_EXPIRED_DOCUMENTS = os.getenv('BLOCK_TRIPS_ON_EXPIRED_DOCUMENTS', 'True').lower() in ('true', '1', 't')
 
 # Payment Configuration
 PAYMENT_MODE = os.getenv('PAYMENT_MODE', 'STATIC_QR')
-PAYMENT_GATEWAY_SECRET = os.getenv('PAYMENT_GATEWAY_SECRET', 'fleetflow_secure_gateway_secret_key_2026')
+if DEBUG:
+    PAYMENT_GATEWAY_SECRET = os.getenv('PAYMENT_GATEWAY_SECRET', 'fleetflow_secure_gateway_secret_key_2026')
+else:
+    PAYMENT_GATEWAY_SECRET = os.getenv('PAYMENT_GATEWAY_SECRET', '')
 
 # Email Configuration
 raw_backend = os.getenv('EMAIL_BACKEND', '').strip()

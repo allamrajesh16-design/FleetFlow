@@ -26,6 +26,7 @@ import {
   AlertCircleIcon,
 } from '../../components/common/Icons';
 import { formatMoney, formatDateTime } from '../../utils/formatters';
+import { fetchPrivateFileBlobUrl } from '../../utils/fileDownloader';
 import './AdminPages.css';
 
 export default function AdminPaymentsPage({ canRefund = true }) {
@@ -59,10 +60,39 @@ export default function AdminPaymentsPage({ canRefund = true }) {
   });
 
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [proofBlobUrl, setProofBlobUrl] = useState(null);
   const [confirmingPayment, setConfirmingPayment] = useState(null);
   const [rejectingPayment, setRejectingPayment] = useState(null);
   const [refundingPayment, setRefundingPayment] = useState(null);
   const [settlingPayment, setSettlingPayment] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    let cleanup = null;
+
+    if (selectedPayment?.proof_screenshot) {
+      fetchPrivateFileBlobUrl(selectedPayment.proof_screenshot, toast.error).then((res) => {
+        if (!active) {
+          if (res?.revoke) res.revoke();
+          return;
+        }
+        if (res && !res.error && res.blobUrl) {
+          cleanup = res.revoke;
+          setProofBlobUrl(res.blobUrl);
+        }
+      });
+    } else {
+      setProofBlobUrl(null);
+    }
+
+    return () => {
+      active = false;
+      if (cleanup) {
+        cleanup();
+      }
+      setProofBlobUrl(null);
+    };
+  }, [selectedPayment?.proof_screenshot, toast.error]);
 
   useEffect(() => {
     if (!openId) return;
@@ -460,7 +490,10 @@ export default function AdminPaymentsPage({ canRefund = true }) {
       {/* Payment Receipt Modal */}
       <Modal
         isOpen={Boolean(selectedPayment)}
-        onClose={() => setSelectedPayment(null)}
+        onClose={() => {
+          setSelectedPayment(null);
+          setProofBlobUrl(null);
+        }}
         title={`Payment Receipt: TXN-${String(selectedPayment?.id || '')}`}
         size="medium"
       >
@@ -521,7 +554,7 @@ export default function AdminPaymentsPage({ canRefund = true }) {
                   Customer Transfer Proof Screenshot
                 </span>
                 <img
-                  src={selectedPayment.proof_screenshot}
+                  src={proofBlobUrl || selectedPayment.proof_screenshot}
                   alt="Proof screenshot"
                   style={{
                     maxWidth: '100%',

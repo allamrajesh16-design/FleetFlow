@@ -47,6 +47,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         source="cash_settled_by.full_name", read_only=True, default=None, allow_null=True
     )
     receipt_number = serializers.SerializerMethodField(read_only=True)
+    proof_screenshot = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Payment
@@ -122,6 +123,16 @@ class PaymentSerializer(serializers.ModelSerializer):
     def get_receipt_number(self, obj):
         if hasattr(obj, "receipt") and obj.receipt:
             return obj.receipt.receipt_number
+        return None
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_proof_screenshot(self, obj):
+        if obj.proof_screenshot:
+            request = self.context.get("request")
+            path = f"/api/payments/{obj.id}/proof/"
+            if request:
+                return request.build_absolute_uri(path)
+            return path
         return None
 
 

@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from bookings.models import Booking
 from core.upload_security import (
+    private_file_storage,
     random_payment_proof_path,
     random_qr_image_path,
     validate_image_file,
@@ -111,6 +112,7 @@ class Payment(models.Model):
     )
     proof_screenshot = models.ImageField(
         upload_to=random_payment_proof_path,
+        storage=private_file_storage,
         validators=[validate_image_file],
         null=True,
         blank=True,

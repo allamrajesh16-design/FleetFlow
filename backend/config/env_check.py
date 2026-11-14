@@ -14,6 +14,10 @@ REQUIRED_VARS_BASE = [
 REQUIRED_VARS_PRODUCTION = [
     'SECRET_KEY',
     'ALLOWED_HOSTS',
+    'PAYMENT_GATEWAY_SECRET',
+]
+
+REQUIRED_DB_VARS_INDIVIDUAL = [
     'DB_NAME',
     'DB_USER',
     'DB_PASSWORD',
@@ -25,19 +29,31 @@ def validate_environment():
     """
     Validates required environment variables on startup.
     Fails fast with detailed messages.
+    Supports either DATABASE_URL (standard for Render, Heroku, Railway)
+    or individual DB_* variables (local / custom PostgreSQL setups).
     """
     debug_mode = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
     app_env = os.getenv('APP_ENV', 'development' if debug_mode else 'production').lower()
+    is_prod_settings = os.getenv('DJANGO_SETTINGS_MODULE', '').endswith('settings_prod')
+    is_production = not debug_mode or app_env == 'production' or is_prod_settings
 
     # Check base required variables
     missing_vars = [var for var in REQUIRED_VARS_BASE if not os.getenv(var)]
 
     # If running in production mode, enforce full production variables
-    if not debug_mode or app_env == 'production':
+    if is_production:
         prod_missing = [var for var in REQUIRED_VARS_PRODUCTION if not os.getenv(var)]
         for v in prod_missing:
             if v not in missing_vars:
                 missing_vars.append(v)
+
+        # Database configuration check:
+        # Accept DATABASE_URL if set; otherwise require DB_* vars
+        has_db_url = bool(os.getenv('DATABASE_URL', '').strip())
+        if not has_db_url:
+            db_missing = [var for var in REQUIRED_DB_VARS_INDIVIDUAL if not os.getenv(var)]
+            if db_missing:
+                missing_vars.append("DATABASE_URL (or complete DB_NAME, DB_USER, DB_PASSWORD, DB_HOST)")
 
     if missing_vars:
         msg = (
@@ -56,7 +72,7 @@ def validate_environment():
 
     # In production, ensure SECRET_KEY is strong and not default/insecure
     secret_key = os.getenv('SECRET_KEY', '')
-    if (not debug_mode or app_env == 'production') and len(secret_key) < 50:
+    if is_production and len(secret_key) < 50:
         msg = (
             "\n" + "=" * 80 + "\n"
             " FLEETFLOW SECURITY ERROR: INSUFFICIENT SECRET_KEY IN PRODUCTION\n"
@@ -65,4 +81,20 @@ def validate_environment():
             "=" * 80 + "\n"
         )
         raise ImproperlyConfigured(msg)
+
+    # In production, ensure PAYMENT_GATEWAY_SECRET is strong and not default/insecure
+    gw_secret = os.getenv('PAYMENT_GATEWAY_SECRET', '')
+    if is_production:
+        INSECURE_GATEWAY_SECRETS = {
+            'fleetflow_secure_gateway_secret_key_2026',
+        }
+        if gw_secret in INSECURE_GATEWAY_SECRETS or len(gw_secret) < 50:
+            msg = (
+                "\n" + "=" * 80 + "\n"
+                " FLEETFLOW SECURITY ERROR: INSUFFICIENT OR INSECURE PAYMENT_GATEWAY_SECRET IN PRODUCTION\n"
+                "=" * 80 + "\n"
+                "PAYMENT_GATEWAY_SECRET in production must be at least 50 characters long and cannot use hardcoded default values.\n"
+                "=" * 80 + "\n"
+            )
+            raise ImproperlyConfigured(msg)
 
