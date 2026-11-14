@@ -38,5 +38,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:${PORT:-8000}/api/health/ || exit 1
 
 # Collect static files, run database migrations, and start Gunicorn WSGI server
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2 --timeout 60 config.wsgi:application"]
+CMD ["sh", "-c", "echo \"[${HOSTNAME}] Starting collectstatic...\" && python manage.py collectstatic --noinput && echo \"[${HOSTNAME}] Starting migrations...\" && python manage.py migrate --noinput && echo \"[${HOSTNAME}] Starting Gunicorn...\" && exec gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --timeout 120 config.wsgi:application"]
 

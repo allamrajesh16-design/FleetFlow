@@ -149,6 +149,9 @@ else:
             }
         }
 
+if 'postgresql' in DATABASES.get('default', {}).get('ENGINE', ''):
+    DATABASES['default'].setdefault('OPTIONS', {})['connect_timeout'] = 10
+
 
 
 # Password validation
