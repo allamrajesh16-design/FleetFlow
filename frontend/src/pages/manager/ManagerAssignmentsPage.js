@@ -515,7 +515,7 @@ export default function ManagerAssignmentsPage() {
               <tbody>
                 {assignableItems.map((item) => (
                   <tr key={item.key}>
-                    <td>
+                    <td data-label="Booking ID">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <strong className="booking-table-id">#{item.id}</strong>
                         {item.customer_selected_vehicle && (
@@ -525,32 +525,32 @@ export default function ManagerAssignmentsPage() {
                         )}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Customer">
                       <div className="table-customer-cell">
                         <strong className="customer-name">{item.customer_name}</strong>
                         <span className="customer-phone">{item.customer_phone || item.customer?.phone || '—'}</span>
                       </div>
                     </td>
-                    <td className="location-cell" title={item.pickup_location || item.source}>
+                    <td data-label="Pickup Location" className="location-cell" title={item.pickup_location || item.source}>
                       🟢 {item.pickup_location || item.source}
                     </td>
-                    <td className="location-cell" title={item.drop_location || item.destination}>
+                    <td data-label="Drop Location" className="location-cell" title={item.drop_location || item.destination}>
                       🔴 {item.drop_location || item.destination}
                     </td>
-                    <td>{formatDate(item.datetime)}</td>
-                    <td style={{ fontWeight: 600 }}>{formatTime(item.datetime)}</td>
-                    <td>
+                    <td data-label="Journey Date">{formatDate(item.datetime)}</td>
+                    <td data-label="Time" style={{ fontWeight: 600 }}>{formatTime(item.datetime)}</td>
+                    <td data-label="Vehicle Type">
                       <span className={`booking-type-chip chip-${item.typeLabel.toLowerCase()}`}>
                         {getVehicleIcon(item.typeLabel)} {item.typeLabel}
                       </span>
                     </td>
-                    <td>{item.passengers || 1} Pax</td>
-                    <td>
+                    <td data-label="Passengers">{item.passengers || 1} Pax</td>
+                    <td data-label="Status">
                       <span className="assignment-status-badge pending">
                         Pending Assignment
                       </span>
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td data-label="Action" style={{ textAlign: 'right' }}>
                       <Button
                         type="button"
                         variant="primary"
@@ -606,11 +606,11 @@ export default function ManagerAssignmentsPage() {
                 <tbody>
                   {pastItems.map((item) => (
                     <tr key={item.key}>
-                      <td>#{item.id}</td>
-                      <td>{item.customer_name}</td>
-                      <td>{formatDateTime(item.datetime)}</td>
-                      <td><span className="assignment-past-badge">Date has passed</span></td>
-                      <td>
+                      <td data-label="Booking ID">#{item.id}</td>
+                      <td data-label="Customer Name">{item.customer_name}</td>
+                      <td data-label="Departure Date & Time">{formatDateTime(item.datetime)}</td>
+                      <td data-label="Status"><span className="assignment-past-badge">Date has passed</span></td>
+                      <td data-label="Action">
                         {item.kind === 'BOOKING' && (
                           <Button
                             variant="danger"

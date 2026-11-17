@@ -241,7 +241,7 @@ export default function AdminUsersPage() {
       render: (u) => {
         const isSelf = u.id === currentAuthUser?.id;
         return (
-          <div className="admin-action-btn-group" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className="admin-action-btn-group" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <IconButton
               action="edit"
               tooltip="Edit User"

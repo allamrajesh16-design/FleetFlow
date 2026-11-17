@@ -194,12 +194,16 @@ export default function FuelManagementPage() {
 
   const columns = [
     {
+      key: 'date',
+      label: 'Date',
       header: 'Date',
       accessor: 'date',
       width: '110px',
       render: (log) => <span style={{ whiteSpace: 'nowrap' }}>{formatDate(log.date)}</span>,
     },
     {
+      key: 'vehicle',
+      label: 'Vehicle',
       header: 'Vehicle',
       accessor: 'vehicle_registration',
       width: '190px',
@@ -224,6 +228,8 @@ export default function FuelManagementPage() {
       ),
     },
     {
+      key: 'driver',
+      label: 'Driver',
       header: 'Driver',
       accessor: 'driver_name',
       width: '160px',
@@ -234,6 +240,8 @@ export default function FuelManagementPage() {
       ),
     },
     {
+      key: 'review_status',
+      label: 'Status',
       header: 'Status',
       accessor: 'review_status',
       width: '120px',
@@ -252,18 +260,24 @@ export default function FuelManagementPage() {
       },
     },
     {
+      key: 'fuel_type',
+      label: 'Fuel Type',
       header: 'Fuel Type',
       accessor: 'fuel_type',
       width: '90px',
       render: (log) => getFuelTypeLabel(log.fuel_type),
     },
     {
+      key: 'quantity',
+      label: 'Quantity',
       header: 'Quantity',
       accessor: 'quantity',
       width: '90px',
       render: (log) => formatFuelQuantity(log.quantity, log.fuel_type),
     },
     {
+      key: 'total_cost',
+      label: 'Total Cost',
       header: 'Total Cost',
       accessor: 'total_cost',
       width: '120px',
@@ -271,6 +285,8 @@ export default function FuelManagementPage() {
       render: (log) => <strong>{formatRupees(log.total_cost)}</strong>,
     },
     {
+      key: 'receipt',
+      label: 'Receipt',
       header: 'Receipt',
       accessor: 'has_receipt',
       width: '80px',
@@ -294,6 +310,8 @@ export default function FuelManagementPage() {
         ),
     },
     {
+      key: 'actions',
+      label: 'Actions',
       header: 'Actions',
       width: '190px',
       align: 'right',

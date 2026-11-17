@@ -57,8 +57,43 @@ export default function AdminTripsPage() {
   const columns = useMemo(
     () => [
       {
+        key: 'id',
+        label: 'Trip ID',
+        width: '110px',
+        minWidth: '95px',
+        render: (value, t) => {
+          const item = t || value || {};
+          return (
+            <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+              TRP-{String(item.id).padStart(4, '0')}
+            </span>
+          );
+        },
+      },
+      {
+        key: 'customer',
+        label: 'Customer',
+        width: '180px',
+        minWidth: '150px',
+        render: (value, t) => {
+          const item = t || value || {};
+          return (
+            <div>
+              <div style={{ fontWeight: 'var(--font-weight-semibold, 600)', color: 'var(--color-text)' }}>
+                {item.customer_name || 'Passenger'}
+              </div>
+              <div style={{ fontSize: 'var(--font-size-xs, 12px)', color: 'var(--color-text-muted)' }}>
+                {item.customer_phone || item.customer_email || (item.booking ? `BKG-${item.booking}` : '—')}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
         key: 'vehicle',
         label: 'Vehicle',
+        width: '160px',
+        minWidth: '140px',
         render: (value, t) => {
           const item = t || value || {};
           const reg = item.vehicle_registration || '-';
@@ -76,6 +111,8 @@ export default function AdminTripsPage() {
       {
         key: 'driver',
         label: 'Driver',
+        width: '160px',
+        minWidth: '140px',
         render: (value, t) => {
           const item = t || value || {};
           return (
@@ -90,18 +127,20 @@ export default function AdminTripsPage() {
       },
       {
         key: 'route',
-        label: 'Source → Destination',
+        label: 'Route',
+        width: '200px',
+        minWidth: '170px',
         render: (value, t) => {
           const item = t || value || {};
           const src = item.source || item.pickup_location || '-';
           const dst = item.destination || item.drop_location || '-';
           const typeLabel = item.bus_schedule ? 'Bus trip' : item.booking ? 'Vehicle booking' : '';
           return (
-            <div>
+            <div style={{ fontSize: 'var(--font-size-xs, 12px)', lineHeight: 1.35 }}>
               <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
                 {src} <span style={{ color: 'var(--color-primary)' }}>→</span> {dst}
               </span>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div style={{ color: 'var(--color-text-muted)' }}>
                 {item.scheduled_datetime ? formatDateTime(item.scheduled_datetime) : '-'}
                 {typeLabel ? ` • ${typeLabel}` : ''}
               </div>
@@ -110,8 +149,25 @@ export default function AdminTripsPage() {
         },
       },
       {
+        key: 'fare',
+        label: 'Fare',
+        width: '110px',
+        minWidth: '90px',
+        render: (value, t) => {
+          const item = t || value || {};
+          const fare = item.booking_amount != null ? item.booking_amount : item.estimated_fare;
+          return (
+            <span style={{ fontWeight: 700, color: 'var(--color-text)' }}>
+              {fare != null ? formatMoney(fare) : '—'}
+            </span>
+          );
+        },
+      },
+      {
         key: 'status',
         label: 'Status',
+        width: '120px',
+        minWidth: '100px',
         render: (value, t) => {
           const item = t || value || {};
           return <Badge status={item.status || 'SCHEDULED'} />;
@@ -120,6 +176,9 @@ export default function AdminTripsPage() {
       {
         key: 'actions',
         label: 'Actions',
+        width: '80px',
+        minWidth: '70px',
+        align: 'right',
         render: (value, t) => {
           const item = t || value || {};
           return (
@@ -191,6 +250,16 @@ export default function AdminTripsPage() {
         {selectedTrip && (
           <div>
             <div className="detail-grid">
+              {selectedTrip.customer_name && (
+                <div className="detail-item">
+                  <span className="detail-label">Customer</span>
+                  <span className="detail-value">{selectedTrip.customer_name}</span>
+                  <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                    {selectedTrip.customer_phone || selectedTrip.customer_email || (selectedTrip.booking_id ? `BKG-${selectedTrip.booking_id}` : '')}
+                  </span>
+                </div>
+              )}
+
               <div className="detail-item">
                 <span className="detail-label">Vehicle</span>
                 <span className="detail-value">{selectedTrip.vehicle_registration}</span>

@@ -199,6 +199,8 @@ export default function AdminDashboardPage() {
                   <tr>
                     <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Booking</th>
                     <th style={{ minWidth: '160px', whiteSpace: 'nowrap' }}>Customer</th>
+                    <th style={{ minWidth: '180px', whiteSpace: 'nowrap' }}>Route</th>
+                    <th style={{ minWidth: '100px', whiteSpace: 'nowrap' }}>Fare</th>
                     <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Status</th>
                   </tr>
                 </thead>
@@ -218,6 +220,21 @@ export default function AdminDashboardPage() {
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
                           {formatDateTime(b.created_at)}
                         </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: 'var(--font-size-xs, 12px)', lineHeight: 1.35 }}>
+                          <div style={{ fontWeight: 600 }}>{b.pickup_location || b.source || '—'}</div>
+                          <div style={{ color: 'var(--color-text-muted)' }}>↓ {b.drop_location || b.destination || '—'}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <strong>
+                          {b.final_fare != null
+                            ? formatMoney(b.final_fare)
+                            : b.estimated_fare != null
+                            ? formatMoney(b.estimated_fare)
+                            : '—'}
+                        </strong>
                       </td>
                       <td>
                         <StatusDot status={b.status} label={b.status} />
@@ -285,7 +302,7 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-3)', textAlign: 'center' }}>
+          <div className="admin-fleet-status-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 'var(--space-3)', textAlign: 'center' }}>
             <div style={{ padding: 'var(--space-3)', background: 'var(--status-green-bg)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--status-green-text)' }}>
                 {vehicleCounts.ACTIVE || 0}

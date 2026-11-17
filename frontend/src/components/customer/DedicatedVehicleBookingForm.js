@@ -49,7 +49,6 @@ export default function DedicatedVehicleBookingForm({
     city: '',
     pincode: '',
     landmark: '',
-    instructions: '',
   });
 
   const [drop, setDrop] = useState({
@@ -58,7 +57,6 @@ export default function DedicatedVehicleBookingForm({
     city: '',
     pincode: '',
     landmark: '',
-    instructions: '',
   });
 
   // Calculate default journey datetime: tomorrow at 09:00 AM
@@ -432,16 +430,6 @@ export default function DedicatedVehicleBookingForm({
                 </div>
               </div>
 
-              <div style={{ marginTop: '12px' }}>
-                <Input
-                  id="pickup_instructions"
-                  label="Pickup Instructions (Optional)"
-                  placeholder="e.g. Call when outside the gate; gate passcode is #123"
-                  value={pickup.instructions}
-                  onChange={(e) => setPickup({ ...pickup, instructions: e.target.value })}
-                />
-              </div>
-
               {fullPickupAddress && (
                 <div className="address-preview-tag fade-in">
                   <span className="preview-label">Pickup Address Preview:</span>
@@ -540,16 +528,6 @@ export default function DedicatedVehicleBookingForm({
                     onChange={(e) => setDrop({ ...drop, landmark: e.target.value })}
                   />
                 </div>
-              </div>
-
-              <div style={{ marginTop: '12px' }}>
-                <Input
-                  id="drop_instructions"
-                  label="Drop Instructions (Optional)"
-                  placeholder="e.g. Drop at luggage drop point or main porch"
-                  value={drop.instructions}
-                  onChange={(e) => setDrop({ ...drop, instructions: e.target.value })}
-                />
               </div>
 
               {fullDropAddress && (
@@ -867,11 +845,11 @@ export default function DedicatedVehicleBookingForm({
                   options={[
                     {
                       value: '',
-                      label: `Any Active Fleet ${isBike ? 'Bike' : 'Car'} (Fleet Manager Recommended)`,
+                      label: `Any Active Fleet ${isBike ? 'Bike' : 'Car'} (Recommended)`,
                     },
                     ...compatibleVehicles.map((v) => ({
                       value: String(v.id),
-                      label: `${v.brand} ${v.model} (${v.registration_number}) — ${v.seating_capacity} Seats — ₹${v.rate_per_km}/km`,
+                      label: `${v.brand} ${v.model} (${v.registration_number}) • ₹${v.rate_per_km}/km`,
                     })),
                   ]}
                   disabled={loadingVehicles}

@@ -11,7 +11,6 @@ import { Skeleton } from '../../components/common/Loader';
 import { VehiclePlate } from '../../components/common/SignatureDesign';
 import {
   ArrowLeftIcon,
-  CheckIcon,
   DriverIcon,
   UserIcon,
   PhoneIcon,
@@ -21,7 +20,7 @@ import {
   SearchIcon,
   CloseIcon,
 } from '../../components/common/Icons';
-import { Textarea, TextInput } from '../../components/forms';
+import { Textarea, TextInput, Select } from '../../components/forms';
 import {
   formatRupees,
   formatDate,
@@ -534,6 +533,9 @@ export default function ManagerCreateAssignmentPage() {
               </div>
 
               <div className="driver-searchable-select-wrap" ref={dropdownRef}>
+                <label className="form-input-label" htmlFor="driver-search-field">
+                  Assigned Driver <span className="text-danger" style={{ color: 'var(--color-danger, #ef4444)' }}>*</span>
+                </label>
                 <div
                   className={`searchable-dropdown-control ${isDropdownOpen ? 'focused' : ''} ${
                     selectedDriver ? 'has-selection' : ''
@@ -546,7 +548,6 @@ export default function ManagerCreateAssignmentPage() {
                   <TextInput
                     id="driver-search-field"
                     ref={searchInputRef}
-                    label={<span>Assigned Driver <span className="text-danger">*</span></span>}
                     leftIcon={<SearchIcon size={16} color="#64748b" />}
                     placeholder={
                       selectedDriver
@@ -561,7 +562,7 @@ export default function ManagerCreateAssignmentPage() {
                     onFocus={() => setIsDropdownOpen(true)}
                     autoComplete="off"
                     rightElement={
-                      <div className="dropdown-right-controls">
+                      <div className="dropdown-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {selectedDriver && (
                           <Button
                             type="button"
@@ -658,16 +659,16 @@ export default function ManagerCreateAssignmentPage() {
               </div>
             </div>
 
-            {/* SECTION C: VEHICLE INFORMATION */}
+            {/* SECTION C: SELECT VEHICLE */}
             <div className="form-section-block">
               <div className="form-section-header">
                 <div className="form-section-num">3</div>
                 <div>
-                  <h3 className="form-section-title">Vehicle Information</h3>
+                  <h3 className="form-section-title">Select Vehicle *</h3>
                   <p className="form-section-sub">
                     {isCustomerLocked
                       ? 'Pre-assigned vehicle based on customer selection'
-                      : `Select an available ${target.vehicle_type} for this trip`}
+                      : `Choose an available ${target.vehicle_type || 'vehicle'} for this trip`}
                   </p>
                 </div>
               </div>
@@ -690,49 +691,70 @@ export default function ManagerCreateAssignmentPage() {
                   </span>
                 </div>
               ) : (
-                <div className="vehicle-selection-grid">
-                  {compatibleVehicles.map((vehicle) => {
-                    const isSelected = selectedVehicle?.id === vehicle.id;
-                    const isAvailable = Boolean(vehicle.available);
-                    const isCapacityFit = (vehicle.seating_capacity || 4) >= (target.passengers || 1);
+                <div className="vehicle-selection-wrap">
+                  <Select
+                    id="vehicle-select-field"
+                    label={
+                      <span>
+                        Assigned Vehicle <span className="text-danger" style={{ color: 'var(--color-danger, #ef4444)' }}>*</span>
+                      </span>
+                    }
+                    placeholder="Choose an available vehicle..."
+                    value={selectedVehicle ? String(selectedVehicle.id) : ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const found = compatibleVehicles.find((v) => String(v.id) === val);
+                      setSelectedVehicle(found || null);
+                    }}
+                    options={compatibleVehicles.map((v) => ({
+                      value: String(v.id),
+                      label: `${v.registration_number} — ${v.brand} ${v.model} (${v.vehicle_type || target.vehicle_type || 'Vehicle'}, ${v.seating_capacity} seats)${!v.available ? ' [Busy / Unavailable]' : ''}`,
+                      disabled: !v.available,
+                    }))}
+                  />
 
-                    return (
-                      <div
-                        key={vehicle.id}
-                        className={`vehicle-select-card ${isSelected ? 'selected' : ''} ${
-                          !isAvailable ? 'disabled' : ''
-                        }`}
-                        onClick={() => {
-                          if (isAvailable) setSelectedVehicle(vehicle);
-                        }}
-                        role="button"
-                        tabIndex={isAvailable ? 0 : -1}
-                      >
-                        <div className="vehicle-card-top">
-                          <VehiclePlate registrationNumber={vehicle.registration_number} size="sm" />
-                          <span
-                            className={`vehicle-avail-tag ${isAvailable ? 'available' : 'busy'}`}
-                          >
-                            {isAvailable ? 'Ready' : 'Busy'}
-                          </span>
-                        </div>
-                        <div className="vehicle-card-name">
-                          {vehicle.brand} {vehicle.model}
-                        </div>
-                        <div className="vehicle-card-specs">
-                          <span style={{ color: isCapacityFit ? '#64748b' : '#dc2626' }}>
-                            👥 {vehicle.seating_capacity} Seats
-                          </span>
-                          {vehicle.rate_per_km && <span>₹{vehicle.rate_per_km}/km</span>}
-                        </div>
-                        {isSelected && (
-                          <div className="vehicle-selected-indicator">
-                            <CheckIcon size={12} /> Selected
+                  {/* Selected Vehicle Details Card */}
+                  {selectedVehicle && (
+                    <div className="selected-vehicle-detail-card">
+                      <div className="selected-vehicle-detail-header">
+                        <div className="selected-vehicle-plate-wrap">
+                          <VehiclePlate registrationNumber={selectedVehicle.registration_number} size="sm" />
+                          <div className="selected-vehicle-title-block">
+                            <span className="selected-vehicle-name">
+                              {selectedVehicle.brand} {selectedVehicle.model}
+                            </span>
+                            <span className="selected-vehicle-type-pill">
+                              {selectedVehicle.vehicle_type || target.vehicle_type || 'Vehicle'}
+                            </span>
                           </div>
-                        )}
+                        </div>
+                        <span className={`vehicle-avail-tag ${selectedVehicle.available ? 'available' : 'busy'}`}>
+                          {selectedVehicle.available ? '✓ Available & Ready' : 'Busy'}
+                        </span>
                       </div>
-                    );
-                  })}
+
+                      <div className="selected-vehicle-detail-grid">
+                        <div className="selected-vehicle-stat">
+                          <span className="stat-label">Vehicle Number</span>
+                          <span className="stat-value font-mono">{selectedVehicle.registration_number}</span>
+                        </div>
+                        <div className="selected-vehicle-stat">
+                          <span className="stat-label">Model / Brand</span>
+                          <span className="stat-value">{selectedVehicle.brand} {selectedVehicle.model}</span>
+                        </div>
+                        <div className="selected-vehicle-stat">
+                          <span className="stat-label">Seating Capacity</span>
+                          <span className="stat-value">{selectedVehicle.seating_capacity || 4} Seats</span>
+                        </div>
+                        <div className="selected-vehicle-stat">
+                          <span className="stat-label">Rate / km</span>
+                          <span className="stat-value">
+                            {selectedVehicle.rate_per_km ? `₹${selectedVehicle.rate_per_km}/km` : 'Standard'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

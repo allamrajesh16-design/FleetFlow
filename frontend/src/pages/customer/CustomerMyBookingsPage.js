@@ -121,7 +121,7 @@ export default function CustomerMyBookingsPage() {
 
       {/* Tabs and Search Bar */}
       <div className="bookings-controls-bar">
-        <div className="bookings-tabs" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="bookings-tabs">
           <Button
             type="button"
             size="small"
@@ -156,7 +156,7 @@ export default function CustomerMyBookingsPage() {
           </Button>
         </div>
 
-        <div style={{ minWidth: '240px', flex: '1 1 auto', maxWidth: '360px' }}>
+        <div className="bookings-search-wrapper">
           <SearchInput
             placeholder="Search by location, route..."
             value={searchQuery}
@@ -279,23 +279,25 @@ export default function CustomerMyBookingsPage() {
                     <span className="booking-vehicle-icon">
                       {getVehicleIcon(b.vehicle_type)}
                     </span>
-                    <div>
+                    <div className="booking-header-meta">
                       <div className="booking-type-title">
                         {isBus ? 'Bus Seat Reservation' : `${b.vehicle_type || 'Vehicle'} Ride`}
                       </div>
                       <div className="booking-id-tag">ID: #{String(b.id)}</div>
                     </div>
                   </div>
-                  <StatusBadge status={b.status} />
+                  <div className="booking-status-badge-wrapper">
+                    <StatusBadge status={b.status} />
+                  </div>
                 </div>
 
                 <div className="booking-route-row">
-                  <div className="route-point">
+                  <div className="route-point route-pickup" title={pickup || 'Pickup'}>
                     <span className="dot dot-green" />
                     <span className="route-text">{pickup || 'Pickup'}</span>
                   </div>
                   <div className="route-arrow">➔</div>
-                  <div className="route-point">
+                  <div className="route-point route-drop" title={drop || 'Drop'}>
                     <span className="dot dot-red" />
                     <span className="route-text">{drop || 'Drop'}</span>
                   </div>
@@ -320,7 +322,7 @@ export default function CustomerMyBookingsPage() {
                   </div>
                 </div>
 
-                <div className="booking-card-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <div className="booking-card-actions">
                   {b.status === 'IN_PROGRESS' && (
                     <Button
                       size="small"

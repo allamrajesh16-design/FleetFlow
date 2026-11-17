@@ -186,3 +186,75 @@
   color: var(--success);
 }
 
+/* ============================================================
+   Manager Pages Responsive Overrides (320px - 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .admin-page-container {
+    padding: var(--space-3, 12px) var(--space-3, 12px);
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .admin-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 12px;
+  }
+
+  .dispatch-board-status-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+
+  .dispatch-board-status-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page-container {
+    padding: 10px 8px;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .admin-card {
+    padding: 12px 10px !important;
+    border-radius: 8px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .admin-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .admin-card-header .btn {
+    align-self: flex-start;
+  }
+}
+

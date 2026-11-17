@@ -496,43 +496,137 @@
   }
 }
 
-/* Responsive table for mobile – use data-label attributes */
-@media (max-width: 768px) {
-  .datatable-responsive-table table,
-  .datatable-responsive-table thead,
-  .datatable-responsive-table tbody,
-  .datatable-responsive-table tr,
-  .datatable-responsive-table th,
-  .datatable-responsive-table td {
-    display: block;
+/* Responsive table for mobile – card layout with 40% label / 60% value */
+@media (max-width: 767px) {
+  .datatable-cards-view {
+    display: none !important;
+  }
+
+  .datatable-responsive-table {
+    display: block !important;
     width: 100% !important;
+    overflow-x: visible !important;
+    max-height: none !important;
   }
 
-  .datatable-responsive-table thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
+  .datatable-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border: none !important;
   }
 
-  .datatable-responsive-table td {
-    position: relative;
-    padding-left: 50%;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border-subtle);
+  .datatable-table colgroup,
+  .datatable-table thead {
+    display: none !important;
   }
 
-  .datatable-responsive-table td::before {
+  .datatable-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .datatable-tr {
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--color-surface, #ffffff) !important;
+    border: 1px solid var(--color-border, #e2e8f0) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .datatable-tr:hover {
+    background-color: var(--color-surface, #ffffff) !important;
+  }
+
+  .datatable-tr:hover td:first-child {
+    box-shadow: none !important;
+  }
+
+  .datatable-td {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 8px 0 !important;
+    border: none !important;
+    border-bottom: 1px dashed var(--color-border-subtle, #f1f5f9) !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    text-align: right !important;
+    white-space: normal !important;
+  }
+
+  .datatable-td:last-child {
+    border-bottom: none !important;
+  }
+
+  /* 40% Label on left */
+  .datatable-td::before {
     content: attr(data-label);
-    position: absolute;
-    left: 12px;
-    width: 45%;
-    padding-right: 10px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    white-space: nowrap;
+    flex: 0 0 40% !important;
+    max-width: 40% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--color-text-secondary, #64748b) !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+    position: static !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    letter-spacing: 0.01em;
   }
 
-  .datatable-actions-group {
-    justify-content: flex-start !important;
+  .datatable-td[data-label=""]::before,
+  .datatable-td:not([data-label])::before {
+    display: none !important;
+  }
+
+  /* 60% Value on right */
+  .datatable-td > * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Actions column in card */
+  .datatable-td[data-label="Actions"],
+  .datatable-td[data-label="Action"] {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    padding-top: 10px !important;
+  }
+
+  .datatable-td[data-label="Actions"]::before,
+  .datatable-td[data-label="Action"]::before {
+    margin-bottom: 6px !important;
+    align-self: flex-start !important;
+  }
+
+  .datatable-actions-group,
+  .admin-action-btn-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }

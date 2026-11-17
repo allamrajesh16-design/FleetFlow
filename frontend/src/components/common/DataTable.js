@@ -170,13 +170,13 @@ export default function DataTable({
   // Find specialized columns for card view rendering
   const statusCol = columns.find(
     (c) =>
-      c.key?.toLowerCase().includes('status') ||
-      c.label?.toLowerCase().includes('status')
+      (c.key || c.accessor)?.toLowerCase().includes('status') ||
+      (c.label || c.header)?.toLowerCase().includes('status')
   );
   const actionCol = columns.find(
     (c) =>
-      c.key?.toLowerCase().includes('action') ||
-      c.label?.toLowerCase().includes('action')
+      (c.key || c.accessor)?.toLowerCase().includes('action') ||
+      (c.label || c.header)?.toLowerCase().includes('action')
   );
   const titleCol = columns.find((c) => c !== statusCol && c !== actionCol);
   const detailCols = columns.filter(
@@ -193,10 +193,10 @@ export default function DataTable({
         const res = col.render(row, row, rIdx);
         return res !== undefined && res !== null ? res : '-';
       }
-      return safeGet(row, col.key, '-');
+      return safeGet(row, col.key || col.accessor, '-');
     } catch (err) {
       console.error(
-        `[DataTable] Cell render error in column "${col.key || col.label || 'unknown'}" for row id "${row?.id || rIdx}":`,
+        `[DataTable] Cell render error in column "${col.key || col.accessor || col.label || col.header || 'unknown'}" for row id "${row?.id || rIdx}":`,
         err
       );
       return '-';
@@ -369,6 +369,7 @@ export default function DataTable({
                             return (
                               <td
                                 key={col.key || col.accessor || cIdx}
+                                data-label={col.label || col.header || col.title || (isActions ? 'Actions' : '')}
                                 style={{
                                   textAlign,
                                   minWidth: col.minWidth || (isActions ? '200px' : undefined),
@@ -430,7 +431,7 @@ export default function DataTable({
                             key={col.key || col.label || col.header || col.accessor || cIdx}
                           >
                             <span className="datatable-card-label">
-                              {col.label || col.title}:
+                              {col.label || col.header || col.title || col.key}:
                             </span>
                             <span
                               className={`datatable-card-value ${

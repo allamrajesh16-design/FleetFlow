@@ -253,6 +253,8 @@ export default function DocumentsManagementPage() {
 
   const columns = [
     {
+      key: 'target',
+      label: 'Target',
       header: 'Target',
       accessor: 'target',
       width: '22%',
@@ -271,7 +273,7 @@ export default function DocumentsManagementPage() {
           ) : (
             <div>
               <strong style={{ display: 'block', color: 'var(--color-text-primary)' }}>
-                Driver: {doc.driver_name || 'Self'}
+                Driver: {doc.driver_name || 'Driver'}
               </strong>
               {doc.uploaded_by_name && (
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
@@ -284,7 +286,9 @@ export default function DocumentsManagementPage() {
       ),
     },
     {
-      header: 'Type',
+      key: 'doc_type',
+      label: 'Document Type',
+      header: 'Document Type',
       accessor: 'doc_type',
       width: '18%',
       minWidth: '150px',
@@ -294,12 +298,14 @@ export default function DocumentsManagementPage() {
             {formatDocType(doc.doc_type)}
           </strong>
           <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-            #{doc.document_number}
+            {doc.document_number ? `#${doc.document_number}` : '—'}
           </div>
         </div>
       ),
     },
     {
+      key: 'review_status',
+      label: 'Review Status',
       header: 'Review Status',
       accessor: 'review_status',
       width: '14%',
@@ -323,18 +329,22 @@ export default function DocumentsManagementPage() {
       },
     },
     {
+      key: 'expiry_date',
+      label: 'Expiry Date',
       header: 'Expiry Date',
       accessor: 'expiry_date',
       width: '18%',
       minWidth: '160px',
       render: (doc) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start', whiteSpace: 'nowrap' }}>
-          <span style={{ fontWeight: 600 }}>{formatDate(doc.expiry_date)}</span>
+          <span style={{ fontWeight: 600 }}>{doc.expiry_date ? formatDate(doc.expiry_date) : 'No Expiry'}</span>
           <ExpiryBadge status={doc.expiry_status} daysLeft={doc.days_left} />
         </div>
       ),
     },
     {
+      key: 'file',
+      label: 'File',
       header: 'File',
       accessor: 'file',
       width: '12%',
@@ -363,7 +373,10 @@ export default function DocumentsManagementPage() {
       ),
     },
     {
+      key: 'actions',
+      label: 'Actions',
       header: 'Actions',
+      accessor: 'actions',
       align: 'right',
       width: '20%',
       minWidth: '200px',

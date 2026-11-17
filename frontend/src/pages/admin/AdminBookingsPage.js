@@ -104,49 +104,101 @@ export default function AdminBookingsPage() {
 
   const columns = [
     {
+      key: 'id',
+      label: 'Booking ID',
+      width: '110px',
+      minWidth: '95px',
+      render: (b) => (
+        <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+          BKG-{String(b.id).padStart(4, '0')}
+        </span>
+      ),
+    },
+    {
       key: 'customer',
       label: 'Customer',
-      width: '260px',
-      minWidth: '220px',
+      width: '200px',
+      minWidth: '170px',
       render: (b) => (
         <div>
-          <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>{b.customer_name || 'Passenger'}</div>
-          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-            BKG-{String(b.id).padStart(4, '0')} • {b.customer_email}
+          <div style={{ fontWeight: 'var(--font-weight-semibold, 600)', color: 'var(--color-text)' }}>
+            {b.customer_name || 'Passenger'}
+          </div>
+          <div style={{ fontSize: 'var(--font-size-xs, 12px)', color: 'var(--color-text-muted)' }}>
+            {b.customer_phone || b.customer_email || '—'}
           </div>
         </div>
       ),
+    },
+    {
+      key: 'route',
+      label: 'Route',
+      width: '210px',
+      minWidth: '180px',
+      render: (b) => {
+        const pickup = b.pickup_location || '—';
+        const drop = b.drop_location || '—';
+        return (
+          <div style={{ fontSize: 'var(--font-size-xs, 12px)', lineHeight: 1.35 }}>
+            <div style={{ fontWeight: 600, color: 'var(--color-text)' }} title={pickup}>
+              {pickup}
+            </div>
+            <div style={{ color: 'var(--color-text-muted)' }} title={drop}>
+              ↓ {drop}
+            </div>
+          </div>
+        );
+      },
     },
     {
       key: 'vehicle_type',
       label: 'Vehicle Type',
       width: '120px',
       minWidth: '100px',
-      render: (b) => (
-        <span
-          style={{
-            padding: '2px 8px',
-            borderRadius: 'var(--radius-pill)',
-            fontSize: 'var(--font-size-xs)',
-            fontWeight: 'var(--font-weight-semibold)',
-            background: b.vehicle_type === 'BUS' ? 'var(--blue-50)' : 'var(--success-bg)',
-            color: b.vehicle_type === 'BUS' ? 'var(--blue-700)' : 'var(--success-text)',
-          }}
-        >
-          {b.vehicle_type}
-        </span>
-      ),
+      render: (b) => {
+        const isBus = b.vehicle_type === 'BUS' || b.booking_type === 'BUS_SEAT';
+        return (
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: 'var(--radius-pill, 20px)',
+              fontSize: 'var(--font-size-xs, 12px)',
+              fontWeight: 'var(--font-weight-semibold, 600)',
+              background: isBus ? 'var(--blue-50, #eff6ff)' : 'var(--success-bg, #f0fdf4)',
+              color: isBus ? 'var(--blue-700, #1d4ed8)' : 'var(--success-text, #15803d)',
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {isBus ? 'BUS' : (b.vehicle_type || 'STANDARD')}
+          </span>
+        );
+      },
     },
     {
       key: 'travel_datetime',
       label: 'Date & Time',
-      width: '180px',
-      minWidth: '160px',
+      width: '160px',
+      minWidth: '145px',
       render: (b) => (
-        <span style={{ whiteSpace: 'nowrap' }}>
+        <span style={{ whiteSpace: 'nowrap', fontSize: 'var(--font-size-xs, 12px)' }}>
           {formatDateTime(b.travel_datetime)}
         </span>
       ),
+    },
+    {
+      key: 'fare',
+      label: 'Estimated Fare',
+      width: '120px',
+      minWidth: '100px',
+      render: (b) => {
+        const fare = b.final_fare != null ? b.final_fare : b.estimated_fare;
+        return (
+          <span style={{ fontWeight: 700, color: 'var(--color-text)' }}>
+            {fare != null ? formatMoney(fare) : '—'}
+          </span>
+        );
+      },
     },
     {
       key: 'status',
@@ -158,17 +210,39 @@ export default function AdminBookingsPage() {
     {
       key: 'actions',
       label: 'Actions',
-      width: '100px',
-      minWidth: '80px',
+      width: '140px',
+      minWidth: '110px',
       align: 'right',
       render: (b) => (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
           <IconButton
             action="view"
             tooltip="View Booking Details"
             ariaLabel="View Booking Details"
             onClick={() => setSelectedBooking(b)}
           />
+          {b.status === 'PENDING' && (
+            <>
+              <Button
+                size="sm"
+                variant="success"
+                onClick={() => handleApprove(b)}
+                disabled={actionLoading}
+                style={{ padding: '3px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
+              >
+                Approve
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={() => setRejectingBooking(b)}
+                disabled={actionLoading}
+                style={{ padding: '3px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
+              >
+                Reject
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
@@ -306,6 +380,15 @@ export default function AdminBookingsPage() {
               </div>
             )}
 
+            {selectedBooking.cancel_reason && (
+              <div className="info-card-banner info-card-warning" style={{ marginBottom: 'var(--space-4)' }}>
+                <div>
+                  <h3>Cancellation Reason</h3>
+                  <p>{selectedBooking.cancel_reason}</p>
+                </div>
+              </div>
+            )}
+
             {/* Approval / Rejection Action Buttons if PENDING */}
             {selectedBooking.status === 'PENDING' && (
               <div
@@ -315,6 +398,7 @@ export default function AdminBookingsPage() {
                   gap: 'var(--space-3)',
                   paddingTop: 'var(--space-4)',
                   borderTop: '1px solid var(--color-border)',
+                  flexWrap: 'wrap',
                 }}
               >
                 <Button

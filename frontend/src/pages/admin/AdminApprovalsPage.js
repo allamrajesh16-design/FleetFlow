@@ -166,17 +166,18 @@ export default function AdminApprovalsPage() {
       {
         key: 'actions',
         label: 'Actions',
-        width: '200px',
-        minWidth: '200px',
+        width: '160px',
+        minWidth: '130px',
         render: (value, u) => {
           const item = u || value || {};
           return (
-            <div className="admin-action-btn-group" style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+            <div className="admin-action-btn-group" style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <Button
                 type="button"
                 size="small"
                 variant="success"
                 onClick={() => setApprovingUser(item)}
+                style={{ padding: '4px 10px', fontSize: 'var(--font-size-xs, 12px)' }}
               >
                 Approve
               </Button>
@@ -188,6 +189,7 @@ export default function AdminApprovalsPage() {
                   setRejectReason('');
                   setRejectingUser(item);
                 }}
+                style={{ padding: '4px 10px', fontSize: 'var(--font-size-xs, 12px)' }}
               >
                 Reject
               </Button>

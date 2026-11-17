@@ -137,17 +137,26 @@ export default function ManagerApprovalsPage() {
     () => [
       {
         key: 'customer',
-        label: 'Customer',
+        label: 'Customer & Route',
         render: (value, b) => {
           const item = b || value || {};
           const idStr = item.id ? `BKG-${String(item.id).padStart(4, '0')}` : 'Booking';
-          const src = item.pickup_location || item.source || '-';
-          const dst = item.drop_location || item.destination || '-';
+          const custName =
+            item.customer_name ||
+            item.customer?.full_name ||
+            (typeof item.customer === 'string' ? item.customer : '') ||
+            item.customer_email ||
+            item.user?.full_name ||
+            'Customer';
+          const src = item.pickup_location || item.bus_schedule_detail?.source || item.bus_schedule?.source || item.source || '—';
+          const dst = item.drop_location || item.bus_schedule_detail?.destination || item.bus_schedule?.destination || item.destination || '—';
           return (
             <div>
-              <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>{item.customer_name || 'Customer'}</div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', overflowWrap: 'break-word', wordBreak: 'break-word', maxWidth: '100%' }}>
-                {idStr} • {src} → {dst}
+              <div style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
+                {custName} <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-primary)', fontWeight: 600 }}>({idStr})</span>
+              </div>
+              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', overflowWrap: 'break-word', wordBreak: 'break-word', maxWidth: '100%', marginTop: '2px' }}>
+                <span style={{ color: 'var(--success)' }}>●</span> {src} → <span style={{ color: 'var(--danger)' }}>●</span> {dst}
               </div>
             </div>
           );
@@ -158,8 +167,9 @@ export default function ManagerApprovalsPage() {
         label: 'Vehicle Type',
         render: (value, b) => {
           const item = b || value || {};
-          const vType = item.vehicle_type || 'VEHICLE';
+          const vType = item.vehicle_type || (item.booking_type === 'BUS_SEAT' ? 'BUS' : item.booking_type === 'VEHICLE' ? 'CAR' : 'VEHICLE');
           const isBus = vType === 'BUS';
+          const isBike = vType === 'BIKE';
           return (
             <span
               style={{
@@ -167,8 +177,8 @@ export default function ManagerApprovalsPage() {
                 borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--font-size-xs)',
                 fontWeight: 'var(--font-weight-semibold)',
-                background: isBus ? 'var(--blue-50)' : 'var(--success-bg)',
-                color: isBus ? 'var(--blue-700)' : 'var(--success-text)',
+                background: isBus ? 'var(--blue-50)' : isBike ? 'var(--warning-bg)' : 'var(--success-bg)',
+                color: isBus ? 'var(--blue-700)' : isBike ? 'var(--warning-text)' : 'var(--success-text)',
               }}
             >
               {vType}
@@ -179,7 +189,19 @@ export default function ManagerApprovalsPage() {
       {
         key: 'travel_datetime',
         label: 'Date & Time',
-        render: (value, b) => ((b || value)?.travel_datetime ? formatDateTime((b || value).travel_datetime) : '—'),
+        render: (value, b) => {
+          const item = b || value || {};
+          const travelDt = item.travel_datetime || item.bus_schedule_detail?.departure_datetime || item.bus_schedule?.departure_datetime || item.datetime;
+          return travelDt ? formatDateTime(travelDt) : '—';
+        },
+      },
+      {
+        key: 'fare',
+        label: 'Estimated Fare',
+        render: (value, b) => {
+          const item = b || value || {};
+          return item.estimated_fare ? `₹${item.estimated_fare}` : '—';
+        },
       },
       {
         key: 'status',
@@ -192,7 +214,7 @@ export default function ManagerApprovalsPage() {
         render: (value, b) => {
           const item = b || value || {};
           return (
-            <div className="admin-action-btn-group" style={{ display: 'flex', gap: '8px' }}>
+            <div className="admin-action-btn-group" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <Button
                 type="button"
                 size="small"

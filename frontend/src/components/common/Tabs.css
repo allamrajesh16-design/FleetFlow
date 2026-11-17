@@ -2,6 +2,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
 }
 
 .tabs-line {

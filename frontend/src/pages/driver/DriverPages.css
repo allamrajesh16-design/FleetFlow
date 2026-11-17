@@ -831,7 +831,19 @@
 .driver-modal-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .driver-modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .driver-modal-actions > * {
+    width: 100%;
+  }
 }
 
 /* Trip History */
@@ -2496,6 +2508,17 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .driver-modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .driver-modal-actions > * {
+    width: 100%;
+  }
 }
 
 /* Details Page Grid & Route Visual */

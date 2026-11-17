@@ -69,12 +69,16 @@
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
 /* Base input control styling */
 .ff-control {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: var(--ff-input-height);
   min-height: var(--ff-input-height);
   padding: 10px 14px;
@@ -272,6 +276,12 @@ input.ff-control.ff-has-right-icon {
   -moz-appearance: none;
   padding-right: 40px;
   cursor: pointer;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;

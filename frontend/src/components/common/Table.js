@@ -74,6 +74,7 @@ export default function Table({
                     return (
                       <td
                         key={col.key || cIdx}
+                        data-label={col.title || col.label || col.key || ''}
                         style={{ textAlign }}
                         className={`table-td ${textAlign === 'right' ? 'align-right' : ''}`}
                       >

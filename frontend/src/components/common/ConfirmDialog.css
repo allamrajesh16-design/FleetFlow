@@ -4,6 +4,17 @@
   justify-content: flex-end;
   gap: var(--space-3);
   width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .confirm-dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .confirm-dialog-actions > * {
+    width: 100%;
+  }
 }
 
 .confirm-dialog-content {

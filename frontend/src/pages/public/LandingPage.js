@@ -107,7 +107,6 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const headlineWords = 'Smarter Fleet Management for a Better Tomorrow'.split(' ');
 
   const { ref: stepsRef, isVisible: stepsVisible } = useReveal({ threshold: 0.15 });
   const { ref: footerRef, isVisible: footerVisible } = useReveal({ threshold: 0.1 });
@@ -231,20 +230,8 @@ export default function LandingPage() {
           <div className="landing-hero-text">
             <span className="landing-badge motion-fade-in">Enterprise Fleet Automation</span>
 
-            {/* Word by word headline reveal with 60ms stagger and shine sweep */}
-            <h1 className="landing-title">
-              {headlineWords.map((word, i) => {
-                const isShine = word === 'Smarter' || word === 'Fleet';
-                return (
-                  <span
-                    key={i}
-                    className={`landing-title-word ${isShine ? 'landing-shine-text' : ''}`}
-                    style={{ animationDelay: `${i * 60}ms` }}
-                  >
-                    {word}&nbsp;
-                  </span>
-                );
-              })}
+            <h1 className="landing-title motion-fade-rise">
+              <span className="landing-title-highlight">Smarter Fleet</span> Management for a Better Tomorrow
             </h1>
 
             <p className="landing-subtitle motion-fade-rise" style={{ animationDelay: '480ms' }}>

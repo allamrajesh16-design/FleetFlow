@@ -283,11 +283,15 @@ export default function ExpensesManagementPage() {
 
   const columns = [
     {
+      key: 'date',
+      label: 'Date',
       header: 'Date',
       accessor: 'date',
       render: (item) => formatDate(item.date),
     },
     {
+      key: 'category',
+      label: 'Category',
       header: 'Category',
       accessor: 'category',
       render: (item) => (
@@ -295,21 +299,29 @@ export default function ExpensesManagementPage() {
       ),
     },
     {
+      key: 'vehicle',
+      label: 'Vehicle',
       header: 'Vehicle',
       accessor: 'vehicle_registration',
       render: (item) => item.vehicle_registration || '-',
     },
     {
+      key: 'trip',
+      label: 'Trip',
       header: 'Trip',
       accessor: 'trip',
       render: (item) => (item.trip ? `#${item.trip}` : '-'),
     },
     {
+      key: 'amount',
+      label: 'Amount',
       header: 'Amount',
       accessor: 'amount',
       render: (item) => <strong>{formatRupees(item.amount)}</strong>,
     },
     {
+      key: 'submitted_by',
+      label: 'Submitted By',
       header: 'Submitted By',
       accessor: 'submitted_by_name',
       render: (item) => (
@@ -322,11 +334,15 @@ export default function ExpensesManagementPage() {
       ),
     },
     {
+      key: 'status',
+      label: 'Status',
       header: 'Status',
       accessor: 'status',
       render: (item) => <StatusBadge status={item.status} />,
     },
     {
+      key: 'receipt',
+      label: 'Receipt',
       header: 'Receipt',
       accessor: 'has_receipt',
       render: (item) =>

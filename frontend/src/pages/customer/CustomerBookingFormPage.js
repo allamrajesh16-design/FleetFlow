@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Navigate } from 'react-router-dom';
 import CustomerBikeBookingPage from './CustomerBikeBookingPage';
 import CustomerCarBookingPage from './CustomerCarBookingPage';
 
@@ -9,6 +9,10 @@ export default function CustomerBookingFormPage() {
 
   if (type === 'BIKE') {
     return <CustomerBikeBookingPage />;
+  }
+
+  if (type === 'BUS') {
+    return <Navigate to="/customer/book/bus" replace />;
   }
 
   return <CustomerCarBookingPage />;

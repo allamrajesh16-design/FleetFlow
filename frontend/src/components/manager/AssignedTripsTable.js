@@ -245,6 +245,27 @@ export default function AssignedTripsTable({
         },
       },
       {
+        key: 'route',
+        label: 'Route',
+        width: '180px',
+        render: (value, t) => {
+          const item = t || value || {};
+          const src = item.pickup_location || item.source;
+          const dst = item.drop_location || item.destination;
+          if (!src && !dst) return <span>—</span>;
+          return (
+            <div style={{ fontSize: 'var(--font-size-xs, 12px)', lineHeight: 1.35 }}>
+              <div style={{ fontWeight: 600, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={src}>
+                {src || '—'}
+              </div>
+              <div style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={dst}>
+                ↓ {dst || '—'}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
         key: 'driver',
         label: 'Driver',
         width: '190px',

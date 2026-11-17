@@ -146,3 +146,378 @@ select::placeholder {
   outline: 3px solid var(--focus-ring, #93C5FD);
 }
 
+/* ==========================================================================
+   FleetFlow Shared Mobile Responsiveness & Alignment Rules (max-width: 767px)
+   Applies strictly to mobile viewports. Desktop & tablet (>= 768px) unchanged.
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  /* 1. Page: no horizontal page scroll. min-width: 0; max-width: 100%; box-sizing: border-box */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  .dashboard-layout,
+  .dashboard-main,
+  .dashboard-content,
+  .admin-page-container,
+  .manager-page-container,
+  .driver-page-container,
+  .customer-page-container,
+  .page-container,
+  .dispatch-workspace-page,
+  .profile-container,
+  .app-container {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .dashboard-content {
+    padding: 12px 10px !important;
+  }
+
+  /* Every flex or grid child that holds text gets min-width: 0 */
+  .dashboard-content *,
+  .admin-page-container *,
+  .manager-page-container *,
+  .driver-page-container *,
+  .customer-page-container * {
+    min-width: 0;
+  }
+
+  /* 2. Text and values: overflow-wrap: anywhere; word-break: break-word; white-space: normal */
+  .datatable-card-value,
+  .datatable-td,
+  .summary-card-value,
+  .detail-value,
+  .profile-detail-val,
+  .stat-card-value,
+  .value-text,
+  .table-cell-value,
+  .card-value,
+  .assignments-booking-table td,
+  .driver-summary-val,
+  .route-addr,
+  .customer-name,
+  .location-cell {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  /* 3. Tables on mobile: Card layout where every row becomes a card with
+        40% Label on the left and 60% Value on the right, value aligned right */
+  .assignments-table-responsive-wrapper {
+    overflow-x: visible !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .assignments-booking-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border: none !important;
+  }
+
+  .assignments-booking-table thead {
+    display: none !important;
+  }
+
+  .assignments-booking-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    padding: 6px 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .assignments-booking-table tr {
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--surface, #ffffff) !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .assignments-booking-table td {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 8px 0 !important;
+    border: none !important;
+    border-bottom: 1px dashed var(--border, #f1f5f9) !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    text-align: right !important;
+  }
+
+  .assignments-booking-table td:last-child {
+    border-bottom: none !important;
+  }
+
+  .assignments-booking-table td::before {
+    content: attr(data-label);
+    flex: 0 0 40% !important;
+    max-width: 40% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--color-text-secondary, #64748b) !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  .assignments-booking-table td > * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .assignments-booking-table td[data-label="Action"] {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    padding-top: 10px !important;
+  }
+
+  .assignments-booking-table td[data-label="Action"]::before {
+    margin-bottom: 6px !important;
+    align-self: flex-start !important;
+  }
+
+  /* 4. Tabs, filter chips and segmented buttons: horizontal scroll without clipping */
+  .tabs-container,
+  .tabs-header,
+  .tab-bar,
+  .ff-tabs,
+  .filter-chips,
+  .filter-chips-row,
+  .category-filter-chips,
+  .driver-filter-chips-row,
+  .status-chips-scroll,
+  .segmented-control,
+  .btn-group-segmented,
+  .filter-category-pills,
+  .subnav-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-bottom: 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  .tabs-container::-webkit-scrollbar,
+  .filter-chips-row::-webkit-scrollbar,
+  .segmented-control::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .tab-btn,
+  .tab-item,
+  .filter-chip,
+  .driver-chip-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* 5. Search box, select filters and toolbars: stack vertically, width 100% */
+  .datatable-toolbar,
+  .datatable-toolbar-left,
+  .datatable-toolbar-right,
+  .admin-toolbar,
+  .manager-toolbar,
+  .filter-toolbar,
+  .assignment-filter-toolbar,
+  .ff-filters-bar,
+  .table-toolbar,
+  .search-filters-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  .datatable-search-container,
+  .datatable-filter-item,
+  .search-bar-container,
+  .filter-select-wrapper,
+  .search-box-wrap,
+  .filter-item {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .datatable-filter-select,
+  .ff-control,
+  .search-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 6. Modals & Dialogs (spec from user) */
+  .modal-container,
+  .modal-box,
+  .dialog-card {
+    width: calc(100vw - 24px) !important;
+    max-width: 520px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 7. Buttons: min-height 44px, text wraps instead of overflowing,
+        button groups use flex-wrap with gap, form action buttons are full width */
+  button.btn,
+  .btn,
+  button.action-btn,
+  .datatable-actions-group button,
+  .admin-action-btn-group button {
+    min-height: 44px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .btn-group,
+  .button-group,
+  .action-buttons,
+  .header-actions,
+  .page-header-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-actions {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .form-actions > button,
+  .form-actions > .btn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  /* 8. Pagination: flex-wrap and centered, no overflow */
+  .datatable-pagination-bar,
+  .pagination-container,
+  .pagination-bar,
+  .ff-pagination {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 8px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .datatable-entry-counter,
+  .pagination-counter {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .datatable-pagination-controls,
+  .pagination-controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  /* 9. Page headers, stat cards and summary grids:
+        1 column at 360px and below, 2 columns at 361px to 767px only if they fit */
+  .stats-grid,
+  .stat-cards-grid,
+  .dashboard-stats-grid,
+  .summary-cards-grid,
+  .assignments-summary-grid,
+  .metrics-grid,
+  .overview-grid,
+  .dashboard-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .page-header,
+  .dashboard-header,
+  .dispatch-page-header,
+  .admin-page-header,
+  .manager-page-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Two column forms like assignments collapse to 1 column on mobile */
+  .dispatch-two-column-form {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* 1 column at 360px and below */
+  .stats-grid,
+  .stat-cards-grid,
+  .dashboard-stats-grid,
+  .summary-cards-grid,
+  .assignments-summary-grid,
+  .metrics-grid,
+  .overview-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
